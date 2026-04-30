@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Node (dev dependencies only)
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code (agent memory는 개인 환경에 따라 다름)
+.claude/plans/
+.claude/agent-memory/
+
+# Backup files
+*.bak

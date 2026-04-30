@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write(*.md)",
+      "Write(*.html)",
+      "Write(*.js)",
+      "Write(*.txt)",
+      "Write(assets/**)",
+      "Write(.claude/**)",
+      "Glob",
+      "Grep",
+      "Bash(npx eslint *)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(which *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(tree *)",
+      "Bash(open *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$CLAUDE_FILE_PATH\"; case \"$f\" in *.js|*.html) cd /Users/tj/projects/blackplum_mockup && npx eslint --fix --quiet \"$f\" 2>/dev/null ;; esac; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

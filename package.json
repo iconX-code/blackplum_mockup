@@ -1,0 +1,17 @@
+{
+  "name": "blackplum-mockup",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "blackplum mockup — INBOXX 서비스의 working mockup (React 18 CDN + Pure CSS 3-tier 토큰)",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.1",
+    "eslint-plugin-html": "^8.1.4",
+    "globals": "^17.5.0"
+  }
+}

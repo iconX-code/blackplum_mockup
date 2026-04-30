@@ -1,0 +1,29 @@
+# blackplum mockup — Dependencies
+
+## Runtime (CDN)
+React 18              https://unpkg.com/react@18/umd/react.production.min.js
+ReactDOM 18           https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
+Babel Standalone      https://unpkg.com/@babel/standalone/babel.min.js
+Pretendard Variable   https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css
+                      (1차 폰트. 외부 디자인시스템 swap 시 교체)
+
+## 자체 자산 (정적 파일)
+styles.css            3-tier 디자인 토큰 + 컴포넌트 스타일
+mock-data.js          window.MOCK_DATA — 메시지/스레드/게시글/매크로 룰
+icon-set.js           window.ICON_SET — 아이콘 name → SVG path mapping
+                      1차 출처: Lucide (MIT 라이선스). 필요한 SVG path만 발췌하므로 외부 라이브러리 런타임 의존 없음
+
+## Dev Dependencies (npm — 개발 도구 전용, 배포에 포함되지 않음)
+eslint@10             JS/HTML 린터 (flat config)
+@eslint/js            eslint v10에서 별도 분리된 권장 룰 셋 (flat config의 js.configs.recommended)
+eslint-plugin-html    HTML 내 embedded script 린트 지원
+globals               languageOptions.globals 표준 정의 (browser globals 등)
+
+## Hosting
+GitHub Pages          정적 호스팅 (빌드 불필요)
+
+## Dev Tools (로컬)
+브라우저              index.html 직접 열어 테스트
+
+## 설치
+npm install           # dev dependencies 설치 (eslint)
