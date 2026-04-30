@@ -1,6 +1,6 @@
 # blackplum mockup — Tasks
 
-> 최종 수정: 2026-04-29
+> 최종 수정: 2026-04-30
 
 ---
 
@@ -21,19 +21,24 @@
 
 ---
 
-## Backlog (별도 세션에서 진행)
+## Phase D-1: 외부 디자인시스템 1차 swap (Streamtime theme) — 완료
 
-### 외부 디자인시스템 적용 (1차 swap)
-- 트리거: 사용자가 Phase 0 완료 후 디자인시스템 자산을 프로젝트에 추가 (폰트·색상·타이포·간격·컴포넌트 토큰·아이콘셋 등)
-- 진행 단계
-  1. 추가된 디자인시스템 자산 분석 (typography 체계 / 색상 팔레트 / 간격·radius·shadow / 아이콘셋 등)
-  2. `styles.css`의 Tier 1 primitive 토큰을 디자인시스템 값으로 swap
-  3. semantic 토큰의 매핑 점검 (필요 시 누락된 토큰 보강)
-  4. `icon-set.js`를 디자인시스템 아이콘팩의 SVG로 교체 (또는 Lucide → 새 팩으로 교체)
-  5. swap 결과를 `spec.md`에 반영 (어떤 토큰이 어떤 값으로 매핑됐는지 기록)
-  6. CLAUDE.md / dependencies.txt에 영향이 있다면 동기화
-- 시점: Phase 0 완료 직후, 본격 UI 구현 전 1차 적용. 이후 새 reference 발견 시 반복 가능.
-- 참고: 이 task의 핵심은 토큰 아키텍처가 swap-friendly 하게 설계되었는지의 첫 검증
+> 트리거: `design.md` (Streamtime theme) + `design_ref/` 자산 추가됨. Phase 0 완료 직후 본격 UI 구현 전 1차 적용.
+
+- [x] 1. 디자인시스템 자산 분석 — `design.md` Streamtime theme + `design_ref/colors_and_type.css` (color/type/spacing/radii/shadow/components 추출)
+- [x] 2. spec.md §3-2 Tier 1 primitive 토큰 swap — cream paper + ink + halftone shape primaries + warm grey + 4px-base spacing + 32/pill radii + hard-edge offset shadows + 2px·1.5px border widths + Hanken Grotesk/Inter/mono
+- [x] 3. spec.md §3-3 Tier 2 semantic 매핑 신규 — bg/text/brand/accent/border/status/platform 분리, display-xl/lg/md 추가, weight-heavy/black 추가, 한글 fallback 정책 §3-7-1 신설
+- [x] 4. spec.md §3-5 typography 매핑 테이블 갱신 — Display XL/LG/MD/Button 행 추가
+- [x] 5. spec.md §10 swap 시점·출처 working log 기록
+- [x] 6. dependencies.txt 폰트 갱신 (Pretendard 단독 → Hanken Grotesk + Inter + Pretendard 한글 fallback)
+- [x] 7. styles.css 신규 생성 — frontend-dev. 418줄 / Tier 1: 70 토큰 + Tier 2: 71 토큰 + base reset + icon 유틸(`.icon`/`.icon--sm/md/lg`/`.icon--tone-*`) + 12개 typography helper(`.t-display-xl/lg/md`, `.t-h1~h4`, `.t-body`, `.t-body-lg`, `.t-caption`, `.t-overline`, `.t-button`). display 헬퍼는 `text-wrap: balance` 포함. 컴포넌트 CSS는 Phase 1 작업 (의도적 미작성)
+- [x] 8. styles.css code-reviewer 검증 — 토큰 contract / Tier discipline / scope / imports 모두 PASS. 크리티컬 이슈 0
+- [-] icon-set.js: 본격 UI 구현(Phase 1) 단계에 Lucide 발췌로 생성. 본 swap 범위 외 (skip)
+- [-] CLAUDE.md: 폰트명을 직접 명시하지 않으므로 동기화 불필요 (확인 완료)
+
+---
+
+## Backlog (별도 세션에서 진행)
 
 ### IG DM 자동화 매크로 빌더 wizard 흐름 정리
 - 레퍼런스: `docs/macro_wizard_reference.png` (인포크링크 기준 IG flow ~7 scene)

@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>Wordmark</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 40px 32px; background: var(--st-paper); }
+h1 { font-family: var(--st-font-display); font-weight: 900; font-size: 28px; letter-spacing: -0.025em; margin: 0 0 6px; }
+p.lede { color: var(--st-fg-2); margin: 0 0 32px; max-width: 56ch; }
+.mark { display: flex; align-items: center; justify-content: center; gap: 3px; padding: 20px 0; flex-wrap: nowrap; }
+.mark img { height: clamp(36px, 6vw, 64px); width: auto; flex-shrink: 0; }
+.row { border-top: 1.5px dashed var(--st-grey-200); padding: 24px 0; display: grid; grid-template-columns: 130px 1fr; gap: 24px; align-items: center; }
+.row:first-of-type { border-top: 0; }
+.meta { font-family: var(--st-font-mono); font-size: 11px; color: var(--st-fg-2); }
+.dark { background: var(--st-ink); border-radius: 16px; padding: 24px; }
+.dark img { filter: invert(1); }
+.gif { display: flex; gap: 8px; align-items: center; }
+.gif img { height: 70px; width: auto; }
+</style></head>
+<body>
+<h1>Wordmark</h1>
+<p class="lede">Hand-cut paper letterforms — each glyph is its own SVG. Never set in a typeface.</p>
+<div class="row">
+  <span class="meta">primary / paper</span>
+  <div class="mark">
+    <img src="../assets/letter-s.svg"><img src="../assets/letter-t.svg"><img src="../assets/letter-r.svg"><img src="../assets/letter-e-1.svg"><img src="../assets/letter-a.svg"><img src="../assets/letter-m-1.svg"><img src="../assets/letter-t.svg"><img src="../assets/letter-i.svg"><img src="../assets/letter-m-2.svg"><img src="../assets/letter-e-2.svg">
+  </div>
+</div>
+<div class="row">
+  <span class="meta">inverse / ink</span>
+  <div class="mark dark">
+    <img src="../assets/letter-s.svg"><img src="../assets/letter-t.svg"><img src="../assets/letter-r.svg"><img src="../assets/letter-e-1.svg"><img src="../assets/letter-a.svg"><img src="../assets/letter-m-1.svg"><img src="../assets/letter-t.svg"><img src="../assets/letter-i.svg"><img src="../assets/letter-m-2.svg"><img src="../assets/letter-e-2.svg">
+  </div>
+</div>
+<div class="row">
+  <span class="meta">animated / shapes</span>
+  <div class="gif">
+    <img src="../assets/logo-shape-1.gif"><img src="../assets/logo-shape-2.gif"><img src="../assets/logo-shape-3.gif"><img src="../assets/logo-shape-4.gif"><img src="../assets/logo-shape-5.gif"><img src="../assets/logo-shape-6.gif"><img src="../assets/logo-shape-7.gif">
+  </div>
+</div>
+</body></html>

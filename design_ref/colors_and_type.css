@@ -1,0 +1,227 @@
+/* =============================================================================
+   Streamtime Design System — Colors & Type
+   Extracted from streamtime.net (April 2026)
+   ============================================================================= */
+
+/* ─── FONTS ─────────────────────────────────────────────────────────────────── */
+/* Streamtime uses a geometric sans-serif headline face with friendly, slightly
+   condensed proportions (similar to GT Walsheim / Aeonik). For body it uses a
+   clean neutral sans. Until original WOFF files are supplied, we substitute:
+     - Display: "Hanken Grotesk" (geometric, friendly, broad weights)  ⟵ FLAGGED
+     - Body:    "Inter"           (neutral sans)                       ⟵ FLAGGED
+   Replace the @font-face URLs below with the real Streamtime webfonts when
+   provided by the brand team.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ─── BRAND COLORS ─── */
+  /* Anchored on a soft warm cream background and ink-black foreground, with
+     bright primary accents borrowed from the textured shapes used across the
+     marketing site. */
+
+  /* Foundations */
+  --st-ink:           #0F0F0F;   /* near-black body / display copy */
+  --st-ink-soft:      #1F1F1F;
+  --st-paper:         #F5EFE3;   /* warm cream — the dominant page bg */
+  --st-paper-warm:    #EFE7D6;   /* slightly deeper cream */
+  --st-paper-cool:    #ECE9E2;   /* desaturated alt cream */
+  --st-white:         #FFFFFF;
+
+  /* Brand primaries — pulled from the textured shapes (yellow spike, blue ball,
+     pink semicircle, green spike-circle, purple sun). */
+  --st-yellow:        #FFD23F;   /* signature yellow (logo + spikes) */
+  --st-yellow-soft:   #FFE680;
+  --st-blue:          #4FC3F7;   /* sky blue ball / pill */
+  --st-blue-deep:     #2196F3;
+  --st-pink:          #FF8FA3;   /* warm pink semicircle / bar */
+  --st-pink-soft:     #FFC2CD;
+  --st-green:         #7CB342;   /* spike circle green */
+  --st-green-soft:    #B8D88A;
+  --st-purple:        #8E6FE0;   /* spiked sun purple */
+  --st-coral:         #FF6B4A;   /* deep accent for CTAs / hovers */
+
+  /* Neutrals */
+  --st-grey-100:      #E8E4DA;   /* warm grey card border */
+  --st-grey-200:      #C9C4B8;
+  --st-grey-300:      #9D998E;
+  --st-grey-400:      #6B6862;
+  --st-grey-500:      #3D3B36;
+
+  /* Semantic */
+  --st-fg-1:          var(--st-ink);
+  --st-fg-2:          var(--st-grey-500);
+  --st-fg-3:          var(--st-grey-400);
+  --st-fg-muted:      var(--st-grey-300);
+  --st-bg-1:          var(--st-paper);
+  --st-bg-2:          var(--st-paper-warm);
+  --st-bg-3:          var(--st-white);
+  --st-bg-inverse:    var(--st-ink);
+  --st-fg-inverse:    var(--st-paper);
+  --st-border:        var(--st-ink);          /* hard 1.5–2px black borders */
+  --st-border-soft:   var(--st-grey-100);
+
+  /* CTA */
+  --st-cta-bg:        var(--st-ink);
+  --st-cta-fg:        var(--st-paper);
+  --st-cta-bg-hover:  var(--st-yellow);
+  --st-cta-fg-hover:  var(--st-ink);
+
+  /* ─── TYPE ─── */
+  --st-font-display:  "Hanken Grotesk", "GT Walsheim", "Aeonik", system-ui, -apple-system, sans-serif;
+  --st-font-body:     "Inter", "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+  --st-font-mono:     ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* Sizes — the site uses bold oversized display type with tight tracking */
+  --st-text-xs:       12px;
+  --st-text-sm:       14px;
+  --st-text-base:     16px;
+  --st-text-md:       18px;
+  --st-text-lg:       20px;
+  --st-text-xl:       24px;
+  --st-text-2xl:      32px;
+  --st-text-3xl:      44px;
+  --st-text-4xl:      64px;
+  --st-text-5xl:      88px;
+  --st-text-6xl:      120px;     /* hero scale */
+
+  /* Tracking */
+  --st-tracking-tight:  -0.03em;
+  --st-tracking-snug:   -0.015em;
+  --st-tracking-normal: 0;
+  --st-tracking-wide:   0.02em;
+
+  /* Leading */
+  --st-leading-tight:   0.95;
+  --st-leading-snug:    1.05;
+  --st-leading-normal:  1.2;
+  --st-leading-relaxed: 1.45;
+
+  /* Weights */
+  --st-weight-regular:  400;
+  --st-weight-medium:   500;
+  --st-weight-semi:     600;
+  --st-weight-bold:     700;
+  --st-weight-black:    900;
+
+  /* ─── SPACING / RADII / SHADOWS ─── */
+  --st-space-1:  4px;
+  --st-space-2:  8px;
+  --st-space-3:  12px;
+  --st-space-4:  16px;
+  --st-space-5:  24px;
+  --st-space-6:  32px;
+  --st-space-7:  48px;
+  --st-space-8:  64px;
+  --st-space-9:  96px;
+  --st-space-10: 128px;
+
+  --st-radius-pill:  999px;       /* most CTAs are full pills */
+  --st-radius-lg:    24px;        /* cards */
+  --st-radius-md:    16px;
+  --st-radius-sm:    8px;
+  --st-radius-xs:    4px;
+
+  --st-border-w:     2px;         /* signature thick black border */
+
+  --st-shadow-card:  0 1px 0 0 var(--st-ink);     /* offset only — no soft blur */
+  --st-shadow-press: 4px 4px 0 0 var(--st-ink);   /* hard-shadow stamp on hover */
+
+  --st-ease:         cubic-bezier(.2, .8, .2, 1);
+  --st-ease-bounce:  cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ─── BASE / SEMANTIC ELEMENTS ──────────────────────────────────────────────── */
+html, body {
+  font-family: var(--st-font-body);
+  font-size: var(--st-text-base);
+  color: var(--st-fg-1);
+  background: var(--st-bg-1);
+  line-height: var(--st-leading-relaxed);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4 {
+  font-family: var(--st-font-display);
+  font-weight: var(--st-weight-bold);
+  letter-spacing: var(--st-tracking-tight);
+  line-height: var(--st-leading-tight);
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1, .h1 {
+  font-size: clamp(48px, 8vw, var(--st-text-6xl));
+  font-weight: var(--st-weight-black);
+  letter-spacing: var(--st-tracking-tight);
+}
+
+h2, .h2 {
+  font-size: clamp(36px, 5.5vw, var(--st-text-4xl));
+  font-weight: var(--st-weight-black);
+}
+
+h3, .h3 {
+  font-size: clamp(24px, 3vw, var(--st-text-3xl));
+  font-weight: var(--st-weight-bold);
+  line-height: var(--st-leading-snug);
+}
+
+h4, .h4 {
+  font-size: var(--st-text-xl);
+  font-weight: var(--st-weight-semi);
+  line-height: var(--st-leading-snug);
+}
+
+p, .p {
+  font-size: var(--st-text-md);
+  line-height: var(--st-leading-relaxed);
+  color: var(--st-fg-1);
+  text-wrap: pretty;
+  margin: 0;
+}
+
+.lead {
+  font-size: clamp(20px, 2vw, var(--st-text-xl));
+  line-height: 1.4;
+  font-weight: var(--st-weight-medium);
+}
+
+.eyebrow {
+  font-family: var(--st-font-display);
+  font-size: var(--st-text-sm);
+  font-weight: var(--st-weight-bold);
+  letter-spacing: var(--st-tracking-wide);
+  text-transform: none;
+  color: var(--st-fg-2);
+}
+
+small, .small {
+  font-size: var(--st-text-sm);
+  color: var(--st-fg-2);
+}
+
+code, .mono {
+  font-family: var(--st-font-mono);
+  font-size: 0.92em;
+}
+
+a {
+  color: var(--st-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color .18s var(--st-ease);
+}
+a:hover { color: var(--st-coral); }
+
+/* Headline display — used for the hero "way better way of working" pattern */
+.display {
+  font-family: var(--st-font-display);
+  font-weight: var(--st-weight-black);
+  font-size: clamp(56px, 9vw, 140px);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}

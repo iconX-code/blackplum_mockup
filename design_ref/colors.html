@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>Color palette</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 32px; background: var(--st-paper); font-family: var(--st-font-body); }
+h1 { font-family: var(--st-font-display); font-weight: 900; font-size: 32px; letter-spacing: -0.025em; margin: 0 0 8px; }
+p.lede { color: var(--st-fg-2); margin: 0 0 24px; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.sw { border: 2px solid var(--st-ink); border-radius: 16px; padding: 12px; aspect-ratio: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.sw .name { font-family: var(--st-font-display); font-weight: 700; font-size: 13px; }
+.sw .hex { font-family: var(--st-font-mono); font-size: 11px; opacity: 0.7; }
+</style></head>
+<body>
+<h1>Brand palette</h1>
+<p class="lede">Warm cream paper + ink black + halftone-shape primaries.</p>
+<div class="grid">
+  <div class="sw" style="background:#F5EFE3"><span class="name">Paper</span><span class="hex">#F5EFE3</span></div>
+  <div class="sw" style="background:#0F0F0F;color:#F5EFE3"><span class="name">Ink</span><span class="hex">#0F0F0F</span></div>
+  <div class="sw" style="background:#FFD23F"><span class="name">Yellow</span><span class="hex">#FFD23F</span></div>
+  <div class="sw" style="background:#4FC3F7"><span class="name">Blue</span><span class="hex">#4FC3F7</span></div>
+  <div class="sw" style="background:#FF8FA3"><span class="name">Pink</span><span class="hex">#FF8FA3</span></div>
+  <div class="sw" style="background:#7CB342;color:#fff"><span class="name">Green</span><span class="hex">#7CB342</span></div>
+  <div class="sw" style="background:#8E6FE0;color:#fff"><span class="name">Purple</span><span class="hex">#8E6FE0</span></div>
+  <div class="sw" style="background:#FF6B4A;color:#fff"><span class="name">Coral</span><span class="hex">#FF6B4A</span></div>
+</div>
+</body></html>

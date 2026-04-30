@@ -4,8 +4,12 @@
 React 18              https://unpkg.com/react@18/umd/react.production.min.js
 ReactDOM 18           https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 Babel Standalone      https://unpkg.com/@babel/standalone/babel.min.js
+Hanken Grotesk        https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap
+                      (display 폰트 — 헤드라인/버튼/eyebrow/nav)
+Inter                 https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap
+                      (body 폰트 — 본문/lead/running text)
 Pretendard Variable   https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css
-                      (1차 폰트. 외부 디자인시스템 swap 시 교체)
+                      (한글 fallback — JSX 카피가 한국어이므로 Hanken/Inter의 한글 글리프 부재 보완. spec.md §3-7-1)
 
 ## 자체 자산 (정적 파일)
 styles.css            3-tier 디자인 토큰 + 컴포넌트 스타일

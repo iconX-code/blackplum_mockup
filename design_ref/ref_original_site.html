@@ -1,0 +1,11 @@
+<!doctype html>
+<html><body>
+<iframe id="f" src="https://streamtime.net/" style="width:1440px;height:900px;border:0"></iframe>
+<script>
+window.probe = async () => {
+  // We can't read cross-origin DOM, but we CAN fetch with no-cors as image/script.
+  // Best path: just dump the page-side <link> hrefs we know exist by reading the iframe document, which will fail; so we fall back to known Webflow conventions.
+  return 'iframe loaded';
+};
+</script>
+</body></html>

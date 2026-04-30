@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>Typography</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+body { margin: 0; padding: 32px; background: var(--st-paper); }
+.row { border-bottom: 1.5px dashed var(--st-grey-200); padding: 18px 0; display: grid; grid-template-columns: 130px 1fr; gap: 24px; align-items: baseline; }
+.row:last-child { border-bottom: 0; }
+.meta { font-family: var(--st-font-mono); font-size: 11px; color: var(--st-fg-2); }
+.display { font-family: var(--st-font-display); font-weight: 900; font-size: 88px; line-height: 0.92; letter-spacing: -0.035em; }
+.h1 { font-family: var(--st-font-display); font-weight: 900; font-size: 56px; line-height: 1; letter-spacing: -0.03em; }
+.h2 { font-family: var(--st-font-display); font-weight: 800; font-size: 36px; line-height: 1.05; letter-spacing: -0.025em; }
+.h3 { font-family: var(--st-font-display); font-weight: 700; font-size: 24px; line-height: 1.1; }
+.lead { font-size: 22px; line-height: 1.4; font-weight: 500; }
+.body { font-size: 16px; line-height: 1.5; }
+.eyebrow { font-family: var(--st-font-display); font-size: 14px; font-weight: 700; letter-spacing: 0.02em; color: var(--st-fg-2); }
+</style></head>
+<body>
+<div class="row"><span class="meta">display / 88 / 900</span><span class="display">A way better way of working.</span></div>
+<div class="row"><span class="meta">h1 / 56 / 900</span><span class="h1">Work isn't working.</span></div>
+<div class="row"><span class="meta">h2 / 36 / 800</span><span class="h2">Streamtime every step of the way</span></div>
+<div class="row"><span class="meta">h3 / 24 / 700</span><span class="h3">Sharing is caring, and we care a lot.</span></div>
+<div class="row"><span class="meta">lead / 22 / 500</span><span class="lead">Balance your workflow: plan, track, collaborate, thrive.</span></div>
+<div class="row"><span class="meta">body / 16 / 400</span><span class="body">Streamtime is a project management tool built for creative businesses, who value a healthy profit as much as a happy team.</span></div>
+<div class="row"><span class="meta">eyebrow / 14 / 700</span><span class="eyebrow">Productive wellbeing</span></div>
+</body></html>
