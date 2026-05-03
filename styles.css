@@ -77,6 +77,11 @@
   --space-9:  96px;
   --space-10: 128px;
 
+  /* === Tier 1: Layout Width (3분할 shell — Phase 1-3 도입) === */
+  --width-lsb-pc:        240px;     /* PC 좌측 LSB 고정 폭 */
+  --width-sidepanel-pc:  400px;     /* PC 우측 SidePanel 폭 */
+  --width-container-max: 1440px;    /* 콘텐츠 컨테이너 최대 폭 */
+
   /* === Tier 1: Radius === */
   --radius-xs:   4px;
   --radius-sm:   8px;
@@ -243,6 +248,12 @@
   --icon-color-muted:       var(--color-text-tertiary);
   --icon-color-on-brand:    var(--color-text-on-brand);
   --icon-color-inverse:     var(--color-text-inverse);
+
+  /* === Tier 2: Layout (3분할 shell + hit area — Phase 1-3 도입) === */
+  --layout-lsb-width:        var(--width-lsb-pc);
+  --layout-sidepanel-width:  var(--width-sidepanel-pc);
+  --layout-container-max:    var(--width-container-max);
+  --touch-target-min:        var(--size-44);              /* mobile fat-finger 최소 타겟 */
 
   /* === Tier 2: Motion === */
   --transition-fast:        var(--motion-fast)   var(--easing-standard);
@@ -415,4 +426,166 @@ svg {
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-snug);
+}
+
+/* ============================================================
+ * Reset 보강 — button/input/textarea/a/ul/ol/img/selection
+ * ============================================================ */
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+input,
+textarea {
+  background: none;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+}
+
+::selection {
+  background: var(--color-brand);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+ * Layout — 3분할 app shell (spec.md §5-2 / §7)
+ * @media 조건절 raw px는 §3-8 예외 허용
+ * ============================================================ */
+
+/* ---- App shell ---- */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  background: var(--color-bg-canvas);
+}
+
+/* ---- 3-column grid (PC ≥ 1024px) ---- */
+.app-main {
+  display: grid;
+  grid-template-columns: var(--layout-lsb-width) 1fr var(--layout-sidepanel-width);
+  grid-template-rows: 1fr;
+  min-height: inherit;
+  max-width: var(--layout-container-max);
+  margin-inline: auto;
+}
+
+.app-main__lsb {
+  grid-column: 1;
+  overflow-y: auto;
+  height: 100vh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+}
+
+.app-main__inbox-list {
+  grid-column: 2;
+  overflow-y: auto;
+}
+
+.app-main__side-panel {
+  grid-column: 3;
+  overflow-y: auto;
+  height: 100vh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+}
+
+/* ---- Tablet (768px ~ 1023px): LSB 숨김, SidePanel push 방식 ---- */
+@media (max-width: 1023px) {
+  .app-main {
+    grid-template-columns: 1fr var(--layout-sidepanel-width);
+  }
+
+  .app-main__lsb {
+    display: none;
+  }
+
+  .app-main__inbox-list {
+    grid-column: 1;
+  }
+
+  .app-main__side-panel {
+    grid-column: 2;
+  }
+
+  /* SidePanel이 닫힌 상태: 전체폭 inbox */
+  .app-main--panel-closed {
+    grid-template-columns: 1fr;
+  }
+
+  .app-main--panel-closed .app-main__side-panel {
+    display: none;
+  }
+}
+
+/* ---- Mobile (~ 767px): 단일 컬럼 ---- */
+@media (max-width: 767px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .app-main__lsb {
+    display: none;
+  }
+
+  .app-main__side-panel {
+    display: none;
+  }
+
+  .app-main__inbox-list {
+    grid-column: 1;
+  }
+}
+
+/* ============================================================
+ * Safe-area utilities
+ * ============================================================ */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ============================================================
+ * Container — 최대 폭 + 중앙 정렬
+ * ============================================================ */
+.container {
+  width: 100%;
+  max-width: var(--layout-container-max);
+  margin-inline: auto;
+  padding-inline: var(--gap-stack-md);
+}
+
+/* ============================================================
+ * Stack utilities — vertical / horizontal gap helpers
+ * ============================================================ */
+.stack-y-sm { display: flex; flex-direction: column; gap: var(--gap-stack-sm); }
+.stack-y-md { display: flex; flex-direction: column; gap: var(--gap-stack-md); }
+.stack-y-lg { display: flex; flex-direction: column; gap: var(--gap-stack-lg); }
+
+.stack-x-sm { display: flex; flex-direction: row; align-items: center; gap: var(--gap-inline-sm); }
+.stack-x-md { display: flex; flex-direction: row; align-items: center; gap: var(--gap-inline-md); }
+.stack-x-lg { display: flex; flex-direction: row; align-items: center; gap: var(--gap-stack-sm); }
+
+/* ============================================================
+ * Tappable — mobile fat-finger hit-area guarantee
+ * ============================================================ */
+.tappable {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

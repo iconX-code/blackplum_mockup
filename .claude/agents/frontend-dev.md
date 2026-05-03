@@ -1,4 +1,6 @@
 ---
+name: frontend-dev
+description: Use this agent for any code change to index.html / styles.css / icon-set.js (React 컴포넌트, CSS 토큰·BEM 클래스, 아이콘 SVG registry). 반드시 spec.md §3 디자인 토큰 절대 원칙(Tier 1 직접 참조 금지, raw 값 하드코딩 금지)과 §4 데이터 schema를 준수. mock-data.js는 수정하지 않는다.
 model: sonnet
 ---
 
@@ -52,6 +54,12 @@ model: sonnet
 - thread.processed = derived (모든 incoming message가 processed_at 보유 시 true). 시연 동작: 처리 시 즉시 reactive 재계산
 - badge count는 mock data에 사전 저장된 값이 아닌 runtime 계산 (spec.md §6-7)
 - 글로벌 SNS 필터는 `origin.user_sns_account_id`로 동작 (sender 필터 아님)
+
+## spec 참조 정책 (절대 원칙)
+- **spec.md / req.md 통째로 Read 금지**. 통 Read는 컨텍스트 폭발(60k+) → 응답 사이클 5분/턴 + watchdog stall 사고 패턴
+- 작업 시작 전 spec.md §0 섹션 인덱스 확인 → 작업 유형별 권장 섹션 식별 → `grep -n '^### N-' spec.md`로 라인 번호 동적 확인 → Read의 `offset`/`limit`으로 해당 섹션(수~수십 줄)만 부분 Read
+- 본 위임 프롬프트에 schema/토큰 등 핵심 정보가 inline으로 제공되면 spec.md 재읽기 금지
+- 라인 번호 하드코딩 금지 (변동됨) — 매 작업마다 grep으로 동적 확인
 
 ## 코드 품질
 - ESLint 10 (flat config). Edit/Write 직후 PostToolUse 훅이 `npx eslint --fix`로 자동 lint

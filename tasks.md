@@ -1,6 +1,6 @@
 # blackplum mockup — Tasks
 
-> 최종 수정: 2026-05-03
+> 최종 수정: 2026-05-04
 
 ---
 
@@ -56,30 +56,15 @@
 
 ---
 
-## Phase 1: Foundation — 아이콘 / mock 데이터 / 컴포넌트 CSS 진입
+## Phase 1: Foundation — 아이콘 / mock 데이터 / 컴포넌트 CSS 진입 — 완료 (2026-05-04)
 
 > 트리거: Phase D-1, D-2 완료. 후속 모든 컴포넌트 구현의 기초.
-> 위임: frontend-dev (icon-set.js / styles.css), mock-data-writer (mock-data.js). 두 트랙 병렬 가능.
+> 위임: frontend-dev (icon-set.js / styles.css), mock-data-writer (mock-data.js).
 
-### 1-1. icon-set.js 작성 (frontend-dev)
-- spec.md §3-6 Icon 시스템 / `<Icon name="..." size="..." tone="..." />` 추상화
-- Lucide 발췌로 SVG registry 생성 → `window.ICON_SET`에 등록
-- 필요 아이콘 식별: 카테고리(business/cs/community 등) / 액션(reply/star/menu/check/x/plus/minus/chevron) / 플랫폼 로고(instagram/youtube/tiktok/gmail/naver-mail/other-mail) / 매크로 빌더(carousel/upload/drag-handle/info)
-- spec.md §4-9 PLATFORM_LOGOS 매핑 일치 확인
-
-### 1-2. mock-data.js 핵심 데이터 작성 (mock-data-writer)
-- 범위: spec.md §4-11 분포 가이드 기준. 단 §4-11-1의 `automations[]`·`AUTOMATION_TEMPLATES`는 Phase 5에서 작성 (의존성 격리)
-- 작성 대상: `channel` + `connected_sns_accounts` / `origins[]` (post + sender) / `threads[]` / `messages[]` (AI context 풀 채움) / `savedReplies[]` / `ai_drafts` / `TAG_CATALOG` / `CATEGORIES` / `PLATFORM_LOGOS`
-- 미처리 ~75% / 처리됨 ~25% 분포, outgoing message 자동 기록 동작 명세 반영
-- 비즈니스 long thread 2개 (req.md §5-3-3 A→B→C→B→D 주제 전환 시연)
-
-### 1-3. styles.css 컴포넌트 CSS 진입 (frontend-dev)
-- Phase D-1 완료된 토큰 + 유틸 위에 컴포넌트별 BEM 클래스를 phase 진행에 따라 점진 추가
-- 본 phase에서는 layout 기초(컨테이너/그리드/세이프 영역) + reset 보강만. 구체 컴포넌트 CSS는 Phase 2~5에서 해당 컴포넌트와 함께 작성
-
-### 1-4. code-reviewer 검증
-- icon-set: SVG name 컨벤션 / `<Icon />` props 매핑 / PLATFORM_LOGOS 정합
-- mock-data: schema 준수 (§4-1~§4-7) / 분포 (§4-11) / outgoing 동작 명세
+- [x] 1-1. icon-set.js 작성 (frontend-dev) — 53개 아이콘 등록 (카테고리 7 / 액션 22 / 매크로 빌더 8 / 플랫폼 로고 6 / 기타 UI 10). Lucide 발췌, viewBox 24×24, `<Icon />` 추상화 / PLATFORM_LOGOS 6종 매핑 정합. follow-up: `filter` polygon에 `fill="currentColor"` 추가
+- [x] 1-2. mock-data.js 핵심 데이터 작성 (mock-data-writer) — 1664줄 / 74 threads / 200 messages / 56 origins / 13 savedReplies / 7 connected SNS accounts (IG main+sub / YT / Gmail / TikTok / Naver / Other mail). 카테고리 분포: business 20 (16/4) / ops 25 (20/5) / social 20 (16/4) / direct_check 9 (7/2). 플랫폼 분포: instagram(39) > youtube(14) > gmail(9) > tiktok(5) > naver_mail(4) > other_mail(3) — spec §4-11 권장 순서 일치. Long thread t1, t2 각 20msg, A→B→C→B→D 주제 전환. business_extracted 20 thread 전부 채움. ai_context_solo / ai_context_cumulative / ai_thread_context 풀 채움. automations[] / AUTOMATION_TEMPLATES[] 빈 배열 (Phase 5 예약). follow-up fix 다수: outgoing sender_id 6건 / 플랫폼 분포 swap 5건 (Gmail→YT 4 + naver→tiktok 1) / t6 message_ids 시간순 / t44 platform / m108·m185 sender_id YT 핸들 / o39 display_name / o6·o49 origin platform
+- [x] 1-3. styles.css 컴포넌트 CSS 진입 (frontend-dev) — 418줄 → 591줄. spec.md §3-2/§3-3 신설 layout 토큰 4개 동기화 (Tier 1: `--width-lsb-pc`/`--width-sidepanel-pc`/`--width-container-max`, Tier 2: `--layout-lsb-width`/`--layout-sidepanel-width`/`--layout-container-max`/`--touch-target-min`). layout 클래스: `.app-shell` / `.app-main` BEM 트리 (`__lsb`/`__inbox-list`/`__side-panel`/`--panel-closed`) / `.safe-area-top`/`.safe-area-bottom` / `.container` / `.stack-y-sm/md/lg` / `.stack-x-sm/md/lg` / `.tappable`. PC(1024+) grid / Tablet(768~1023) / Mobile(~767) 분기. reset 보강(button/input/textarea/a/ul/ol/img/`*::selection`). follow-up: `env(safe-area-inset-*)`에 `0px` fallback 추가
+- [x] 1-4. code-reviewer 통합 검증 — 1차 FAIL 결과로 8개 발견사항 도출 → mock-data 9건 + icon/styles 2건 mechanical fix로 정리. 최종 자동 정합성 검증 12개 항목 모두 ✓ (outgoing rule / thread.tags / thread-origin platform / origin-account platform / message_ids order / processed invariant / ai_context / business_extracted / TAG_CATALOG 멤버십 / enum 등). 미동기화로 분리된 항목: spec §3-2/§3-3 매크로 빌더 토큰 11개 styles.css 동기화는 Phase 5-1로 분리 (의도된 격리)
 
 ---
 

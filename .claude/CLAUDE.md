@@ -20,6 +20,8 @@ Instagram DM/댓글, YouTube 댓글, Gmail, 틱톡 DM/댓글, 네이버 메일, 
 - frontend-dev와 mock-data-writer는 담당 파일이 다르므로 병렬 실행 가능
 - 여러 파일에 걸친 변경은 관련 agent들을 병렬 실행
 - 코드 수정이 포함된 작업 단위(phase/task)가 완료될 때마다 반드시 `code-reviewer` agent로 검증. 단순 문서 수정만 있는 경우는 제외
+- sub-agent 정의 파일(`.claude/agents/*.md`) 추가·수정 시 frontmatter에 `name`(lowercase+hyphens, 필수) / `description`(필수) 두 필드를 반드시 포함. 누락 시 세션에 등록 거부됨. 변경 후에는 세션 재시작 또는 `/agents` 슬래시 명령으로 리로드
+- **spec 참조 정책**: spec.md / req.md는 1500+ / 580+ 줄로 통째로 Read 시 컨텍스트 폭발(60k+) → 응답 사이클 지연 + watchdog stall 사고 패턴(실제 발생 이력). main thread는 sub-agent 위임 시 가능하면 정확한 섹션 위치를 핀포인트로 지정(예: "spec.md §4-3 / 라인 626~655만 Read"). 또는 schema/토큰 등 핵심 정보를 위임 프롬프트에 inline 제공하여 agent의 spec 재읽기를 차단. 자세한 정책은 spec.md §0 / sub-agent 정의 참조
 
 ## 기술 스택
 - 프론트엔드: React 18 (CDN, UMD) + Babel Standalone (CDN, JSX 런타임 트랜스파일)
