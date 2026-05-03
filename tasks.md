@@ -1,6 +1,6 @@
 # blackplum mockup — Tasks
 
-> 최종 수정: 2026-05-04
+> 최종 수정: 2026-05-04 (Phase 2 완료)
 
 ---
 
@@ -68,30 +68,20 @@
 
 ---
 
-## Phase 2: Shell & 공통 UI
+## Phase 2: Shell & 공통 UI — 완료 (2026-05-04)
 
 > 트리거: Phase 1 완료. icon-set.js·mock-data.js·styles.css 베이스 확보 후.
 > 위임: frontend-dev (전적). main 스레드는 orchestration·검증.
 
-### 2-1. App / 화면 라우팅
-- `<App>` 최상위 (spec.md §2-4 단순 화면 라우팅: `currentScreen='landing'|'main'`)
-- `<LandingScreen>` (§5-1): SNS 시작 버튼만, 클릭 시 `main`으로 즉시 전환
-- `<MainScreen>` (§5-2): TopToolbar / LSB / InboxList / SidePanel 3분할 컨테이너 (PC) / 섹션 전환형 (모바일)
+- [x] 2-1. App / 화면 라우팅 — `<App>` 최상위 `currentScreen: 'landing' | 'main'` state (초기 'landing'). `<LandingScreen>` blackplum wordmark + 4개 SNS 버튼(Google / Naver / Kakao / Apple) → 클릭 시 main 즉시 전환. `<MainScreen>` TopToolbar + 3분할 셸(LSB / InboxList / SidePanel). PC 그리드 / 모바일 섹션 전환형. LSB·InboxList·SidePanel 본체는 Phase 3·4 placeholder 유지
+- [x] 2-2. TopToolbar — 좌측 SNS 필터 7 chip(Set 토글, mouse hover 확장 → display_name `::after`, `accent_color` inline border). 우측 (+) 버튼 → 모달 시연("준비 중인 기능이에요") / 검색 돋보기 → Toast stub("Phase 6")
+- [x] 2-3. 공통 UI — `<Icon>` (spec §3-6-3 그대로) / `<Toast>` ToastProvider + useToast(), 2초 auto fade / `<Modal>` focus trap·esc·backdrop·portal / `<Popover>` anchorRef + position prop(현재 미사용, Phase 3+ 진입) / `<EmptyState>` icon+title+desc+action
+- [x] 2-4. 반응형 base — `@media (max-width: 767px)` 모바일 LSB 드로어 슬라이드인 + scrim backdrop + esc/backdrop click 닫힘. `--touch-target-min` 44px 적용. SidePanel 풀스크린 분기는 Phase 4 활성
+- [x] 2-5. code-reviewer 통합 검증 — 1차 6 FAIL + 2 WARN → mechanical follow-up 4건 fix: Tier 2 토큰 9개 / Tier 3 토큰 14개 spec.md §3-3·§3-4 등록, Tier 1 직접 참조 2건 → Tier 2 교체, modal `max-height` raw vh 토큰화. styles.css 591 → 1056줄. WARN 2건은 backlog로 이관(LandingScreen kakao/apple 아이콘 미등록, Popover unused warning은 Phase 3 자연 해소)
 
-### 2-2. TopToolbar (§5-4)
-- 글로벌 SNS 필터 / SNS 추가 (+) / 검색 진입(돋보기, Phase 6에서 동작)
-
-### 2-3. 공통 UI (§5-8)
-- `<Icon>` (§3-6 추상화 컴포넌트)
-- `<Toast>` (Phase 5의 placeholder 메시지에서도 사용)
-- `<Modal>` / `<Popover>` (검색 / 매크로 빌더 wizard 진입에 활용)
-- `<EmptyState>` (카테고리 빈 상태)
-
-### 2-4. 반응형 base (§7)
-- breakpoint 미디어쿼리 (~767 / 768~1023 / 1024~)
-- 모바일 UI 원칙 (§7-2): hit area / 화면 단순화 / 햄버거 LSB / 하단 탭 후보
-
-### 2-5. code-reviewer 검증
+### Phase 2 backlog (Phase 3+ 진입 시 처리)
+- LandingScreen kakao / apple brand 아이콘: `icon-set.js`에 SVG path 등록 후 `<Icon name="brand-kakao" />` / `<Icon name="brand-apple" />`로 연결 (현재 둘 다 `null`로 텍스트만 노출)
+- `<Popover>` 미사용 ESLint warning: Phase 3 (LSB 카테고리 메뉴 / SortToggle dropdown 등) 또는 Phase 6 검색 진입에서 자연 해소 예정
 
 ---
 

@@ -397,6 +397,7 @@ UI 코드가 직접 참조하는 토큰. swap 후에도 이 토큰의 이름은 
 
   /* === Tier 2: Surface — radius === */
   --surface-radius-card:    var(--radius-lg);          /* 24px — card / panel */
+  --surface-radius-md:      var(--radius-md);          /* 16px — icon box, small surfaces */
   --surface-radius-chip:    var(--radius-pill);
   --surface-radius-pill:    var(--radius-pill);
 
@@ -431,6 +432,18 @@ UI 코드가 직접 참조하는 토큰. swap 후에도 이 토큰의 이름은 
   --transition-fast:        var(--motion-fast)   var(--easing-standard);
   --transition-normal:      var(--motion-normal) var(--easing-standard);
   --transition-slow:        var(--motion-slow)   var(--easing-standard);
+  --motion-duration-fast:   var(--motion-fast);
+  --motion-duration-normal: var(--motion-normal);
+  --motion-duration-slow:   var(--motion-slow);
+  --motion-easing-standard: var(--easing-standard);
+
+  /* === Tier 2: Overlay scrim (backdrop) === */
+  --color-scrim-heavy:      rgba(15, 15, 15, 0.5);   /* modal backdrop */
+  --color-scrim-light:      rgba(15, 15, 15, 0.4);   /* drawer backdrop */
+
+  /* === Tier 2: Interaction — press offset (button/card hover lift) === */
+  --press-offset-x:         -2px;
+  --press-offset-y:         -2px;
 
   /* === Tier 2: Layout (3분할 shell + hit area — Phase 1-3 도입) === */
   --layout-lsb-width:        var(--width-lsb-pc);
@@ -471,6 +484,22 @@ UI 코드가 직접 참조하는 토큰. swap 후에도 이 토큰의 이름은 
   --card-radius:           var(--surface-radius-card);
   --card-shadow:           var(--surface-shadow-card);
   --card-border:           1px solid var(--color-border-subtle);
+
+  /* === Phase 2 컴포넌트 토큰 === */
+  --landing-inner-max-width:             400px;
+  --chip-expanded-max-width:             180px;
+  --chip-label-max-width:                140px;
+  --toast-max-width:                     320px;
+  --toast-enter-offset:                  8px;
+  --toast-exit-offset:                   4px;
+  --modal-dialog-max-width:              480px;
+  --modal-dialog-max-height:             90vh;   /* PC */
+  --modal-dialog-max-height-mobile:      85vh;   /* mobile bottom-sheet 형태 */
+  --popover-min-width:                   160px;
+  --empty-state-icon-size:               48px;
+  --empty-state-desc-max-width:          280px;
+  --empty-state-min-height:              200px;
+  --lsb-drawer-width:                    min(280px, 80vw);
 
   /* === §5-9 매크로 빌더 컴포넌트 토큰 === */
   --sheet-handle-bg:                     var(--color-grey-200);
@@ -1554,3 +1583,4 @@ mockup 범위에서는 별도 CI 파이프라인 불요.
 | 2026-05-03 | DM 자동화 매크로 빌더 사양 정리. source: `docs/macro-prd.md` §10 P0+P1+P2 일부 채택. 결정사항: 진입 모델 LSB 유지(spec.md §5-9 그대로), 데이터 모델 `MacroRule` placeholder → `Automation` 전면 교체(§4-8), wizard step 5단계 분리(트리거/답글/팔로우 분기/메시지/최종 확인). req.md §6-2 보강(7개 하위 섹션). spec.md §4-8 schema 재정의 + 검증 함수 + AUTOMATION_TEMPLATES + BLANK_AUTOMATION_DRAFT, §4-10 모듈 키 갱신(macroRules → automations + AUTOMATION_TEMPLATES), §4-11 분포 5~7개 + 7개 룰 시연 포인트 표, §5-9 컴포넌트 트리·step 매핑·PC/모바일 동작·상태 모델·검증·인터랙션·step 사양 표. §3-2/§3-3/§3-4 토큰 25개 추가(Tier 1 2개: `--color-overlay-scrim`/`--opacity-disabled`, Tier 2 11개: sheet/accordion/chip/reply-remove/status-info-soft/sheet-radius, Tier 3 12개: sheet-handle/wizard-indicator/wizard-progress/automation-card/keyword-chip/toggle). styles.css 토큰 적용은 후속 frontend-dev task |
 | 2026-05-03 | Phase 1-3 트리거. 3분할 shell layout 토큰 신설. §3-2 Tier 1: `--width-lsb-pc`(240px) / `--width-sidepanel-pc`(400px) / `--width-container-max`(1440px). §3-3 Tier 2: `--layout-lsb-width` / `--layout-sidepanel-width` / `--layout-container-max` / `--touch-target-min`(=`var(--size-44)`). §3-8에 미디어쿼리 breakpoint raw px 예외 명시 (CSS `var()`를 `@media` 조건절에서 사용 불가하므로 불가피, §7-1 표를 단일 truth source로) |
 | 2026-05-04 | Phase 1 완료 (Foundation). icon-set.js 53개 아이콘(Lucide MIT 발췌) / mock-data.js 74 threads · 200 messages · 56 origins · 7 SNS accounts / styles.css 418→591줄(layout shell + reset 보강). 카테고리·플랫폼 분포 §4-11 일치, Long thread 2개(A→B→C→B→D), automations[] / AUTOMATION_TEMPLATES[] 빈 배열로 Phase 5 예약. code-reviewer 통합 검증 → 8개 발견사항 follow-up fix 후 12개 자동 정합성 항목 ALL PASS. 미동기화 격리: spec §3-2/§3-3 매크로 빌더 토큰 11개의 styles.css 동기화는 Phase 5-1에 위임 (의도된 분리). 환경 정비: sub-agent frontmatter `name`+`description` 누락 등록 거부 사고 → 3개 파일 보강 + CLAUDE.md 작업 위임 원칙에 메모 추가 |
+| 2026-05-04 | Phase 2 완료 (Shell & 공통 UI). index.html 신규 463줄 — React 18 UMD + Babel Standalone, App / LandingScreen / MainScreen / TopToolbar / Icon / Toast(2초 auto fade) / Modal(focus trap·esc·backdrop) / Popover / EmptyState. `<App>` `currentScreen: 'landing' \| 'main'` state, ToastProvider 최상위 래핑. TopToolbar 7개 SNS chip 토글(Set 상태) + 동적 `accent_color` inline border + hover 확장(`:hover` width transition + `::after` display_name). 모바일(≤767px) 햄버거 → LSB 드로어(슬라이드인 + backdrop·esc 닫힘). LSB / InboxList / SidePanel 본체는 Phase 3·4 placeholder 유지. styles.css 591→1056줄. code-reviewer 통합 검증 → 6 FAIL + 2 WARN → follow-up fix 4건: (1) Tier 2 토큰 9개 §3-3 등록(`--surface-radius-md`, motion duration·easing 분리 4개 = `--motion-duration-fast/normal/slow` + `--motion-easing-standard`, scrim heavy/light, press-offset x/y). (2) Tier 3 토큰 14개 §3-4 등록(landing/chip/toast(enter·exit offset)/modal max-width·max-height(PC/mobile)/popover/empty-state/lsb-drawer). (3) `top-toolbar__chip` Tier 1 `--border-w-soft` 직접 참조 → Tier 2 `--surface-border-soft`. (4) modal `max-height: 90vh/85vh` raw → Tier 3 토큰. WARN 2건: LandingScreen kakao/apple brand 아이콘 미등록(backlog), Popover ESLint unused warning(Phase 3 사용 시 자연 해소). swap-friendly 결정: `@keyframes animation` shorthand는 duration/easing 분리 Tier 2 토큰을 통해서만 진입(기존 `--transition-*` composite shorthand는 transition 속성 전용으로 유지) |

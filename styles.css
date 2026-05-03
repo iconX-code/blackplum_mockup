@@ -219,6 +219,7 @@
 
   /* === Tier 2: Surface — radius === */
   --surface-radius-card:    var(--radius-lg);          /* 24px — card / panel */
+  --surface-radius-md:      var(--radius-md);          /* 16px — icon box, small surfaces */
   --surface-radius-chip:    var(--radius-pill);
   --surface-radius-pill:    var(--radius-pill);
 
@@ -259,6 +260,18 @@
   --transition-fast:        var(--motion-fast)   var(--easing-standard);
   --transition-normal:      var(--motion-normal) var(--easing-standard);
   --transition-slow:        var(--motion-slow)   var(--easing-standard);
+  --motion-duration-fast:   var(--motion-fast);
+  --motion-duration-normal: var(--motion-normal);
+  --motion-duration-slow:   var(--motion-slow);
+  --motion-easing-standard: var(--easing-standard);
+
+  /* === Tier 2: Overlay scrim (backdrop) === */
+  --color-scrim-heavy:      rgba(15, 15, 15, 0.5);   /* modal backdrop */
+  --color-scrim-light:      rgba(15, 15, 15, 0.4);   /* drawer backdrop */
+
+  /* === Tier 2: Interaction — press offset (button/card hover lift) === */
+  --press-offset-x:         -2px;
+  --press-offset-y:         -2px;
 }
 
 /* ============================================================
@@ -453,6 +466,43 @@ textarea {
 }
 
 /* ============================================================
+ * Tier 3: Component tokens (Phase 2 — spec.md §3-4)
+ * ============================================================ */
+:root {
+  /* LandingScreen */
+  --landing-inner-max-width:    400px;
+
+  /* TopToolbar chip */
+  --chip-expanded-max-width:    180px;
+  --chip-label-max-width:       140px;
+
+  /* Toast */
+  --toast-max-width:            320px;
+
+  /* Modal */
+  --modal-dialog-max-width:     480px;
+
+  /* Popover */
+  --popover-min-width:          160px;
+
+  /* EmptyState icon box */
+  --empty-state-icon-size:      48px;
+  --empty-state-desc-max-width: 280px;
+  --empty-state-min-height:     200px;
+
+  /* LSB drawer (mobile) */
+  --lsb-drawer-width:           min(280px, 80vw);
+
+  /* Modal max-height */
+  --modal-dialog-max-height:        90vh;   /* PC */
+  --modal-dialog-max-height-mobile: 85vh;   /* mobile bottom-sheet 형태 */
+
+  /* Toast animation micro-offsets */
+  --toast-enter-offset:         8px;
+  --toast-exit-offset:          4px;
+}
+
+/* ============================================================
  * Layout — 3분할 app shell (spec.md §5-2 / §7)
  * @media 조건절 raw px는 §3-8 예외 허용
  * ============================================================ */
@@ -588,4 +638,427 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ============================================================
+ * Phase 2 Component CSS
+ * ============================================================ */
+
+/* ---- LandingScreen ---- */
+.landing-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-canvas);
+  padding: var(--gap-stack-lg);
+}
+
+.landing-screen__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-section);
+  width: 100%;
+  max-width: var(--landing-inner-max-width);
+}
+
+.landing-screen__brand {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-inline-md);
+}
+
+.landing-screen__tagline {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.landing-screen__buttons {
+  width: 100%;
+}
+
+.landing-screen__button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-inline-md);
+  padding: var(--gap-inline-md) var(--gap-stack-md);
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  box-shadow: var(--surface-shadow-press);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.landing-screen__button:hover {
+  transform: translate(var(--press-offset-x), var(--press-offset-y));
+  box-shadow: var(--surface-shadow-press-lg);
+}
+
+.landing-screen__button:active {
+  transform: translate(0, 0);
+  box-shadow: var(--surface-shadow-card);
+}
+
+/* ---- TopToolbar ---- */
+.top-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-md);
+  padding: var(--gap-inline-sm) var(--gap-stack-md);
+  background: var(--color-bg-canvas);
+  border-bottom: var(--surface-border-soft);
+  min-height: var(--touch-target-min);
+}
+
+.top-toolbar__hamburger {
+  display: none;
+  flex-shrink: 0;
+}
+
+.top-toolbar__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.top-toolbar__filter::-webkit-scrollbar {
+  display: none;
+}
+
+/* SNS filter chip */
+.top-toolbar__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-inline-xs);
+  height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: 0 var(--gap-inline-sm);
+  background: var(--color-bg-surface);
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-tertiary);
+  overflow: hidden;
+  /* hover expansion — show display name */
+  max-width: var(--touch-target-min);
+  transition:
+    max-width var(--transition-normal),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.top-toolbar__chip::after {
+  content: attr(data-display-name);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-width var(--transition-normal),
+    opacity var(--transition-fast);
+}
+
+.top-toolbar__chip:hover {
+  max-width: var(--chip-expanded-max-width);
+  color: var(--color-text-primary);
+  background: var(--color-bg-canvas-alt);
+}
+
+.top-toolbar__chip:hover::after {
+  max-width: var(--chip-label-max-width);
+  opacity: 1;
+}
+
+.top-toolbar__chip--active {
+  background: var(--color-bg-inverse);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-inverse);
+}
+
+.top-toolbar__chip--active:hover {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+.top-toolbar__chip-initial {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.top-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  flex-shrink: 0;
+}
+
+.top-toolbar__action-button {
+  background: none;
+  border: none;
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-primary);
+  transition: background var(--transition-fast);
+}
+
+.top-toolbar__action-button:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+/* ---- Toast ---- */
+.toast {
+  position: fixed;
+  bottom: var(--gap-stack-lg);
+  right: var(--gap-stack-lg);
+  z-index: 9000;
+  padding: var(--gap-inline-md) var(--gap-stack-md);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--surface-shadow-press);
+  pointer-events: none;
+  animation: toast-in var(--motion-duration-fast) var(--motion-easing-standard) both,
+             toast-out var(--motion-duration-normal) var(--motion-easing-standard) 1800ms both;
+  max-width: var(--toast-max-width);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(var(--toast-enter-offset)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(var(--toast-exit-offset)); }
+}
+
+@media (max-width: 767px) {
+  .toast {
+    right: var(--gap-stack-md);
+    left: var(--gap-stack-md);
+    bottom: calc(var(--gap-stack-md) + env(safe-area-inset-bottom, 0px));
+    text-align: center;
+    max-width: none;
+  }
+}
+
+/* ---- Modal ---- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap-stack-md);
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim-heavy);
+}
+
+.modal__dialog {
+  position: relative;
+  z-index: 1;
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-card);
+  box-shadow: var(--surface-shadow-press-lg);
+  width: 100%;
+  max-width: var(--modal-dialog-max-width);
+  max-height: var(--modal-dialog-max-height);
+  overflow-y: auto;
+  outline: none;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-stack-md) var(--gap-stack-md) 0;
+  gap: var(--gap-inline-sm);
+}
+
+.modal__title {
+  flex: 1;
+}
+
+.modal__close {
+  flex-shrink: 0;
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-primary);
+  transition: background var(--transition-fast);
+}
+
+.modal__close:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+.modal__body {
+  padding: var(--gap-stack-md);
+}
+
+.modal__primary-button {
+  width: 100%;
+  padding: var(--gap-inline-md) var(--gap-stack-md);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  box-shadow: var(--surface-shadow-press);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.modal__primary-button:hover {
+  transform: translate(var(--press-offset-x), var(--press-offset-y));
+  box-shadow: var(--surface-shadow-press-lg);
+}
+
+.modal__primary-button:active {
+  transform: translate(0, 0);
+  box-shadow: var(--surface-shadow-card);
+}
+
+@media (max-width: 767px) {
+  .modal__dialog {
+    max-width: 100%;
+    margin: 0;
+    border-radius: var(--surface-radius-card) var(--surface-radius-card) 0 0;
+    align-self: flex-end;
+    max-height: var(--modal-dialog-max-height-mobile);
+  }
+
+  .modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+}
+
+/* ---- Popover ---- */
+.popover {
+  position: absolute;
+  z-index: 7000;
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  box-shadow: var(--surface-shadow-press);
+  padding: var(--gap-inline-sm);
+  min-width: var(--popover-min-width);
+}
+
+.popover--bottom-end {
+  transform: translateX(-100%);
+}
+
+/* ---- EmptyState ---- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-inline-md);
+  padding: var(--gap-section) var(--gap-stack-md);
+  text-align: center;
+  min-height: var(--empty-state-min-height);
+}
+
+.empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--empty-state-icon-size);
+  height: var(--empty-state-icon-size);
+  background: var(--color-bg-canvas-alt);
+  border-radius: var(--surface-radius-md);
+}
+
+.empty-state__title {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.empty-state__desc {
+  margin: 0;
+  color: var(--color-text-muted);
+  max-width: var(--empty-state-desc-max-width);
+}
+
+.empty-state__action {
+  margin-top: var(--gap-inline-sm);
+}
+
+/* ---- Mobile LSB drawer ---- */
+.app-main__lsb-drawer-backdrop {
+  display: none;
+}
+
+.app-main__lsb-drawer {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .top-toolbar__hamburger {
+    display: inline-flex;
+  }
+
+  .app-main__lsb-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--color-scrim-light);
+  }
+
+  .app-main__lsb-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 400;
+    width: var(--lsb-drawer-width);
+    background: var(--color-bg-canvas);
+    border-right: var(--surface-border-default);
+    box-shadow: var(--surface-shadow-press-lg);
+    overflow-y: auto;
+    padding-top: env(safe-area-inset-top, 0px);
+    animation: lsb-slide-in var(--motion-duration-normal) var(--motion-easing-standard) both;
+  }
+
+  .app-main__lsb-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: var(--gap-inline-sm) var(--gap-inline-sm);
+    border-bottom: var(--surface-border-soft);
+  }
+
+  @keyframes lsb-slide-in {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+  }
 }
