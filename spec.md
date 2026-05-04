@@ -420,6 +420,7 @@ UI 코드가 직접 참조하는 토큰. swap 후에도 이 토큰의 이름은 
   --gap-section:            var(--space-7);
 
   /* === Tier 2: Icon === */
+  --icon-size-xs:           var(--size-12);
   --icon-size-sm:           var(--size-16);
   --icon-size-md:           var(--size-20);
   --icon-size-lg:           var(--size-24);
@@ -463,6 +464,18 @@ UI 코드가 직접 참조하는 토큰. swap 후에도 이 토큰의 이름은 
   --color-reply-remove-bg:        var(--color-accent-pink-soft);
   --color-reply-remove-fg:        var(--color-accent-pink);
   --surface-radius-sheet:         var(--radius-lg);            /* 양 상단 코너에만 적용 — CSS 측에서 처리 */
+
+  /* === Tier 2: Phase 3 — 카드 선택 상태 === */
+  --color-state-selected-bg:      var(--color-yellow-soft);   /* 선택된 카드 배경 */
+  --color-state-selected-border:  var(--color-yellow);        /* 선택된 카드 테두리 */
+  --color-state-checkbox-on:      var(--color-ink);           /* 체크박스 ON 색상 */
+  --color-state-checkbox-off:     var(--color-grey-300);      /* 체크박스 OFF 색상 */
+
+  /* === Tier 2: Stacked card — box-shadow fill & border (alpha via color-mix) === */
+  --color-stacked-card-1:         color-mix(in srgb, var(--color-bg-canvas-alt) 50%, transparent);  /* 1번 카드 fill */
+  --color-stacked-card-2:         color-mix(in srgb, var(--color-bg-canvas-alt) 25%, transparent);  /* 2번 카드 fill */
+  --color-stacked-border-1:       color-mix(in srgb, var(--color-border-strong) 50%, transparent);  /* 1번 카드 외곽선 */
+  --color-stacked-border-2:       color-mix(in srgb, var(--color-border-strong) 25%, transparent);  /* 2번 카드 외곽선 */
 }
 ```
 
@@ -517,6 +530,53 @@ UI 코드가 직접 참조하는 토큰. swap 후에도 이 토큰의 이름은 
   --toggle-on-bg:                        var(--color-status-info-soft);
   --toggle-off-bg:                       var(--color-grey-200);
   --toggle-knob-bg:                      var(--color-bg-surface);
+
+  /* === Phase 3 컴포넌트 토큰 === */
+
+  /* LSB (LeftSidebar) */
+  --lsb-brand-height:           52px;
+  --lsb-category-row-height:    var(--touch-target-min);   /* 44px */
+  --lsb-category-icon-size:     var(--icon-size-md);
+  --lsb-badge-min-width:        20px;
+  --lsb-badge-height:           20px;
+  --lsb-divider-height:         1px;
+  --lsb-section-divider-height: var(--border-w-default);
+  --lsb-profile-height:         56px;
+  --lsb-profile-avatar-size:    var(--size-32);
+
+  /* InboxList */
+  --inbox-header-height:        var(--touch-target-min);
+  --inbox-tag-chip-height:      28px;
+  --inbox-sort-toggle-height:   32px;
+
+  /* PreviewCard */
+  --card-thumb-size:            56px;
+  --card-thumb-logo-size:       var(--icon-size-sm);       /* platform logo badge */
+  --card-thumb-border-width:    var(--border-w-soft);
+  --card-thumb-platform-offset: calc(-1 * var(--card-stacked-offset)); /* badge overlap */
+  --card-gap:                   var(--gap-inline-md);
+  --card-padding-x:             var(--gap-stack-md);
+  --card-padding-y:             var(--gap-inline-md);
+  --card-stacked-offset:        4px;
+  --card-stacked-shadow:                                          /* fill 2장 + 외곽선 2장 (옵션 B) */
+    var(--card-stacked-offset) var(--card-stacked-offset) 0 0 var(--color-stacked-card-1),
+    var(--card-stacked-offset) var(--card-stacked-offset) 0 var(--border-w-default) var(--color-stacked-border-1),
+    calc(var(--card-stacked-offset) * 2) calc(var(--card-stacked-offset) * 2) 0 0 var(--color-stacked-card-2),
+    calc(var(--card-stacked-offset) * 2) calc(var(--card-stacked-offset) * 2) 0 var(--border-w-default) var(--color-stacked-border-2);
+  --card-min-height:            var(--touch-target-min);   /* 44px */
+  --card-tag-chip-height:       20px;
+  --card-checkbox-size:         var(--icon-size-md);
+  --card-longpress-scale:       0.97;
+
+  /* BulkActionBar */
+  --bulk-bar-height:            var(--touch-target-min);   /* 44px 최소 */
+  --bulk-bar-bg:                var(--color-bg-inverse);
+  --bulk-bar-color:             var(--color-text-inverse);
+  --bulk-bar-z:                 20;
+  --bulk-bar-btn-height:        32px;                      /* pill 버튼 높이 */
+
+  /* BulkTagModal */
+  --bulk-tag-chip-height:       32px;
 }
 ```
 
@@ -580,7 +640,7 @@ window.ICON_SET = {
 | prop | 값 | 매핑 |
 | --- | --- | --- |
 | `name` | `string` | `window.ICON_SET[name]` 조회 |
-| `size` | `'sm' \| 'md' \| 'lg'` | `--icon-size-{size}` |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `--icon-size-{size}` |
 | `tone` | `'primary' \| 'muted' \| 'on-brand' \| 'inherit'` | `--icon-color-{tone}` 또는 `currentColor` |
 
 내부 구현 컨셉:
@@ -600,6 +660,7 @@ CSS 측:
 
 ```css
 .icon { display: inline-block; flex-shrink: 0; }
+.icon--xs { width: var(--icon-size-xs); height: var(--icon-size-xs); }
 .icon--sm { width: var(--icon-size-sm); height: var(--icon-size-sm); }
 .icon--md { width: var(--icon-size-md); height: var(--icon-size-md); }
 .icon--lg { width: var(--icon-size-lg); height: var(--icon-size-lg); }
@@ -1584,3 +1645,5 @@ mockup 범위에서는 별도 CI 파이프라인 불요.
 | 2026-05-03 | Phase 1-3 트리거. 3분할 shell layout 토큰 신설. §3-2 Tier 1: `--width-lsb-pc`(240px) / `--width-sidepanel-pc`(400px) / `--width-container-max`(1440px). §3-3 Tier 2: `--layout-lsb-width` / `--layout-sidepanel-width` / `--layout-container-max` / `--touch-target-min`(=`var(--size-44)`). §3-8에 미디어쿼리 breakpoint raw px 예외 명시 (CSS `var()`를 `@media` 조건절에서 사용 불가하므로 불가피, §7-1 표를 단일 truth source로) |
 | 2026-05-04 | Phase 1 완료 (Foundation). icon-set.js 53개 아이콘(Lucide MIT 발췌) / mock-data.js 74 threads · 200 messages · 56 origins · 7 SNS accounts / styles.css 418→591줄(layout shell + reset 보강). 카테고리·플랫폼 분포 §4-11 일치, Long thread 2개(A→B→C→B→D), automations[] / AUTOMATION_TEMPLATES[] 빈 배열로 Phase 5 예약. code-reviewer 통합 검증 → 8개 발견사항 follow-up fix 후 12개 자동 정합성 항목 ALL PASS. 미동기화 격리: spec §3-2/§3-3 매크로 빌더 토큰 11개의 styles.css 동기화는 Phase 5-1에 위임 (의도된 분리). 환경 정비: sub-agent frontmatter `name`+`description` 누락 등록 거부 사고 → 3개 파일 보강 + CLAUDE.md 작업 위임 원칙에 메모 추가 |
 | 2026-05-04 | Phase 2 완료 (Shell & 공통 UI). index.html 신규 463줄 — React 18 UMD + Babel Standalone, App / LandingScreen / MainScreen / TopToolbar / Icon / Toast(2초 auto fade) / Modal(focus trap·esc·backdrop) / Popover / EmptyState. `<App>` `currentScreen: 'landing' \| 'main'` state, ToastProvider 최상위 래핑. TopToolbar 7개 SNS chip 토글(Set 상태) + 동적 `accent_color` inline border + hover 확장(`:hover` width transition + `::after` display_name). 모바일(≤767px) 햄버거 → LSB 드로어(슬라이드인 + backdrop·esc 닫힘). LSB / InboxList / SidePanel 본체는 Phase 3·4 placeholder 유지. styles.css 591→1056줄. code-reviewer 통합 검증 → 6 FAIL + 2 WARN → follow-up fix 4건: (1) Tier 2 토큰 9개 §3-3 등록(`--surface-radius-md`, motion duration·easing 분리 4개 = `--motion-duration-fast/normal/slow` + `--motion-easing-standard`, scrim heavy/light, press-offset x/y). (2) Tier 3 토큰 14개 §3-4 등록(landing/chip/toast(enter·exit offset)/modal max-width·max-height(PC/mobile)/popover/empty-state/lsb-drawer). (3) `top-toolbar__chip` Tier 1 `--border-w-soft` 직접 참조 → Tier 2 `--surface-border-soft`. (4) modal `max-height: 90vh/85vh` raw → Tier 3 토큰. WARN 2건: LandingScreen kakao/apple brand 아이콘 미등록(backlog), Popover ESLint unused warning(Phase 3 사용 시 자연 해소). swap-friendly 결정: `@keyframes animation` shorthand는 duration/easing 분리 Tier 2 토큰을 통해서만 진입(기존 `--transition-*` composite shorthand는 transition 속성 전용으로 유지) |
+| 2026-05-04 | Phase 3 완료 (Inbox 메인 — LSB + InboxList + PreviewCard 두 type + 다중선택/일괄처리 + 정렬·badge count). index.html 463→1241줄(+778), styles.css 1064→1860줄(+796). 라운드 1: LeftSidebar 9행(ai_pick / 분류 4 / sent / dm_automation + 구분선 2 + 섹션나눔 1) + InboxList(카테고리 헤더 + TagFilterBar + SortToggle + 카드 리스트 + EmptyState) + PreviewCard.Type1(`business_extracted` 6필드 정형 슬롯) / Type2(sender + 미리보기 + relative time + tag chips) + `is_stacked` 3건 stacked 카드 + 정렬(priority_score desc 기본 / last_message_at desc 최신순 토글) + Badge count runtime computed(`categoryFilter` 의사코드 §6-7 그대로, sent / dm_automation 항상 0, LSB badge는 SNS 필터 무시) + sent 카테고리는 outgoing message만 추출한 단순 리스트. 라운드 2: 다중선택/일괄처리 — PC hover 체크박스 / 모바일 long-press 500ms → 선택 모드 진입. 선택 집합 `Set<thread_id>`. BulkActionBar(읽음처리 / 태그 추가)로 InboxList 헤더 morph. mock data 직접 mutate 금지 → MainScreen `processedOverrides: Set<id>` + `threadTagOverrides: Map<id, string[]>`로 React state override, `applyOverrides` helper가 thread에 두 override 합성. BulkTagModal은 TAG_CATALOG 4그룹(business/ops/social/manual) chip 그리드. Toast 결과 안내. 카테고리 전환 시 자동 종료, 마지막 선택 해제 시 자동 종료. code-reviewer 1차 검증 → critical 1건 + FAIL 6건 → follow-up fix 7건 모두 정리: (1) `threadsWithOverrides` useMemo가 `threadTagOverrides`를 무시 → tags 병합 + deps 추가(태그 일괄 추가 후 LSB badge 새 카테고리 즉시 반영). (2) `.preview-card__thumb-platform`의 `-4px` raw → `--card-thumb-platform-offset` Tier 3 신설. (3) `.bulk-action-bar__btn`의 `32px` raw → `--bulk-bar-btn-height` Tier 3 신설. (4) Phase 3 토큰 spec.md §3-3/§3-4 일괄 등록 — Tier 2 4개(`--color-state-selected-bg/border`, `--color-state-checkbox-on/off`) + Tier 3 30개(LSB 9 / Inbox 3 / Card 14 / Bulk 6). (5) `.preview-card__inner` dead rule(JSX에 미존재) → `.preview-card--selectable.preview-card--selection-mode-on { padding-left: ... }` modifier 기반 인덴트로 교체. (6/7) `selection-mode-on` non-BEM → `preview-card--selection-mode-on`(JSX·CSS 모두 정규화). ESLint 0 errors / 1 pre-existing Popover warning(Phase 6 검색 진입에서 자연 해소 예정). 백로그: SidePanel 진입(Phase 4), dm_automation view 활성(Phase 5), BulkActionBar 모바일 sticky top offset 검토(Phase 4 SidePanel 통합 시) |
+| 2026-05-04 | Phase 3 후속 사용자 브라우저 점검 누적 fix. **레이아웃·스크롤 분리**: html/body overflow hidden + `.app-shell` flex-column + height 100dvh + `.app-main { flex:1; min-height:0 }` → InboxList만 자체 overflow-y. TopToolbar/LSB/SidePanel sticky 정상화. **TopToolbar 반응형 분기 재구성**: PC(≥1024) `grid-template-columns: var(--layout-lsb-width) 1fr auto`로 `.app-main`과 pixel-perfect 정렬, wordmark 좌측 LSB 영역 차지. Tablet+Mobile(≤1023) wordmark 숨김 + `grid auto 1fr auto`(햄버거/카테고리명/액션), (+) SNS 추가 PC 전용으로 분리, drawer 헤더에 wordmark 추가(`hideBrand` prop으로 LSB 본체 brand 숨김). **SNS chip 재구현**: grid `0fr↔1fr` 폐기 → 각 chip 자체 `max-width` transition. collapsed `width=height=44px` 정확한 원형, hover 시 컨텐츠 기반 동적 폭 + 상한 `--chip-expanded-width`(160px). 좌측 chip 영향 0 / 우측만 자연스럽게 밀림. 전체 토글 `chip--all` 추가. label-cell도 max-width 기반 transition. **연결 계정 통일**: Tablet+Mobile에서 SNS chip filter 영역 숨김 → "연결 계정" 버튼 → `<Popover>`로 통일(Modal/bottom-sheet 분기 폐기). `withBackdrop` prop 신설 + dim scrim. Popover 컴포넌트 `position: absolute → fixed` + 좌표 계산 scrollX/Y 제거(`position: relative` ancestor 좌표 mismatch 근본 해소). `.popover` border-radius `--surface-radius-chip`(pill) → `--surface-radius-card`(24px) 교체로 양옆 부풀림 해소. width `min(--popover-max-width, calc(100vw - gap*2))` viewport 안전 처리. **InboxList toolbar 통일**: 카테고리 헤더 영역 폐기(JSX/CSS/토큰 cleanup). SortToggle segmented control → `<Icon name="sort">` 버튼 + Popover dropdown(우선순위순/최신순). TagFilterBar `flex-wrap: nowrap` + `overflow-y: hidden`(가로 스크롤만). 모바일 toolbar 상단 `top: var(--touch-target-min)` override 제거(빈 공간 해소). direct_check / sent layout 통일 — sent 별도 분기 폐기, 둘 다 type filter chip 3종(DM/댓글/메일) 고정 표시. sent도 정렬 토글 정상(priority_score / sent_at). **Icon system robust 처리**: `<Icon>` SVG root에 Lucide standard attrs(`fill=none stroke=currentColor strokeWidth=2 strokeLinecap=round strokeLinejoin=round`) 추가로 stroke 기반 아이콘(menu / x / search / check / sort / more-* 등) silent invisibility 해소. fill 기반 4건(more-horizontal/more-vertical/drag-handle dot 9개 + logo-youtube play triangle)에 `fill=currentColor stroke=none` 보강. CSS `.icon line/polyline/polygon` 셀렉터 + `.icon [fill="currentColor"]` override 추가. `--icon-size-xs: var(--size-12)` Tier 2 + `.icon--xs` helper 신설(`size="xs"` 호출이 사실상 무효였던 silent bug 해소). **PreviewCard stacked 시각 fix**: hover 시 `transform: translate()`이 stacking context 강제 생성 → pseudo `z-index: -1`이 부모 background를 못 뚫는 paint order bug → pseudo(`::before/::after`) 폐기 → `box-shadow` 4-stack(fill 2장 + 외곽선 2장)으로 재구현. `color-mix(in srgb, ...)` alpha 처리로 opacity 0.5/0.25 표현. hover/non-hover 일관 paint order. Tier 2 색상 4개(`--color-stacked-card-1/2`, `--color-stacked-border-1/2`) + Tier 3 1개(`--card-stacked-shadow`) 신설. **기타**: `.preview-card--sent`의 `border-left` 단독 override 제거(둥근 모서리와 충돌하던 selvage 해소). 폐기 토큰 누적: `--chip-expanded-max-width` / `--chip-label-max-width` / `--inbox-header-height` / `--inbox-sort-toggle-height`. spec.md §3 토큰 동기화 완료. ESLint 0 errors / 0 warnings(Popover unused warning은 본 라운드 사용 시작으로 자연 해소). 백로그(tasks.md 등재): 아이콘 일괄 점검(Phase 7-1 직전) / InboxList 정렬 기준 확장(현재 우선순위·최신순 2종) |

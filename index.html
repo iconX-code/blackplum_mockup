@@ -18,7 +18,7 @@
 
   <script type="text/babel" data-presets="react">
     const {
-      useState, useEffect, useRef,
+      useState, useEffect, useRef, useMemo,
       useCallback, useContext, createContext,
     } = React;
 
@@ -33,6 +33,11 @@
         <svg
           className={cls}
           viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           dangerouslySetInnerHTML={{ __html: inner }}
         />
       );
@@ -146,22 +151,22 @@
     /* ================================================================
      * Popover — spec.md §5-8
      * ================================================================ */
-    function Popover({ isOpen, onClose, anchorRef, position = 'bottom-start', children }) {
+    function Popover({ isOpen, onClose, anchorRef, position = 'bottom-start', withBackdrop = false, children }) {
       const popoverRef = useRef(null);
       const [coords, setCoords] = useState({ top: 0, left: 0 });
 
       useEffect(() => {
         if (!isOpen || !anchorRef.current) return;
         const rect = anchorRef.current.getBoundingClientRect();
-        const top = rect.bottom + window.scrollY + 4;
+        const top = rect.bottom + 4;
         const left = position === 'bottom-end'
-          ? rect.right + window.scrollX
-          : rect.left + window.scrollX;
+          ? rect.right
+          : rect.left;
         setCoords({ top, left });
       }, [isOpen, anchorRef, position]);
 
       useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen || withBackdrop) return;
         const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
         const handleClick = (e) => {
           if (popoverRef.current && !popoverRef.current.contains(e.target) &&
@@ -175,20 +180,30 @@
           document.removeEventListener('keydown', handleKey);
           document.removeEventListener('mousedown', handleClick);
         };
-      }, [isOpen, onClose, anchorRef]);
+      }, [isOpen, onClose, anchorRef, withBackdrop]);
+
+      useEffect(() => {
+        if (!isOpen || !withBackdrop) return;
+        const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handleKey);
+        return () => { document.removeEventListener('keydown', handleKey); };
+      }, [isOpen, onClose, withBackdrop]);
 
       if (!isOpen) return null;
 
       const posClass = position === 'bottom-end' ? 'popover--bottom-end' : 'popover--bottom-start';
 
       return (
-        <div
-          ref={popoverRef}
-          className={`popover ${posClass}`}
-          style={{ top: coords.top, left: coords.left }}
-        >
-          {children}
-        </div>
+        <>
+          {withBackdrop && <div className="popover__backdrop" onClick={onClose} />}
+          <div
+            ref={popoverRef}
+            className={`popover ${posClass}`}
+            style={{ top: coords.top, left: coords.left }}
+          >
+            {children}
+          </div>
+        </>
       );
     }
 
@@ -217,18 +232,29 @@
     /* ================================================================
      * TopToolbar — spec.md §5-4
      * ================================================================ */
-    function TopToolbar({ accounts, selectedAccountIds, onToggleAccount, onOpenLsb }) {
+    function TopToolbar({ accounts, selectedAccountIds, onToggleAccount, onToggleAll, onOpenLsb, selectedCategory }) {
       const showToast = useToast();
       const [addModalOpen, setAddModalOpen] = useState(false);
+      const [snsFilterPopoverOpen, setSnsFilterPopoverOpen] = useState(false);
       const PLATFORM_LOGOS = window.MOCK_DATA.PLATFORM_LOGOS;
+      const CATEGORIES = window.MOCK_DATA.CATEGORIES;
+      const connectedBtnRef = useRef(null);
 
       const handleSearchClick = () => {
         showToast({ message: '검색은 Phase 6에서 구현 예정이에요.' });
       };
 
+      const handleAddAccount = () => {
+        setSnsFilterPopoverOpen(false);
+        setAddModalOpen(true);
+      };
+
+      const allActive = selectedAccountIds.size === accounts.length;
+      const categoryLabel = CATEGORIES[selectedCategory] ? CATEGORIES[selectedCategory].display : selectedCategory;
+
       return (
         <header className="top-toolbar safe-area-top">
-          {/* 모바일 햄버거 */}
+          {/* 좌측: 햄버거 */}
           <button
             className="top-toolbar__hamburger tappable"
             onClick={onOpenLsb}
@@ -237,8 +263,29 @@
             <Icon name="menu" size="md" tone="primary" />
           </button>
 
-          {/* 글로벌 SNS 필터 chips */}
+          {/* 가운데: 현재 카테고리명 — Tablet/Mobile에서만 표시 (≤1023px) */}
+          <span className="top-toolbar__category-label" aria-live="polite">{categoryLabel}</span>
+
+          {/* 워드마크 — PC에서만 표시 (≥1024px) */}
+          <span className="top-toolbar__wordmark">blackplum</span>
+
+          {/* 글로벌 SNS 필터 chips — PC에서만 표시 (≥1024px) */}
           <div className="top-toolbar__filter" role="group" aria-label="SNS 계정 필터">
+            {/* 전체 토글 chip */}
+            <button
+              className={`top-toolbar__chip top-toolbar__chip--all tappable${allActive ? ' top-toolbar__chip--active' : ''}`}
+              onClick={onToggleAll}
+              aria-pressed={allActive}
+              aria-label={allActive ? '전체 해제' : '전체 선택'}
+            >
+              <span className="top-toolbar__chip-icon-cell">
+                <Icon name={allActive ? 'circle-check' : 'circle'} size="sm" tone="inherit" />
+              </span>
+              <span className="top-toolbar__chip-label-cell">
+                <span>전체</span>
+              </span>
+            </button>
+
             {accounts.map((account) => {
               const logoIcon = PLATFORM_LOGOS[account.platform];
               const isActive = selectedAccountIds.has(account.id);
@@ -254,26 +301,44 @@
                   aria-pressed={isActive}
                   aria-label={account.display_name}
                   style={chipStyle}
-                  data-display-name={account.display_name}
                 >
-                  {logoIcon
-                    ? <Icon name={logoIcon} size="sm" tone="inherit" />
-                    : <span className="top-toolbar__chip-initial">{account.initial || account.display_name[0]}</span>
-                  }
+                  <span className="top-toolbar__chip-icon-cell">
+                    {logoIcon
+                      ? <Icon name={logoIcon} size="sm" tone="inherit" />
+                      : <span className="top-toolbar__chip-initial">{account.initial || account.display_name[0]}</span>
+                    }
+                  </span>
+                  <span className="top-toolbar__chip-label-cell">
+                    <span>{account.display_name}</span>
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* 우측 액션 버튼 */}
+          {/* 우측: 연결 계정 버튼 + 검색 (Tablet/Mobile) / (+) + 검색 (PC) */}
           <div className="top-toolbar__actions">
+            {/* 연결 계정 버튼 — Tablet/Mobile에서만 표시 (≤1023px) */}
             <button
-              className="top-toolbar__action-button tappable"
+              ref={connectedBtnRef}
+              className="top-toolbar__connected-accounts-btn tappable"
+              onClick={() => setSnsFilterPopoverOpen(true)}
+              aria-label="연결 계정 필터"
+              aria-expanded={snsFilterPopoverOpen}
+            >
+              <Icon name="link" size="sm" tone="primary" />
+              <span>연결 계정</span>
+            </button>
+
+            {/* (+) SNS 추가 버튼 — PC에서만 표시 (≥1024px) */}
+            <button
+              className="top-toolbar__action-button top-toolbar__action-button--add-sns tappable"
               onClick={() => setAddModalOpen(true)}
               aria-label="SNS 계정 추가"
             >
               <Icon name="plus" size="md" tone="primary" />
             </button>
+
             <button
               className="top-toolbar__action-button tappable"
               onClick={handleSearchClick}
@@ -302,7 +367,854 @@
               </button>
             </div>
           </Modal>
+
+          {/* SNS 필터 Popover — 연결 계정 버튼 하단에 anchor */}
+          <Popover
+            isOpen={snsFilterPopoverOpen}
+            onClose={() => setSnsFilterPopoverOpen(false)}
+            anchorRef={connectedBtnRef}
+            position="bottom-end"
+            withBackdrop
+          >
+            <div className="sns-filter-popover">
+              <div className="sns-filter-modal__chips">
+                {/* 전체 토글 */}
+                <button
+                  className={`top-toolbar__chip top-toolbar__chip--all tappable${allActive ? ' top-toolbar__chip--active' : ''}`}
+                  onClick={onToggleAll}
+                  aria-pressed={allActive}
+                  aria-label={allActive ? '전체 해제' : '전체 선택'}
+                >
+                  <span className="top-toolbar__chip-icon-cell">
+                    <Icon name={allActive ? 'circle-check' : 'circle'} size="sm" tone="inherit" />
+                  </span>
+                  <span className="top-toolbar__chip-label-cell">
+                    <span>전체</span>
+                  </span>
+                </button>
+
+                {/* 계정별 chip */}
+                {accounts.map((account) => {
+                  const logoIcon = PLATFORM_LOGOS[account.platform];
+                  const isActive = selectedAccountIds.has(account.id);
+                  const chipStyle = account.accent_color
+                    ? { borderColor: account.accent_color }
+                    : {};
+
+                  return (
+                    <button
+                      key={account.id}
+                      className={`top-toolbar__chip tappable${isActive ? ' top-toolbar__chip--active' : ''}`}
+                      onClick={() => onToggleAccount(account.id)}
+                      aria-pressed={isActive}
+                      aria-label={account.display_name}
+                      style={chipStyle}
+                    >
+                      <span className="top-toolbar__chip-icon-cell">
+                        {logoIcon
+                          ? <Icon name={logoIcon} size="sm" tone="inherit" />
+                          : <span className="top-toolbar__chip-initial">{account.initial || account.display_name[0]}</span>
+                        }
+                      </span>
+                      <span className="top-toolbar__chip-label-cell">
+                        <span>{account.display_name}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {/* (+) 추가 버튼 */}
+                <button
+                  className="sns-filter-modal__add-btn tappable"
+                  onClick={handleAddAccount}
+                  aria-label="SNS 계정 추가"
+                >
+                  <Icon name="plus" size="sm" tone="inherit" />
+                </button>
+              </div>
+            </div>
+          </Popover>
         </header>
+      );
+    }
+
+    /* ================================================================
+     * 유틸리티 함수 — Phase 3
+     * ================================================================ */
+
+    // 카테고리 필터 매칭 (spec.md §6-7)
+    function categoryFilter(cat, thread) {
+      if (cat.tag_filter === '*')        return true;
+      if (cat.tag_filter === 'untagged') return thread.tags.length === 0;
+      if (Array.isArray(cat.tag_filter)) return cat.tag_filter.some((t) => thread.tags.includes(t));
+      if (cat.view)                      return false;
+      return false;
+    }
+
+    // badge count 계산 (SNS 필터 무시)
+    function calcBadge(catKey, CATEGORIES, threads) {
+      const cat = CATEGORIES[catKey];
+      if (!cat) return 0;
+      return threads.filter((t) => !t.processed && categoryFilter(cat, t)).length;
+    }
+
+    // 메시지 타입 라벨
+    function msgTypeLabel(messageType) {
+      if (messageType === 'dm')      return 'DM';
+      if (messageType === 'comment') return '댓글';
+      if (messageType === 'email')   return '메일';
+      return messageType;
+    }
+
+    // 상대 시각 표시 (last_message_at)
+    function relativeTime(isoString) {
+      const now = new Date();
+      const then = new Date(isoString);
+      const diffMs = now - then;
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHr  = Math.floor(diffMs / 3600000);
+      const diffDay = Math.floor(diffMs / 86400000);
+
+      if (diffMin < 1)  return '방금 전';
+      if (diffMin < 60) return `${diffMin}분 전`;
+      if (diffDay === 0) {
+        // 오늘 — 시각 표시
+        const h = then.getHours();
+        const m = String(then.getMinutes()).padStart(2, '0');
+        const ampm = h < 12 ? '오전' : '오후';
+        const h12 = h % 12 || 12;
+        return `오늘 ${ampm} ${h12}:${m}`;
+      }
+      if (diffDay === 1) return '어제';
+      if (diffDay < 7)   return `${diffDay}일 전`;
+      if (diffHr < 24 * 30) return `${Math.floor(diffDay / 7)}주 전`;
+      return `${Math.floor(diffDay / 30)}달 전`;
+    }
+
+    /* ================================================================
+     * LeftSidebar — spec.md §5-3
+     * ================================================================ */
+    const LSB_ITEMS = [
+      { key: 'ai_pick',       icon: 'category-ai-pick',       showBadge: true },
+      { key: '__divider1__',  type: 'divider' },
+      { key: 'business',      icon: 'category-business',      showBadge: true },
+      { key: 'ops',           icon: 'category-ops',           showBadge: true },
+      { key: 'social',        icon: 'category-social',        showBadge: true },
+      { key: 'direct_check',  icon: 'category-direct-check',  showBadge: true },
+      { key: '__divider2__',  type: 'divider' },
+      { key: 'sent',          icon: 'category-sent',          showBadge: false },
+      { key: '__section__',   type: 'section' },
+      { key: 'dm_automation', icon: 'category-dm-automation', showBadge: false },
+    ];
+
+    function LeftSidebar({ selectedCategory, onSelectCategory, onClose, threadsOverride, hideBrand }) {
+      const { channel, threads, CATEGORIES } = window.MOCK_DATA;
+      const effectiveThreads = threadsOverride || threads;
+
+      return (
+        <div className="lsb">
+          {/* CI/BI 영역 — hideBrand 시 숨김 (drawer 헤더에서 대신 표시) */}
+          {!hideBrand && (
+            <div className="lsb__brand">
+              <span className="lsb__brand-wordmark">blackplum</span>
+            </div>
+          )}
+
+          {/* 카테고리 리스트 */}
+          <nav className="lsb__nav" aria-label="카테고리">
+            {LSB_ITEMS.map((item) => {
+              if (item.type === 'divider') {
+                return <div key={item.key} className="lsb__divider" aria-hidden="true" />;
+              }
+              if (item.type === 'section') {
+                return <div key={item.key} className="lsb__section-divider" aria-hidden="true" />;
+              }
+              const cat = CATEGORIES[item.key];
+              const isActive = selectedCategory === item.key;
+              const badge = item.showBadge ? calcBadge(item.key, CATEGORIES, effectiveThreads) : 0;
+
+              return (
+                <button
+                  key={item.key}
+                  className={`lsb__category${isActive ? ' lsb__category--active' : ''}`}
+                  onClick={() => {
+                    onSelectCategory(item.key);
+                    if (onClose) onClose();
+                  }}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <span className="lsb__category-icon">
+                    <Icon
+                      name={item.icon}
+                      size="md"
+                      tone={isActive ? 'inverse' : 'muted'}
+                    />
+                  </span>
+                  <span className="lsb__category-label">{cat ? cat.display : item.key}</span>
+                  {badge > 0 && (
+                    <span className="lsb__category-badge">{badge}</span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* 프로필 영역 */}
+          <div className="lsb__profile">
+            <div className="lsb__profile-avatar">
+              <span className="lsb__profile-initial">
+                {channel.user_display_name ? channel.user_display_name[0] : '?'}
+              </span>
+            </div>
+            <span className="lsb__profile-name">{channel.user_display_name || channel.channel_display_name}</span>
+          </div>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * PreviewCard — Type1 (비즈니스) / Type2 (기본)
+     * ================================================================ */
+    function PreviewCard({ thread, selectionMode, isSelected, onCardClick, onCheckboxClick }) {
+      const { origins, messages, CATEGORIES } = window.MOCK_DATA;
+      const longPressRef = useRef(null);
+      const [pressing, setPressing] = useState(false);
+      const PLATFORM_LOGOS = window.MOCK_DATA.PLATFORM_LOGOS;
+
+      const origin = origins.find((o) => o.id === thread.origin_id);
+      const lastMsg = messages.find((m) => m.id === thread.message_ids[thread.message_ids.length - 1]);
+
+      // Type1 판정
+      const useType1 = thread.business_extracted && categoryFilter(CATEGORIES.business, thread);
+
+      // 썸네일
+      const thumbUrl = origin && origin.type === 'post'
+        ? origin.post_meta && origin.post_meta.thumbnail_url
+        : null;
+      const thumbInitial = origin
+        ? origin.display_name[0]
+        : '?';
+
+      // 플랫폼 로고
+      const platformLogoKey = PLATFORM_LOGOS[thread.platform] || null;
+
+      // 썸네일 border color — 동적 (accent_color 또는 platform token)
+      const thumbBorderStyle = { borderColor: `var(--color-platform-${thread.platform === 'naver_mail' ? 'naver' : thread.platform === 'other_mail' ? 'mail' : thread.platform})` };
+
+      const handleClick = () => {
+        if (onCardClick) onCardClick(thread.id);
+      };
+
+      const handleCheckboxClick = (e) => {
+        e.stopPropagation();
+        if (onCheckboxClick) onCheckboxClick(thread.id);
+      };
+
+      // 모바일 long-press 핸들러
+      const handleTouchStart = (_e) => {
+        if (selectionMode) return; // 이미 선택 모드면 long-press 불필요
+        setPressing(true);
+        longPressRef.current = setTimeout(() => {
+          setPressing(false);
+          if (onCheckboxClick) onCheckboxClick(thread.id);
+        }, 500);
+      };
+
+      const handleTouchEnd = () => {
+        setPressing(false);
+        clearTimeout(longPressRef.current);
+      };
+
+      const handleTouchMove = () => {
+        setPressing(false);
+        clearTimeout(longPressRef.current);
+      };
+
+      const stackedClass = thread.is_stacked ? ' preview-card--stacked' : '';
+      const typeClass = useType1 ? ' preview-card--type-business' : '';
+      const selectableClass = ' preview-card--selectable';
+      const selectedClass = isSelected ? ' preview-card--selected' : '';
+      const selectionModeClass = selectionMode ? ' preview-card--selection-mode-on' : '';
+      const pressingClass = pressing ? ' preview-card--pressing' : '';
+
+      return (
+        <button
+          className={`preview-card${stackedClass}${typeClass}${selectableClass}${selectedClass}${selectionModeClass}${pressingClass}`}
+          onClick={handleClick}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
+          type="button"
+        >
+          {/* 체크박스 (선택 모드 or hover 시 노출) */}
+          <span
+            className="preview-card__checkbox"
+            onClick={handleCheckboxClick}
+            role="checkbox"
+            aria-checked={isSelected}
+            aria-label="스레드 선택"
+          >
+            <Icon name={isSelected ? 'square-check' : 'square'} size="md" tone="inherit" />
+          </span>
+
+          {/* 썸네일 */}
+          <div className="preview-card__thumb">
+            {thumbUrl ? (
+              <img
+                className="preview-card__thumb-img"
+                src={thumbUrl}
+                alt={origin ? origin.display_name : ''}
+                style={thumbBorderStyle}
+              />
+            ) : (
+              <div className="preview-card__thumb-initial" style={thumbBorderStyle}>
+                {thumbInitial}
+              </div>
+            )}
+            {platformLogoKey && (
+              <div className="preview-card__thumb-platform">
+                <Icon name={platformLogoKey} size="sm" tone="inherit" />
+              </div>
+            )}
+          </div>
+
+          {/* 본문 */}
+          <div className="preview-card__body">
+            {useType1 ? (
+              <PreviewCardType1Body thread={thread} origin={origin} lastMsg={lastMsg} />
+            ) : (
+              <PreviewCardType2Body thread={thread} origin={origin} lastMsg={lastMsg} />
+            )}
+          </div>
+        </button>
+      );
+    }
+
+    function PreviewCardType1Body({ thread }) {
+      const biz = thread.business_extracted;
+      // 상단 행: 회사/브랜드 + 시각
+      return (
+        <>
+          <div className="preview-card__body-row">
+            <span className="preview-card__biz-company">
+              {biz.brand || biz.company}
+            </span>
+            <span className="preview-card__time">{relativeTime(thread.last_message_at)}</span>
+          </div>
+          {biz.contact_person && (
+            <span className="preview-card__biz-person">{biz.contact_person}</span>
+          )}
+          {biz.proposal_summary && (
+            <p className="preview-card__biz-summary">{biz.proposal_summary}</p>
+          )}
+          {biz.product && (
+            <span className="preview-card__biz-product">{biz.product}</span>
+          )}
+          <div className="preview-card__biz-footer">
+            <TagChips tags={thread.tags} max={2} />
+            {biz.conditions && (
+              <span className="preview-card__biz-conditions">{biz.conditions}</span>
+            )}
+          </div>
+        </>
+      );
+    }
+
+    function PreviewCardType2Body({ thread, origin, lastMsg }) {
+      const senderName = origin ? origin.display_name : '알 수 없음';
+      const preview = lastMsg ? lastMsg.body : '';
+
+      return (
+        <>
+          <div className="preview-card__body-row">
+            <span className="preview-card__sender">{senderName}</span>
+            <span className="preview-card__time">{relativeTime(thread.last_message_at)}</span>
+          </div>
+          <span className="preview-card__type-label">{msgTypeLabel(thread.message_type)}</span>
+          {preview && (
+            <p className="preview-card__preview">{preview}</p>
+          )}
+          <TagChips tags={thread.tags} max={3} />
+        </>
+      );
+    }
+
+    // 태그 chip 목록
+    function TagChips({ tags, max }) {
+      const visible = tags.slice(0, max);
+      const more = tags.length - visible.length;
+      if (tags.length === 0) return null;
+      return (
+        <div className="preview-card__tags">
+          {visible.map((tag) => (
+            <span key={tag} className="preview-card__tag">{tag}</span>
+          ))}
+          {more > 0 && (
+            <span className="preview-card__tag">+{more}</span>
+          )}
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * SentMessageCard — sent 카테고리용 outgoing 메시지 카드
+     * ================================================================ */
+    function SentMessageCard({ msg }) {
+      const { origins, threads } = window.MOCK_DATA;
+      const PLATFORM_LOGOS = window.MOCK_DATA.PLATFORM_LOGOS;
+      const showToast = useToast();
+
+      // 메시지로부터 thread → origin 조회
+      const thread = threads.find((t) => t.id === msg.thread_id);
+      const origin = thread ? origins.find((o) => o.id === thread.origin_id) : null;
+      const platformLogoKey = thread ? (PLATFORM_LOGOS[thread.platform] || null) : null;
+
+      const thumbInitial = origin ? origin.display_name[0] : '?';
+      const thumbBorderStyle = thread
+        ? { borderColor: `var(--color-platform-${thread.platform === 'naver_mail' ? 'naver' : thread.platform === 'other_mail' ? 'mail' : thread.platform})` }
+        : {};
+
+      return (
+        <button
+          className="preview-card preview-card--sent"
+          onClick={() => showToast({ message: 'SidePanel은 Phase 4에서 구현 예정이에요.' })}
+          type="button"
+        >
+          <div className="preview-card__thumb">
+            <div className="preview-card__thumb-initial" style={thumbBorderStyle}>
+              {thumbInitial}
+            </div>
+            {platformLogoKey && (
+              <div className="preview-card__thumb-platform">
+                <Icon name={platformLogoKey} size="sm" tone="inherit" />
+              </div>
+            )}
+          </div>
+          <div className="preview-card__body">
+            <div className="preview-card__body-row">
+              <span className="preview-card__sender">{origin ? origin.display_name : '알 수 없음'}</span>
+              <span className="preview-card__time">{relativeTime(msg.sent_at)}</span>
+            </div>
+            {thread && (
+              <span className="preview-card__type-label">{msgTypeLabel(thread.message_type)}</span>
+            )}
+            <p className="preview-card__preview">{msg.body}</p>
+          </div>
+        </button>
+      );
+    }
+
+    /* ================================================================
+     * BulkActionBar — 선택 모드 일괄 액션 바
+     * ================================================================ */
+    function BulkActionBar({ count, onClose, onMarkRead, onTagApply }) {
+      return (
+        <div className="bulk-action-bar">
+          <div className="bulk-action-bar__left">
+            <button
+              className="bulk-action-bar__close"
+              onClick={onClose}
+              type="button"
+              aria-label="선택 모드 종료"
+            >
+              <Icon name="x" size="md" tone="inverse" />
+            </button>
+            <span className="bulk-action-bar__count">{count}개 선택됨</span>
+          </div>
+          <div className="bulk-action-bar__actions">
+            <button
+              className="bulk-action-bar__btn"
+              onClick={onMarkRead}
+              type="button"
+              disabled={count === 0}
+            >
+              읽음처리
+            </button>
+            <button
+              className="bulk-action-bar__btn"
+              onClick={onTagApply}
+              type="button"
+              disabled={count === 0}
+            >
+              태그 추가
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * BulkTagModal — 일괄 태그 추가 Modal
+     * ================================================================ */
+    function BulkTagModal({ isOpen, onClose, onApply }) {
+      const { TAG_CATALOG } = window.MOCK_DATA;
+      const [pendingTags, setPendingTags] = useState(() => new Set());
+
+      // Modal 열릴 때마다 선택 초기화
+      useEffect(() => {
+        if (isOpen) setPendingTags(new Set());
+      }, [isOpen]);
+
+      const toggleTag = useCallback((tag) => {
+        setPendingTags((prev) => {
+          const next = new Set(prev);
+          if (next.has(tag)) next.delete(tag);
+          else next.add(tag);
+          return next;
+        });
+      }, []);
+
+      const handleApply = () => {
+        if (pendingTags.size === 0) return;
+        onApply([...pendingTags]);
+      };
+
+      const groups = [
+        { key: 'business', label: '비즈니스', tags: TAG_CATALOG.business },
+        { key: 'ops',      label: '운영/CS',  tags: TAG_CATALOG.ops },
+        { key: 'social',   label: '소통',      tags: TAG_CATALOG.social },
+        { key: 'manual',   label: '수동 태그', tags: TAG_CATALOG.manual },
+      ];
+
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="태그 일괄 추가">
+          <div className="bulk-tag-modal">
+            {groups.map(({ key, label, tags }) => (
+              <div key={key} className="bulk-tag-modal__group">
+                <span className="bulk-tag-modal__group-label">{label}</span>
+                <div className="bulk-tag-modal__chips">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      className={`bulk-tag-modal__chip${pendingTags.has(tag) ? ' bulk-tag-modal__chip--selected' : ''}`}
+                      onClick={() => toggleTag(tag)}
+                      aria-pressed={pendingTags.has(tag)}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="bulk-tag-modal__apply-btn"
+              onClick={handleApply}
+              disabled={pendingTags.size === 0}
+            >
+              {pendingTags.size > 0 ? `${pendingTags.size}개 태그 추가` : '태그를 선택하세요'}
+            </button>
+          </div>
+        </Modal>
+      );
+    }
+
+    /* ================================================================
+     * InboxList — spec.md §5-5
+     * ================================================================ */
+    function InboxList({ selectedCategory, selectedAccountIds, processedOverrides, threadTagOverrides, onProcessThreads, onTagThreads }) {
+      const { threads, origins, messages, CATEGORIES, TAG_CATALOG } = window.MOCK_DATA;
+      const showToast = useToast();
+      const [sortMode, setSortMode] = useState('priority'); // 'priority' | 'latest'
+      const [activeTagFilters, setActiveTagFilters] = useState(() => new Set());
+      const [selectionMode, setSelectionMode] = useState(false);
+      const [selectedThreadIds, setSelectedThreadIds] = useState(() => new Set());
+      const [tagModalOpen, setTagModalOpen] = useState(false);
+      const [sortPopoverOpen, setSortPopoverOpen] = useState(false);
+      const sortBtnRef = useRef(null);
+
+      // 카테고리 변경 시 태그 필터 + 선택 모드 초기화
+      useEffect(() => {
+        setActiveTagFilters(new Set());
+        setSelectionMode(false);
+        setSelectedThreadIds(new Set());
+      }, [selectedCategory]);
+
+      const cat = CATEGORIES[selectedCategory];
+
+      // applyOverrides: processedOverrides + threadTagOverrides 를 thread에 반영
+      const applyOverrides = useCallback((thread) => {
+        const processed = thread.processed || processedOverrides.has(thread.id);
+        const extraTags = threadTagOverrides.get(thread.id) || [];
+        const tags = extraTags.length
+          ? Array.from(new Set([...thread.tags, ...extraTags]))
+          : thread.tags;
+        if (processed === thread.processed && tags === thread.tags) return thread;
+        return { ...thread, processed, tags };
+      }, [processedOverrides, threadTagOverrides]);
+
+      // type chip 고정 목록 (direct_check / sent 전용)
+      const TYPE_CHIPS = [
+        { key: 'dm',      label: 'DM' },
+        { key: 'comment', label: '댓글' },
+        { key: 'email',   label: '메일' },
+      ];
+
+      // chipMode: 'type' → message_type 기반 chip, 'tag' → 자동분류 태그 chip
+      const chipMode = (selectedCategory === 'direct_check' || selectedCategory === 'sent')
+        ? 'type'
+        : 'tag';
+
+      // TagFilterBar에 노출할 태그 목록 (tag 모드 전용)
+      const availableTags = useMemo(() => {
+        if (!cat) return [];
+        if (selectedCategory === 'ai_pick') {
+          return [...TAG_CATALOG.business, ...TAG_CATALOG.ops, ...TAG_CATALOG.social];
+        }
+        if (Array.isArray(cat.tag_filter)) return cat.tag_filter;
+        return [];
+      }, [selectedCategory, cat, TAG_CATALOG]);
+
+      // chip 항목: tag 모드는 availableTags, type 모드는 TYPE_CHIPS 고정
+      const chipItems = chipMode === 'type'
+        ? TYPE_CHIPS
+        : availableTags.map((tag) => ({ key: tag, label: tag }));
+
+      // 대상 thread 필터링 (override 반영)
+      const filteredThreads = useMemo(() => {
+        if (!cat || selectedCategory === 'sent' || selectedCategory === 'dm_automation') return [];
+
+        let list = threads
+          .map(applyOverrides)
+          .filter((t) => {
+            if (t.processed) return false;
+            // SNS 필터 적용
+            const origin = origins.find((o) => o.id === t.origin_id);
+            if (!origin || !selectedAccountIds.has(origin.user_sns_account_id)) return false;
+            // 카테고리 필터
+            if (!categoryFilter(cat, t)) return false;
+            // chip 필터 — tag 모드: thread.tags 매칭 / type 모드: message_type 매칭
+            if (activeTagFilters.size > 0) {
+              if (chipMode === 'type') {
+                if (!activeTagFilters.has(t.message_type)) return false;
+              } else {
+                const hasTag = [...activeTagFilters].some((tag) => t.tags.includes(tag));
+                if (!hasTag) return false;
+              }
+            }
+            return true;
+          });
+
+        // 정렬
+        if (sortMode === 'latest') {
+          list = [...list].sort((a, b) => b.last_message_at.localeCompare(a.last_message_at));
+        } else {
+          list = [...list].sort((a, b) => b.priority_score - a.priority_score);
+        }
+        return list;
+      }, [threads, origins, selectedAccountIds, selectedCategory, cat, sortMode, activeTagFilters, applyOverrides, chipMode]);
+
+      // 보낸메시지함 (type chip 필터 + 정렬 적용)
+      const sentMessages = useMemo(() => {
+        if (selectedCategory !== 'sent') return [];
+        let list = messages.filter((m) => m.direction === 'outgoing');
+        // type chip 필터
+        if (activeTagFilters.size > 0) {
+          list = list.filter((m) => {
+            const thread = threads.find((t) => t.id === m.thread_id);
+            return thread && activeTagFilters.has(thread.message_type);
+          });
+        }
+        // 정렬
+        if (sortMode === 'priority') {
+          list = [...list].sort((a, b) => {
+            const tA = threads.find((t) => t.id === a.thread_id);
+            const tB = threads.find((t) => t.id === b.thread_id);
+            return (tB ? tB.priority_score : 0) - (tA ? tA.priority_score : 0);
+          });
+        } else {
+          list = [...list].sort((a, b) => b.sent_at.localeCompare(a.sent_at));
+        }
+        return list;
+      }, [selectedCategory, messages, threads, activeTagFilters, sortMode]);
+
+      const toggleTagFilter = useCallback((tag) => {
+        setActiveTagFilters((prev) => {
+          const next = new Set(prev);
+          if (next.has(tag)) next.delete(tag);
+          else next.add(tag);
+          return next;
+        });
+      }, []);
+
+      // 선택 모드 종료
+      const exitSelectionMode = useCallback(() => {
+        setSelectionMode(false);
+        setSelectedThreadIds(new Set());
+      }, []);
+
+      // 카드 클릭 핸들러
+      const handleCardClick = useCallback((threadId) => {
+        if (selectionMode) {
+          // 선택 모드: 토글
+          setSelectedThreadIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(threadId)) next.delete(threadId);
+            else next.add(threadId);
+            // 마지막 선택 해제 시 모드 종료
+            if (next.size === 0) {
+              setSelectionMode(false);
+            }
+            return next;
+          });
+        } else {
+          // 선택 모드 OFF: SidePanel (Phase 4 stub)
+          showToast({ message: 'SidePanel은 Phase 4에서 구현 예정이에요.' });
+        }
+      }, [selectionMode, showToast]);
+
+      // 체크박스 클릭 (선택 모드 진입 포함)
+      const handleCheckboxClick = useCallback((threadId) => {
+        setSelectionMode(true);
+        setSelectedThreadIds((prev) => {
+          const next = new Set(prev);
+          if (next.has(threadId)) {
+            next.delete(threadId);
+            if (next.size === 0) setSelectionMode(false);
+          } else {
+            next.add(threadId);
+          }
+          return next;
+        });
+      }, []);
+
+      // 일괄 읽음 처리
+      const handleMarkRead = useCallback(() => {
+        if (selectedThreadIds.size === 0) return;
+        onProcessThreads([...selectedThreadIds]);
+        const cnt = selectedThreadIds.size;
+        exitSelectionMode();
+        showToast({ message: `${cnt}개 스레드를 처리했어요` });
+      }, [selectedThreadIds, onProcessThreads, exitSelectionMode, showToast]);
+
+      // 일괄 태그 추가 (Modal apply)
+      const handleTagApply = useCallback((tags) => {
+        if (selectedThreadIds.size === 0 || tags.length === 0) return;
+        onTagThreads([...selectedThreadIds], tags);
+        const cnt = selectedThreadIds.size;
+        const tagLabel = tags.length === 1 ? tags[0] : `${tags.length}개 태그`;
+        setTagModalOpen(false);
+        exitSelectionMode();
+        showToast({ message: `${cnt}개 스레드에 '${tagLabel}'를 추가했어요` });
+      }, [selectedThreadIds, onTagThreads, exitSelectionMode, showToast]);
+
+      return (
+        <div className="inbox-list">
+          {/* 선택 모드: BulkActionBar */}
+          {selectionMode && (
+            <BulkActionBar
+              count={selectedThreadIds.size}
+              onClose={exitSelectionMode}
+              onMarkRead={handleMarkRead}
+              onTagApply={() => setTagModalOpen(true)}
+            />
+          )}
+
+          {/* DM 자동화 분기 */}
+          {selectedCategory === 'dm_automation' ? (
+            <EmptyState
+              icon="category-dm-automation"
+              title="DM 자동화"
+              description="Phase 5에서 활성화됩니다."
+            />
+          ) : (
+            <>
+              {/* 툴바: chip 필터 + Sort 버튼 */}
+              <div className="inbox-list__toolbar">
+                <div className="inbox-list__toolbar-chips">
+                  {chipItems.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      className={`tag-filter-chip${activeTagFilters.has(key) ? ' tag-filter-chip--active' : ''}`}
+                      onClick={() => toggleTagFilter(key)}
+                      type="button"
+                      aria-pressed={activeTagFilters.has(key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="inbox-list__sort">
+                  <button
+                    ref={sortBtnRef}
+                    type="button"
+                    className="inbox-list__sort-button"
+                    onClick={() => setSortPopoverOpen((v) => !v)}
+                    aria-expanded={sortPopoverOpen}
+                    aria-label="정렬 방식 선택"
+                  >
+                    <Icon name="sort" size="sm" tone="muted" />
+                  </button>
+                  <Popover
+                    isOpen={sortPopoverOpen}
+                    onClose={() => setSortPopoverOpen(false)}
+                    anchorRef={sortBtnRef}
+                    position="bottom-end"
+                  >
+                    <div className="inbox-list__sort-dropdown">
+                      {[
+                        { key: 'priority', label: '우선순위순' },
+                        { key: 'latest',   label: '최신순' },
+                      ].map(({ key, label }) => (
+                        <button
+                          key={key}
+                          type="button"
+                          className={`inbox-list__sort-option${sortMode === key ? ' inbox-list__sort-option--active' : ''}`}
+                          onClick={() => { setSortMode(key); setSortPopoverOpen(false); }}
+                        >
+                          {label}
+                          {sortMode === key && <Icon name="check" size="xs" tone="inherit" />}
+                        </button>
+                      ))}
+                    </div>
+                  </Popover>
+                </div>
+              </div>
+
+              {/* 카드 리스트 */}
+              <div className="inbox-list__cards">
+                {selectedCategory === 'sent' ? (
+                  sentMessages.length === 0 ? (
+                    <EmptyState
+                      icon="category-sent"
+                      title="보낸 메시지 없음"
+                      description="아직 보낸 메시지가 없어요."
+                    />
+                  ) : (
+                    sentMessages.map((msg) => (
+                      <SentMessageCard key={msg.id} msg={msg} />
+                    ))
+                  )
+                ) : filteredThreads.length === 0 ? (
+                  <EmptyState
+                    icon="category-ai-pick"
+                    title="미처리 항목 없음"
+                    description="이 카테고리의 미처리 메시지가 없어요."
+                  />
+                ) : (
+                  filteredThreads.map((thread) => (
+                    <PreviewCard
+                      key={thread.id}
+                      thread={thread}
+                      selectionMode={selectionMode}
+                      isSelected={selectedThreadIds.has(thread.id)}
+                      onCardClick={handleCardClick}
+                      onCheckboxClick={handleCheckboxClick}
+                    />
+                  ))
+                )}
+              </div>
+            </>
+          )}
+
+          {/* 일괄 태그 Modal */}
+          <BulkTagModal
+            isOpen={tagModalOpen}
+            onClose={() => setTagModalOpen(false)}
+            onApply={handleTagApply}
+          />
+        </div>
       );
     }
 
@@ -315,6 +1227,11 @@
         () => new Set(accounts.map((a) => a.id))
       );
       const [lsbOpen, setLsbOpen] = useState(false);
+      const [selectedCategory, setSelectedCategory] = useState('ai_pick');
+
+      // 일괄 처리 override state — LSB badge + InboxList listing 모두 반영
+      const [processedOverrides, setProcessedOverrides] = useState(() => new Set());
+      const [threadTagOverrides, setThreadTagOverrides] = useState(() => new Map());
 
       const handleToggleAccount = useCallback((id) => {
         setSelectedAccountIds((prev) => {
@@ -328,8 +1245,47 @@
         });
       }, []);
 
+      const handleToggleAll = useCallback(() => {
+        setSelectedAccountIds((prev) =>
+          prev.size === accounts.length ? new Set() : new Set(accounts.map((a) => a.id))
+        );
+      }, [accounts]);
+
       const handleOpenLsb = useCallback(() => setLsbOpen(true), []);
       const handleCloseLsb = useCallback(() => setLsbOpen(false), []);
+
+      // 일괄 읽음 처리 — processedOverrides에 thread_id 추가
+      const handleProcessThreads = useCallback((threadIds) => {
+        setProcessedOverrides((prev) => {
+          const next = new Set(prev);
+          threadIds.forEach((id) => next.add(id));
+          return next;
+        });
+      }, []);
+
+      // 일괄 태그 추가 — threadTagOverrides Map 업데이트
+      const handleTagThreads = useCallback((threadIds, tags) => {
+        setThreadTagOverrides((prev) => {
+          const next = new Map(prev);
+          threadIds.forEach((id) => {
+            const existing = next.get(id) || [];
+            next.set(id, Array.from(new Set([...existing, ...tags])));
+          });
+          return next;
+        });
+      }, []);
+
+      // LSB badge count — override 반영 threads
+      const threadsWithOverrides = useMemo(() => {
+        const { threads } = window.MOCK_DATA;
+        return threads.map((t) => {
+          const processed = t.processed || processedOverrides.has(t.id);
+          const extra = threadTagOverrides.get(t.id);
+          const tags = extra && extra.length ? Array.from(new Set([...t.tags, ...extra])) : t.tags;
+          if (processed === t.processed && tags === t.tags) return t;
+          return { ...t, processed, tags };
+        });
+      }, [processedOverrides, threadTagOverrides]);
 
       // esc로 LSB 닫기
       useEffect(() => {
@@ -345,14 +1301,18 @@
             accounts={accounts}
             selectedAccountIds={selectedAccountIds}
             onToggleAccount={handleToggleAccount}
+            onToggleAll={handleToggleAll}
             onOpenLsb={handleOpenLsb}
+            selectedCategory={selectedCategory}
           />
           <div className="app-main app-main--panel-closed">
-            {/* LSB — Phase 3에서 구현 */}
+            {/* LSB — PC */}
             <aside className="app-main__lsb">
-              <p className="t-caption" style={{ color: 'var(--color-text-muted)', padding: 'var(--gap-stack-md)' }}>
-                LSB — Phase 3에서 구현
-              </p>
+              <LeftSidebar
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                threadsOverride={threadsWithOverrides}
+              />
             </aside>
 
             {/* 모바일 LSB 드로어 */}
@@ -365,6 +1325,7 @@
                 />
                 <aside className="app-main__lsb-drawer">
                   <div className="app-main__lsb-drawer-header">
+                    <span className="app-main__lsb-drawer-header__wordmark">blackplum</span>
                     <button
                       className="tappable"
                       onClick={handleCloseLsb}
@@ -373,19 +1334,26 @@
                       <Icon name="x" size="md" tone="primary" />
                     </button>
                   </div>
-                  <p className="t-caption" style={{ color: 'var(--color-text-muted)', padding: 'var(--gap-stack-md)' }}>
-                    LSB — Phase 3에서 구현
-                  </p>
+                  <LeftSidebar
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={setSelectedCategory}
+                    onClose={handleCloseLsb}
+                    threadsOverride={threadsWithOverrides}
+                    hideBrand
+                  />
                 </aside>
               </>
             )}
 
-            {/* InboxList — Phase 3에서 구현 */}
+            {/* InboxList */}
             <main className="app-main__inbox-list">
-              <EmptyState
-                icon="category-direct-check"
-                title="InboxList"
-                description="Phase 3에서 구현 예정"
+              <InboxList
+                selectedCategory={selectedCategory}
+                selectedAccountIds={selectedAccountIds}
+                processedOverrides={processedOverrides}
+                threadTagOverrides={threadTagOverrides}
+                onProcessThreads={handleProcessThreads}
+                onTagThreads={handleTagThreads}
               />
             </main>
 

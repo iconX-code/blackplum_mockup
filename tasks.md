@@ -1,6 +1,6 @@
 # blackplum mockup — Tasks
 
-> 최종 수정: 2026-05-04 (Phase 2 완료)
+> 최종 수정: 2026-05-04 (Phase 3 완료 + 후속 사용자 브라우저 점검 라운드 정리)
 
 ---
 
@@ -85,41 +85,23 @@
 
 ---
 
-## Phase 3: Inbox 메인 (LSB + InboxList + 미리보기 카드)
+## Phase 3: Inbox 메인 (LSB + InboxList + 미리보기 카드) — 완료 (2026-05-04)
 
 > 트리거: Phase 2 완료. shell·공통 UI 위에서 메인 메시지 큐 구현.
-> 위임: frontend-dev.
+> 위임: frontend-dev (라운드 1: 3-1·3-2·3-3·3-5 / 라운드 2: 3-4) + code-reviewer (3-6).
 
-### 3-1. LeftSidebar (LSB) (§5-3)
-- CI/BI / 카테고리 탭 (TAG_CATALOG 기반) / DM 자동화 항목 / 프로필
-- 카테고리 클릭 시 `view` 분기: 일반 카테고리 → InboxList 스레드, `dm_automation` → AutomationListView (Phase 5에서 본격 동작)
-- 모바일 햄버거 진입
+- [x] 3-1. LeftSidebar (§5-3) — 9행(CI/BI + 7 카테고리 + 구분선 2 + 섹션나눔 1: ai_pick / 분류 4 / sent / dm_automation). 카테고리 클릭 → `selectedCategory` state 갱신 → InboxList 분기 + (모바일) drawer 자동 닫힘. 프로필 영역 하단 고정 (설정 버튼 미노출). 카테고리 아이콘 7종 + badge runtime computed (sent / dm_automation 항상 0)
+- [x] 3-2. InboxList (§5-5) — 카테고리 헤더 + TagFilterBar(카테고리 내 태그 합집합 chip / ai_pick은 business+ops+social 합집합 / direct_check·sent·dm_automation 미노출) + SortToggle(우선순위순 기본 / 최신순) + 카드 리스트 + EmptyState. sent 카테고리는 `messages.filter(direction=outgoing)` 기반 단순 리스트(SentMessageCard). dm_automation은 Phase 5 placeholder
+- [x] 3-3. PreviewCard 두 type — `Type1`(business 카테고리 + `business_extracted` 보유): 6필드 정형 슬롯(company/brand/contact_person/proposal_summary/product/conditions). `Type2`(그 외): sender + 미리보기 텍스트(2~3줄 truncate) + relative time + depth 2 tag chips(최대 3 + N more). 공통: 썸네일(post_thumb_url 또는 sender avatar) + 우상단 SNS 플랫폼 로고 + 계정 `accent_color` border(inline style 예외) + `is_stacked` 3건(mock-data.js 라인 337/352/427)에 `.preview-card--stacked` pseudo 효과
+- [x] 3-4. 다중선택 / 일괄처리 (§6-2) — PC hover 체크박스 / 모바일 long-press 500ms → 선택 모드 진입. 선택 집합 `Set<thread_id>`. BulkActionBar(읽음처리 / 태그 추가)로 InboxList 헤더 morph. mock data 직접 mutate 금지 → MainScreen `processedOverrides: Set<id>` + `threadTagOverrides: Map<id, string[]>`로 React state override, `applyOverrides` helper가 thread에 두 override 합성. BulkTagModal은 TAG_CATALOG 4그룹(business/ops/social/manual) chip 그리드. Toast 결과 안내. 카테고리 전환 시 자동 종료, 마지막 선택 해제 시 자동 종료
+- [x] 3-5. 우선순위 score 정렬 (§6-1) + Badge count (§6-7) — 정렬: priority_score desc 기본 / last_message_at desc 최신순. Badge: `threads.filter(!processed && categoryFilter(CATEGORIES[X], t)).length` 의사코드 그대로. sent / dm_automation 항상 0. LSB badge는 SNS 필터 무시(글로벌 SNS 필터는 InboxList 표시에만 적용). 한 thread 다중 카테고리 노출 시 모든 매칭 카테고리에서 badge 가산 (categoryFilter 자연 처리)
+- [x] 3-6. code-reviewer 통합 검증 — 1차 critical 1건 + FAIL 6건 → follow-up fix 7건 모두 정리: (1) `threadsWithOverrides` useMemo가 `threadTagOverrides` 무시 → tags 병합 + deps 추가. (2) `-4px` raw → `--card-thumb-platform-offset` Tier 3 신설. (3) `32px` raw → `--bulk-bar-btn-height` Tier 3 신설. (4) Phase 3 토큰 spec.md §3-3/§3-4 일괄 등록(Tier 2 4 + Tier 3 30). (5) `.preview-card__inner` dead rule → modifier 기반 padding-left로 교체. (6/7) `selection-mode-on` non-BEM → `preview-card--selection-mode-on`. 최종: ESLint 0 errors / 1 pre-existing Popover warning(Phase 6 자연 해소 예정). index.html 463→1241줄(+778) / styles.css 1064→1860줄(+796)
 
-### 3-2. InboxList (§5-5)
-- SNSFilterBar (글로벌 SNS 필터를 카테고리 단위로 적용)
-- 카테고리 헤더 (§7-3 안내 메시지 후보)
-- SortToggle (우선순위 / 받은시각 / ...)
-- 무한 스크롤 stub
-
-### 3-3. PreviewCard 두 type
-- `<PreviewCard.Type1>` 비즈니스 카드 (정형 추출 레이아웃)
-- `<PreviewCard.Type2>` 기본 카드 (req.md §7-2 형태)
-- 썸네일·SNS 로고·계정 색 border·메시지 type / Body 영역 (sender·미리보기·받은시각·tag chips)
-
-### 3-4. 다중선택 / 일괄처리 (§6-2)
-- PC: hover 체크박스 / 모바일: 길게 누르기로 진입
-- 선택 집합 state (`Set<thread_id>`)
-- 일괄 액션: 읽음처리(=무시) / 분류·태그 일괄 처리
-
-### 3-5. 우선순위 score 정렬 (§6-1) + Badge count (§6-7)
-- 모든 카테고리: `미처리 thread 수` 동일 계산식
-- 처리됨 / 보낸메시지함 / DM 자동화는 badge 항상 0
-- DM 자동화 badge는 Phase 5 view와 무관하게 0 유지
-
-### 3-6. code-reviewer 검증
-- spec.md §6-1 / §6-7 계산식 일치
-- 미처리/처리 분리 동작 (§4-5 processed_at / read_at)
-- 모바일 hit area / 7-1 breakpoint 동작
+### Phase 3 backlog (Phase 4+ 진입 시 처리)
+- BulkActionBar 모바일 sticky top offset 검토 (Phase 4 SidePanel 통합 시 헤더 위치 재정리)
+- PreviewCard 클릭 → SidePanel 진입 동작 활성 (Phase 4-1)
+- dm_automation view 활성 (Phase 5)
+- 모바일 long-press 시 브라우저 기본 context menu 억제(`preventDefault`)는 scroll 부작용 우려로 미적용 — mockup 허용 범위, 필요 시 Phase 6/7에서 재검토
 
 ---
 
@@ -243,3 +225,5 @@
 - 디자인시스템 N차 swap (Phase D-N): `design.md` / `design_ref/` 자산 갱신 시
 - req.md / macro-prd.md 업데이트로 인한 사양 보강: 변경 시점에 영향 phase로 분기 등재
 - 매크로 빌더 P3 (이벤트 추첨 탭, A/B 테스트, 고급 분석): 본 mockup 범위 외 (macro-prd.md §10)
+- **아이콘 일괄 점검 (Phase 7-1 직전 권장)**: 제품 전체에 사용되는 아이콘(brand 로고 / 카테고리 / 액션 / 매크로 / SNS 로고 등 53개+α)을 한 번에 시각·정합성 검증. LandingScreen의 kakao/apple brand 아이콘 미등록(Phase 2 backlog)도 본 점검에 합류
+- **InboxList 정렬 기준 확장**: 현재는 우선순위순 / 최신순 2종. SortToggle을 드롭다운 sort 아이콘 형태로 전환한 시점(2026-05-04)부터 정렬 기준은 향후 추가 예정. 후보: 미처리 우선 / 답장 대기 / sender 알파벳순 / unread 우선 등. 추가 시 §6-1 우선순위 score 모델 정합성 함께 점검

@@ -67,13 +67,13 @@ window.ICON_SET = {
   'menu':
     '<line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" />',
 
-  // more-horizontal — 가로 점 3개
+  // more-horizontal — 가로 점 3개 (fill 기반 dot)
   'more-horizontal':
-    '<circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />',
+    '<circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />',
 
-  // more-vertical — 세로 점 3개
+  // more-vertical — 세로 점 3개 (fill 기반 dot)
   'more-vertical':
-    '<circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" />',
+    '<circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="5" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" />',
 
   // check — 확인
   'check':
@@ -151,9 +151,9 @@ window.ICON_SET = {
   'upload':
     '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /><path d="M12 12v9" /><path d="m16 16-4-4-4 4" />',
 
-  // grip-vertical — 드래그 핸들
+  // grip-vertical — 드래그 핸들 (fill 기반 dot)
   'drag-handle':
-    '<circle cx="9" cy="12" r="1" /><circle cx="9" cy="5" r="1" /><circle cx="9" cy="19" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="5" r="1" /><circle cx="15" cy="19" r="1" />',
+    '<circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="9" cy="5" r="1" fill="currentColor" stroke="none" /><circle cx="9" cy="19" r="1" fill="currentColor" stroke="none" /><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none" /><circle cx="15" cy="19" r="1" fill="currentColor" stroke="none" />',
 
   // info — 정보
   'info':
@@ -183,9 +183,9 @@ window.ICON_SET = {
   'logo-instagram':
     '<rect width="20" height="20" x="2" y="2" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />',
 
-  // YouTube 로고 — 라운드 사각형 + 삼각형 play
+  // YouTube 로고 — 라운드 사각형 + 삼각형 play (play path는 fill 기반)
   'logo-youtube':
-    '<path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" />',
+    '<path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /><path d="m10 15 5-3-5-3z" fill="currentColor" stroke="none" />',
 
   // TikTok 로고 — 뮤직 노트 형태의 라인 트레이스
   'logo-tiktok':

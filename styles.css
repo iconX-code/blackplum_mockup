@@ -242,6 +242,7 @@
   --gap-section:            var(--space-7);
 
   /* === Tier 2: Icon === */
+  --icon-size-xs:           var(--size-12);
   --icon-size-sm:           var(--size-16);
   --icon-size-md:           var(--size-20);
   --icon-size-lg:           var(--size-24);
@@ -264,6 +265,18 @@
   --motion-duration-normal: var(--motion-normal);
   --motion-duration-slow:   var(--motion-slow);
   --motion-easing-standard: var(--easing-standard);
+
+  /* === Tier 2: State — selection === */
+  --color-state-selected-bg:   var(--color-yellow-soft);   /* 선택된 카드 배경 */
+  --color-state-selected-border: var(--color-yellow);      /* 선택된 카드 테두리 */
+  --color-state-checkbox-on:   var(--color-ink);           /* 체크박스 on 색 */
+  --color-state-checkbox-off:  var(--color-grey-300);      /* 체크박스 off 색 */
+
+  /* === Tier 2: Stacked card fill & border (box-shadow stack용 alpha 색상) === */
+  --color-stacked-card-1:   color-mix(in srgb, var(--color-bg-canvas-alt) 50%, transparent);
+  --color-stacked-card-2:   color-mix(in srgb, var(--color-bg-canvas-alt) 25%, transparent);
+  --color-stacked-border-1: color-mix(in srgb, var(--color-border-strong) 50%, transparent);
+  --color-stacked-border-2: color-mix(in srgb, var(--color-border-strong) 25%, transparent);
 
   /* === Tier 2: Overlay scrim (backdrop) === */
   --color-scrim-heavy:      rgba(15, 15, 15, 0.5);   /* modal backdrop */
@@ -329,6 +342,7 @@ svg {
  * Icon utility (spec.md §3-6-3)
  * ============================================================ */
 .icon { display: inline-block; flex-shrink: 0; }
+.icon--xs { width: var(--icon-size-xs); height: var(--icon-size-xs); }
 .icon--sm { width: var(--icon-size-sm); height: var(--icon-size-sm); }
 .icon--md { width: var(--icon-size-md); height: var(--icon-size-md); }
 .icon--lg { width: var(--icon-size-lg); height: var(--icon-size-lg); }
@@ -336,7 +350,10 @@ svg {
 .icon--tone-primary  { color: var(--icon-color-primary); }
 .icon--tone-muted    { color: var(--icon-color-muted); }
 .icon--tone-on-brand { color: var(--icon-color-on-brand); }
-.icon path, .icon circle, .icon rect { stroke: currentColor; fill: none; }
+.icon--tone-inverse  { color: var(--icon-color-inverse); }
+.icon path, .icon circle, .icon rect,
+.icon line, .icon polyline, .icon polygon { stroke: currentColor; fill: none; }
+.icon [fill="currentColor"] { fill: currentColor; stroke: none; }
 
 /* ============================================================
  * Typography helpers (spec.md §3-5)
@@ -473,8 +490,14 @@ textarea {
   --landing-inner-max-width:    400px;
 
   /* TopToolbar chip */
-  --chip-expanded-max-width:    180px;
-  --chip-label-max-width:       140px;
+  --chip-collapsed-width:       var(--touch-target-min);   /* icon-only 상태 chip 폭(=height) — 원형 */
+  --chip-expanded-width:        160px;                     /* hover 확장 시 전체 chip 폭 */
+  --chip-icon-col-width:        var(--touch-target-min);   /* 아이콘 셀 고정 폭 */
+  --chip-label-padding-right:   var(--gap-inline-sm);      /* 확장 시 라벨 우측 패딩 */
+  /* SNS 필터 모달 (Tablet/Mobile) */
+  --sns-filter-modal-chip-height: var(--touch-target-min); /* 모달 내 chip 높이 */
+  /* TopToolbar wordmark */
+  --toolbar-wordmark-font-size: var(--font-size-h3);
 
   /* Toast */
   --toast-max-width:            320px;
@@ -484,6 +507,10 @@ textarea {
 
   /* Popover */
   --popover-min-width:          160px;
+  --popover-max-width:          320px;
+  --popover-max-height:         60vh;
+  --z-popover:                  7000;
+  --z-popover-backdrop:         6999;
 
   /* EmptyState icon box */
   --empty-state-icon-size:      48px;
@@ -500,6 +527,53 @@ textarea {
   /* Toast animation micro-offsets */
   --toast-enter-offset:         8px;
   --toast-exit-offset:          4px;
+
+  /* ---- LSB (LeftSidebar) component tokens ---- */
+  --lsb-brand-height:           52px;
+  --lsb-category-row-height:    var(--touch-target-min);   /* 44px — fat-finger 최소 */
+  --lsb-category-icon-size:     var(--icon-size-md);
+  --lsb-badge-min-width:        20px;
+  --lsb-badge-height:           20px;
+  --lsb-divider-height:         1px;
+  --lsb-section-divider-height: var(--border-w-default);   /* 굵은 섹션 구분선 */
+  --lsb-profile-height:         56px;
+  --lsb-profile-avatar-size:    var(--size-32);
+
+  /* ---- InboxList component tokens ---- */
+  --inbox-tag-chip-height:      28px;
+  --inbox-sort-btn-size:        var(--touch-target-min);
+  --inbox-sort-dropdown-min-w:  120px;
+
+  /* ---- PreviewCard component tokens ---- */
+  --card-thumb-size:            56px;
+  --card-thumb-logo-size:       var(--icon-size-sm);       /* platform logo badge */
+  --card-thumb-border-width:    var(--border-w-soft);
+  --card-gap:                   var(--gap-inline-md);
+  --card-padding-x:             var(--gap-stack-md);
+  --card-padding-y:             var(--gap-inline-md);
+  --card-stacked-offset:        4px;
+  --card-stacked-shadow:
+    var(--card-stacked-offset) var(--card-stacked-offset) 0 0 var(--color-stacked-card-1),
+    var(--card-stacked-offset) var(--card-stacked-offset) 0 var(--border-w-default) var(--color-stacked-border-1),
+    calc(var(--card-stacked-offset) * 2) calc(var(--card-stacked-offset) * 2) 0 0 var(--color-stacked-card-2),
+    calc(var(--card-stacked-offset) * 2) calc(var(--card-stacked-offset) * 2) 0 var(--border-w-default) var(--color-stacked-border-2);
+  --card-min-height:            var(--touch-target-min);   /* 44px — fat-finger */
+  --card-tag-chip-height:       20px;
+  --card-checkbox-size:         var(--icon-size-md);       /* 체크박스 아이콘 크기 */
+  --card-longpress-scale:       0.97;                      /* 모바일 long-press 시각 피드백 */
+
+  /* ---- PreviewCard — platform badge offset ---- */
+  --card-thumb-platform-offset: calc(-1 * var(--card-stacked-offset));
+
+  /* ---- BulkActionBar component tokens ---- */
+  --bulk-bar-height:            var(--touch-target-min);   /* 44px 최소 */
+  --bulk-bar-bg:                var(--color-bg-inverse);   /* dark background */
+  --bulk-bar-color:             var(--color-text-inverse); /* light text */
+  --bulk-bar-z:                 20;                        /* sticky z-index (header z=10보다 위) */
+  --bulk-bar-btn-height:        32px;
+
+  /* ---- BulkTagModal component tokens ---- */
+  --bulk-tag-chip-height:       32px;
 }
 
 /* ============================================================
@@ -507,11 +581,18 @@ textarea {
  * @media 조건절 raw px는 §3-8 예외 허용
  * ============================================================ */
 
-/* ---- App shell ---- */
+/* ---- App shell — flex-column, height=100dvh (이슈 #7) ---- */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 .app-shell {
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
   background: var(--color-bg-canvas);
@@ -522,32 +603,30 @@ textarea {
   display: grid;
   grid-template-columns: var(--layout-lsb-width) 1fr var(--layout-sidepanel-width);
   grid-template-rows: 1fr;
-  min-height: inherit;
+  flex: 1;
+  min-height: 0;
   max-width: var(--layout-container-max);
   margin-inline: auto;
+  width: 100%;
 }
 
 .app-main__lsb {
   grid-column: 1;
-  overflow-y: auto;
-  height: 100vh;
-  height: 100dvh;
-  position: sticky;
-  top: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .app-main__inbox-list {
   grid-column: 2;
   overflow-y: auto;
+  height: 100%;
+  min-height: 0;
 }
 
 .app-main__side-panel {
   grid-column: 3;
   overflow-y: auto;
-  height: 100vh;
-  height: 100dvh;
-  position: sticky;
-  top: 0;
+  height: 100%;
 }
 
 /* ---- Tablet (768px ~ 1023px): LSB 숨김, SidePanel push 방식 ---- */
@@ -719,6 +798,17 @@ textarea {
   min-height: var(--touch-target-min);
 }
 
+.top-toolbar__wordmark {
+  font-family: var(--font-family-display);
+  font-size: var(--toolbar-wordmark-font-size);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+  white-space: nowrap;
+  /* 모바일에서는 햄버거 메뉴 옆에 표시 */
+}
+
 .top-toolbar__hamburger {
   display: none;
   flex-shrink: 0;
@@ -737,52 +827,76 @@ textarea {
   display: none;
 }
 
-/* SNS filter chip */
+/* SNS filter chip — max-width transition으로 컨텐츠 기반 폭 + 상한 160px */
 .top-toolbar__chip {
-  position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--gap-inline-xs);
-  height: var(--touch-target-min);
-  min-width: var(--touch-target-min);
-  padding: 0 var(--gap-inline-sm);
+  /* collapsed: width=auto이지만 max-width=44px → 정확한 44×44 원형 */
+  width: auto;
+  min-width: var(--chip-collapsed-width);
+  max-width: var(--chip-collapsed-width);
+  height: var(--chip-collapsed-width);
+  padding: 0;
   background: var(--color-bg-surface);
   border: var(--surface-border-soft);
   border-radius: var(--surface-radius-pill);
   color: var(--color-text-tertiary);
   overflow: hidden;
-  /* hover expansion — show display name */
-  max-width: var(--touch-target-min);
-  transition:
-    max-width var(--transition-normal),
-    color var(--transition-fast),
-    border-color var(--transition-fast),
-    background var(--transition-fast);
   white-space: nowrap;
+  flex-shrink: 0;
+  /* 양방향 동일한 transition — max-width 전환으로 컨텐츠 기반 자연스러운 확장 */
+  transition-property: max-width, color, border-color, background;
+  transition-duration: var(--motion-duration-normal), var(--motion-duration-fast), var(--motion-duration-fast), var(--motion-duration-fast);
+  transition-timing-function: var(--motion-easing-standard);
 }
 
-.top-toolbar__chip::after {
-  content: attr(data-display-name);
+/* 아이콘 셀 — chip 내 좌측 고정, 항상 동일 위치 */
+.top-toolbar__chip-icon-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--chip-icon-col-width);
+  min-width: var(--chip-icon-col-width);
+  height: 100%;
+  flex-shrink: 0;
+}
+
+/* 라벨 셀 — collapsed 시 max-width=0으로 overflow hidden 숨김, hover 시 컨텐츠 폭만큼 펼쳐짐 */
+.top-toolbar__chip-label-cell {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  width: auto;
+  max-width: 0;
+  transition-property: max-width, padding-right;
+  transition-duration: var(--motion-duration-normal);
+  transition-timing-function: var(--motion-easing-standard);
+}
+
+.top-toolbar__chip-label-cell span {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-medium);
-  max-width: 0;
-  overflow: hidden;
   opacity: 0;
-  transition:
-    max-width var(--transition-normal),
-    opacity var(--transition-fast);
+  transition-property: opacity;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-easing-standard);
+  white-space: nowrap;
 }
 
 .top-toolbar__chip:hover {
-  max-width: var(--chip-expanded-max-width);
+  max-width: var(--chip-expanded-width);
   color: var(--color-text-primary);
   background: var(--color-bg-canvas-alt);
 }
 
-.top-toolbar__chip:hover::after {
-  max-width: var(--chip-label-max-width);
+.top-toolbar__chip:hover .top-toolbar__chip-label-cell {
+  /* 라벨 셀을 chip의 max-width 상한 내에서 컨텐츠 폭만큼 펼침 */
+  max-width: var(--chip-expanded-width);
+  padding-right: var(--chip-label-padding-right);
+}
+
+.top-toolbar__chip:hover .top-toolbar__chip-label-cell span {
   opacity: 1;
 }
 
@@ -804,6 +918,24 @@ textarea {
   line-height: 1;
 }
 
+/* 전체 토글 chip — 항상 라벨이 보이는 펼쳐진 형태 */
+.top-toolbar__chip--all {
+  max-width: var(--chip-expanded-width);
+}
+
+.top-toolbar__chip--all .top-toolbar__chip-label-cell {
+  max-width: var(--chip-expanded-width);
+  padding-right: var(--chip-label-padding-right);
+}
+
+.top-toolbar__chip--all .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.top-toolbar__chip--all:hover {
+  max-width: var(--chip-expanded-width);
+}
+
 .top-toolbar__actions {
   display: flex;
   align-items: center;
@@ -820,6 +952,33 @@ textarea {
 }
 
 .top-toolbar__action-button:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+/* 카테고리 레이블 — Tablet/Mobile 전용, PC에서는 숨김 */
+.top-toolbar__category-label {
+  display: none;
+}
+
+/* 연결 계정 버튼 — Tablet/Mobile 전용, PC에서는 숨김 */
+.top-toolbar__connected-accounts-btn {
+  display: none; /* 기본 숨김, ≤1023px에서 inline-flex로 전환 */
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  background: none;
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-primary);
+  padding: 0 var(--gap-inline-sm);
+  height: var(--touch-target-min);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-toolbar__connected-accounts-btn:hover {
   background: var(--color-bg-canvas-alt);
 }
 
@@ -959,14 +1118,22 @@ textarea {
 
 /* ---- Popover ---- */
 .popover {
-  position: absolute;
-  z-index: 7000;
+  position: fixed;
+  z-index: var(--z-popover);
   background: var(--color-bg-surface);
   border: var(--surface-border-default);
-  border-radius: var(--surface-radius-chip);
+  border-radius: var(--surface-radius-card);
   box-shadow: var(--surface-shadow-press);
   padding: var(--gap-inline-sm);
   min-width: var(--popover-min-width);
+  max-width: calc(100vw - var(--gap-inline-md) * 2);
+}
+
+.popover__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-popover-backdrop);
+  background: var(--color-scrim-light);
 }
 
 .popover--bottom-end {
@@ -1019,9 +1186,52 @@ textarea {
   display: none;
 }
 
-@media (max-width: 767px) {
+/* Tablet + Mobile (≤1023px): 햄버거, drawer 활성화 + wordmark/filter 분기 */
+@media (max-width: 1023px) {
+  /* TopToolbar: 3-section grid (햄버거 | 카테고리명 | 우측 액션) */
+  .top-toolbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0;
+  }
+
   .top-toolbar__hamburger {
     display: inline-flex;
+  }
+
+  /* TopToolbar wordmark 숨김 — drawer 헤더에서 표시 */
+  .top-toolbar__wordmark {
+    display: none;
+  }
+
+  /* SNS filter chip 전체 숨김 — 연결 계정 버튼으로 대체 */
+  .top-toolbar__filter {
+    display: none;
+  }
+
+  /* 가운데 카테고리명 표시 */
+  .top-toolbar__category-label {
+    display: block;
+    text-align: center;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-body-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 var(--gap-inline-sm);
+  }
+
+  /* 연결 계정 버튼 표시 */
+  .top-toolbar__connected-accounts-btn {
+    display: inline-flex;
+  }
+
+  /* (+) SNS 추가 버튼 숨김 — Tablet/Mobile에서 불필요 (popover 내 통합) */
+  .top-toolbar__action-button--add-sns {
+    display: none;
   }
 
   .app-main__lsb-drawer-backdrop {
@@ -1052,13 +1262,908 @@ textarea {
   .app-main__lsb-drawer-header {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: var(--gap-inline-sm) var(--gap-inline-sm);
     border-bottom: var(--surface-border-soft);
+  }
+
+  .app-main__lsb-drawer-header__wordmark {
+    font-family: var(--font-family-display);
+    font-size: var(--toolbar-wordmark-font-size);
+    font-weight: var(--font-weight-black);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    padding-left: var(--gap-inline-xs);
   }
 
   @keyframes lsb-slide-in {
     from { transform: translateX(-100%); }
     to   { transform: translateX(0); }
   }
+}
+
+/* PC (≥1024px): drawer header wordmark 숨김 (drawer 자체가 표시되지 않으므로 안전장치) */
+@media (min-width: 1024px) {
+  /* PC TopToolbar: LSB width | filter(1fr) | actions(auto) — app-main grid와 시각 정렬 */
+  .top-toolbar {
+    display: grid;
+    grid-template-columns: var(--layout-lsb-width) 1fr auto;
+    align-items: center;
+    gap: 0;
+    padding-inline: 0;
+  }
+
+  /* wordmark: LSB 폭 전체를 차지, 텍스트는 LSB 컨텐츠 padding에 맞춰 좌측 정렬 */
+  .top-toolbar__wordmark {
+    padding: 0 var(--card-padding-x);
+  }
+
+  /* filter: 첫 chip 좌측이 LSB 우측 경계와 정렬, 우측 패딩으로 actions 여백 확보 */
+  .top-toolbar__filter {
+    padding-inline-start: 0;
+    padding-inline-end: var(--gap-inline-sm);
+  }
+
+  /* actions: 우측 패딩 유지 */
+  .top-toolbar__actions {
+    padding-inline-end: var(--gap-stack-md);
+  }
+
+  .top-toolbar__connected-accounts-btn {
+    display: none;
+  }
+
+  /* 가운데 카테고리명 숨김 — PC에서는 wordmark + chip filter 구조 사용 */
+  .top-toolbar__category-label {
+    display: none;
+  }
+}
+
+/* ============================================================
+ * Phase 3 Component CSS
+ * ============================================================ */
+
+/* ---- LeftSidebar (LSB) ---- */
+.lsb {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-bg-canvas);
+  border-right: var(--surface-border-soft);
+}
+
+/* PC에서 LSB brand 숨김 — wordmark는 TopToolbar 좌측에 표시 (이슈 #5, 옵션 A) */
+.app-main__lsb .lsb__brand {
+  display: none;
+}
+
+.lsb__brand {
+  display: flex;
+  align-items: center;
+  height: var(--lsb-brand-height);
+  padding: 0 var(--card-padding-x);
+  flex-shrink: 0;
+  border-bottom: var(--surface-border-soft);
+}
+
+.lsb__brand-wordmark {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+}
+
+.lsb__nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-inline-sm) 0;
+}
+
+.lsb__divider {
+  height: var(--lsb-divider-height);
+  background: var(--color-border-soft);
+  margin: var(--gap-inline-xs) var(--card-padding-x);
+}
+
+.lsb__section-divider {
+  height: var(--lsb-section-divider-height);
+  background: var(--color-border-strong);
+  margin: var(--gap-inline-sm) var(--card-padding-x);
+}
+
+.lsb__category {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+  width: 100%;
+  min-height: var(--lsb-category-row-height);
+  padding: 0 var(--card-padding-x);
+  border-radius: var(--surface-radius-md);
+  color: var(--color-text-secondary);
+  text-align: left;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.lsb__category:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+.lsb__category--active {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+.lsb__category--active:hover {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+.lsb__category-icon {
+  flex-shrink: 0;
+  width: var(--lsb-category-icon-size);
+  height: var(--lsb-category-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lsb__category-label {
+  flex: 1;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lsb__category-badge {
+  flex-shrink: 0;
+  min-width: var(--lsb-badge-min-width);
+  height: var(--lsb-badge-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--gap-inline-xs);
+  border-radius: var(--surface-radius-pill);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  background: var(--color-brand);
+  color: var(--color-text-on-brand);
+}
+
+.lsb__category--active .lsb__category-badge {
+  background: var(--color-text-inverse);
+  color: var(--color-text-primary);
+}
+
+.lsb__profile {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+  padding: var(--gap-inline-sm) var(--card-padding-x);
+  min-height: var(--lsb-profile-height);
+  border-top: var(--surface-border-soft);
+  flex-shrink: 0;
+}
+
+.lsb__profile-avatar {
+  width: var(--lsb-profile-avatar-size);
+  height: var(--lsb-profile-avatar-size);
+  border-radius: var(--surface-radius-pill);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.lsb__profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lsb__profile-initial {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.lsb__profile-name {
+  flex: 1;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- InboxList ---- */
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* TagFilterBar */
+.tag-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  padding: var(--gap-inline-sm) var(--card-padding-x);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  border-bottom: var(--surface-border-soft);
+  flex-wrap: nowrap;
+}
+
+.tag-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.tag-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  height: var(--inbox-tag-chip-height);
+  padding: 0 var(--gap-inline-sm);
+  border-radius: var(--surface-radius-pill);
+  border: var(--surface-border-soft);
+  background: var(--color-bg-surface);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tag-filter-chip:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+.tag-filter-chip--active {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-border-strong);
+}
+
+.tag-filter-chip--active:hover {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+/* toolbar row (TagFilterBar + Sort 버튼 나란히) */
+.inbox-list__toolbar {
+  display: flex;
+  align-items: center;
+  padding: var(--gap-inline-sm) var(--card-padding-x);
+  gap: var(--gap-inline-sm);
+  border-bottom: var(--surface-border-soft);
+  flex-shrink: 0;
+  background: var(--color-bg-canvas);
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+
+.inbox-list__toolbar-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+}
+
+.inbox-list__toolbar-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.inbox-list__toolbar-chips .tag-filter-chip {
+  flex-shrink: 0;
+}
+
+/* Sort 버튼 컨테이너 */
+.inbox-list__sort {
+  flex-shrink: 0;
+}
+
+.inbox-list__sort-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--inbox-sort-btn-size);
+  height: var(--inbox-sort-btn-size);
+  border: none;
+  border-radius: var(--surface-radius-md);
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.inbox-list__sort-button:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+/* Sort dropdown (popover 내부) */
+.inbox-list__sort-dropdown {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--inbox-sort-dropdown-min-w);
+  padding: var(--gap-stack-xs) 0;
+}
+
+.inbox-list__sort-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-inline-sm);
+  width: 100%;
+  padding: var(--gap-stack-xs) var(--gap-inline-md);
+  border: none;
+  background: none;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+
+.inbox-list__sort-option:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+.inbox-list__sort-option--active {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.inbox-list__cards {
+  flex: 1;
+  padding: var(--gap-inline-sm) var(--gap-inline-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+}
+
+/* ---- PreviewCard ---- */
+.preview-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--card-gap);
+  padding: var(--card-padding-y) var(--card-padding-x);
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-card);
+  box-shadow: var(--surface-shadow-card);
+  min-height: var(--card-min-height);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.preview-card:hover {
+  transform: translate(var(--press-offset-x), var(--press-offset-y));
+  box-shadow: var(--surface-shadow-press-lg);
+}
+
+.preview-card:active {
+  transform: translate(0, 0);
+  box-shadow: var(--surface-shadow-card);
+}
+
+/* stacked effect — box-shadow stack (stacking context 독립, hover misalignment 없음) */
+.preview-card--stacked {
+  box-shadow:
+    var(--card-stacked-shadow),
+    var(--surface-shadow-card);
+}
+
+.preview-card--stacked:hover {
+  box-shadow:
+    var(--card-stacked-shadow),
+    var(--surface-shadow-press-lg);
+}
+
+/* thumb area */
+.preview-card__thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--card-thumb-size);
+  height: var(--card-thumb-size);
+  border-radius: var(--surface-radius-md);
+  overflow: visible;
+}
+
+.preview-card__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--surface-radius-md);
+  border: var(--card-thumb-border-width) solid var(--color-border-soft);
+  display: block;
+}
+
+.preview-card__thumb-initial {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--surface-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-canvas-alt);
+  border: var(--card-thumb-border-width) solid var(--color-border-soft);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.preview-card__thumb-platform {
+  position: absolute;
+  bottom: var(--card-thumb-platform-offset);
+  right: var(--card-thumb-platform-offset);
+  width: var(--card-thumb-logo-size);
+  height: var(--card-thumb-logo-size);
+  background: var(--color-bg-surface);
+  border-radius: var(--surface-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--surface-border-soft);
+}
+
+/* body area */
+.preview-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-xs);
+}
+
+.preview-card__body-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-inline-xs);
+}
+
+.preview-card__sender {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-card__type-label {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.preview-card__time {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.preview-card__preview {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.preview-card__tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-xs);
+  margin-top: var(--gap-inline-xs);
+}
+
+.preview-card__tag {
+  display: inline-flex;
+  align-items: center;
+  height: var(--card-tag-chip-height);
+  padding: 0 var(--gap-inline-xs);
+  border-radius: var(--surface-radius-pill);
+  border: var(--surface-border-soft);
+  background: var(--color-bg-canvas-alt);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Type1 (business card) specific */
+.preview-card--type-business .preview-card__biz-company {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-card--type-business .preview-card__biz-person {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.preview-card--type-business .preview-card__biz-summary {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.preview-card--type-business .preview-card__biz-product {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+.preview-card--type-business .preview-card__biz-conditions {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-card__biz-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-inline-sm);
+  margin-top: var(--gap-inline-xs);
+}
+
+/* ============================================================
+ * Multi-selection — BulkActionBar + PreviewCard 선택 상태
+ * ============================================================ */
+
+/* BulkActionBar — InboxList 상단 sticky, 선택 모드 시 헤더 대체 */
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--card-padding-x);
+  min-height: var(--bulk-bar-height);
+  background: var(--bulk-bar-bg);
+  color: var(--bulk-bar-color);
+  border-bottom: var(--surface-border-default);
+  position: sticky;
+  top: 0;
+  z-index: var(--bulk-bar-z);
+  flex-shrink: 0;
+}
+
+.bulk-action-bar__left {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+}
+
+.bulk-action-bar__count {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--bulk-bar-color);
+}
+
+.bulk-action-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+}
+
+.bulk-action-bar__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  padding: 0 var(--gap-inline-md);
+  height: var(--bulk-bar-btn-height);
+  border: var(--border-w-soft) solid var(--color-text-inverse);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--bulk-bar-color);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.bulk-action-bar__btn:hover {
+  background: var(--color-text-inverse);
+  color: var(--color-bg-inverse);
+}
+
+.bulk-action-bar__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--bulk-bar-color);
+  flex-shrink: 0;
+}
+
+/* PreviewCard — 선택 가능 상태 (PC: hover 시 체크박스 표시) */
+.preview-card__checkbox {
+  display: none;
+  position: absolute;
+  left: var(--gap-inline-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--card-checkbox-size);
+  height: var(--card-checkbox-size);
+  z-index: 2;
+  color: var(--color-state-checkbox-off);
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* PC: hover 시 체크박스 노출 */
+@media (min-width: 768px) {
+  .preview-card--selectable:hover .preview-card__checkbox {
+    display: flex;
+  }
+}
+
+/* 선택된 카드는 항상 체크박스 표시 */
+.preview-card--selected .preview-card__checkbox {
+  display: flex;
+  color: var(--color-state-checkbox-on);
+}
+
+/* 선택된 카드 강조 */
+.preview-card--selected {
+  background: var(--color-state-selected-bg);
+  border-color: var(--color-state-selected-border);
+}
+
+/* 선택 모드 ON: 모든 카드 체크박스 노출 (선택/미선택 불문) */
+.preview-card--selectable.preview-card--selection-mode-on .preview-card__checkbox {
+  display: flex;
+}
+
+/* 선택 모드에서 체크박스 공간만큼 내용 indent */
+.preview-card--selectable.preview-card--selection-mode-on {
+  padding-left: calc(var(--card-checkbox-size) + var(--card-gap));
+}
+
+/* long-press 시각 피드백 */
+.preview-card--pressing {
+  transform: scale(var(--card-longpress-scale));
+  transition: transform var(--transition-fast);
+}
+
+/* BulkTagModal chip grid */
+.bulk-tag-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-stack-md);
+}
+
+.bulk-tag-modal__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+}
+
+.bulk-tag-modal__group-label {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.bulk-tag-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-xs);
+}
+
+.bulk-tag-modal__chip {
+  height: var(--bulk-tag-chip-height);
+  padding: 0 var(--gap-inline-md);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.bulk-tag-modal__chip:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+.bulk-tag-modal__chip--selected {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-border-strong);
+}
+
+.bulk-tag-modal__apply-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--touch-target-min);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  margin-top: var(--gap-stack-md);
+  transition: opacity var(--transition-fast);
+}
+
+.bulk-tag-modal__apply-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- SNS 필터 모달 (Tablet/Mobile) ---- */
+.sns-filter-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-sm);
+  padding-bottom: var(--gap-stack-md);
+}
+
+/* 모달 내 chip — 항상 라벨 표시(확장) 형태, hover 전환 없음 */
+.sns-filter-modal .top-toolbar__chip {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding-right: var(--chip-label-padding-right);
+}
+
+.sns-filter-modal .top-toolbar__chip:hover {
+  width: auto;
+  max-width: none;
+}
+
+.sns-filter-modal .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+.sns-filter-modal .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.sns-filter-modal .top-toolbar__chip:hover .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+/* (+) 추가 버튼 — modal 내에서 chip과 동일한 높이 */
+.sns-filter-modal__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--chip-collapsed-width);
+  height: var(--chip-collapsed-width);
+  background: none;
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.sns-filter-modal__add-btn:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+/* ---- sns-filter-popover — 연결 계정 popover 내부 컨테이너 ---- */
+.sns-filter-popover {
+  width: min(var(--popover-max-width), calc(100vw - var(--gap-stack-md) * 2));
+  max-height: var(--popover-max-height);
+  overflow-y: auto;
+}
+
+/* popover 내 chip — sns-filter-modal과 동일하게 항상 라벨 표시 */
+.sns-filter-popover .sns-filter-modal__chips {
+  padding-bottom: 0;
+}
+
+.sns-filter-popover .top-toolbar__chip {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding-right: var(--chip-label-padding-right);
+}
+
+.sns-filter-popover .top-toolbar__chip:hover {
+  width: auto;
+  max-width: none;
+}
+
+.sns-filter-popover .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+.sns-filter-popover .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.sns-filter-popover .top-toolbar__chip:hover .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
 }
