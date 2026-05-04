@@ -1,6 +1,6 @@
 # blackplum mockup — Tasks
 
-> 최종 수정: 2026-05-04 (Phase 3 완료 + 후속 사용자 브라우저 점검 라운드 정리)
+> 최종 수정: 2026-05-04 (Phase 4 완료 — SidePanel 스레드 상세)
 
 ---
 
@@ -105,34 +105,52 @@
 
 ---
 
-## Phase 4: SidePanel — 스레드 상세
+## Phase 4: SidePanel — 스레드 상세 — 완료 (2026-05-04)
 
 > 트리거: Phase 3 완료. 카드 클릭 → SidePanel 진입 동작 활성.
-> 위임: frontend-dev.
+> 위임: frontend-dev (4-1~4-5 단일 라운드) + code-reviewer (4-6) + frontend-dev follow-up.
 
-### 4-1. SidePanel shell (§5-6, §7-3)
-- PC: inline 우측 패널 / 모바일: 풀스크린 진입
-- 닫기 버튼 / dirty 상태 confirm (Phase 5 wizard와 공유 패턴)
+- [x] 4-1. SidePanel shell (§5-6, §7-3) — PC inline grid 슬롯 / Tablet+모바일(≤1023) 풀스크린 overlay(절대 위치 + backdrop dim). esc 닫기, X 버튼 닫기. `app-main--panel-open`/`--panel-closed` modifier로 PC grid 분기. `isNarrow` resize listener로 분기.
+- [x] 4-2. ThreadHeader / MessageThread (§5-6) — `message_type` 3 분기: DMBubbleList(incoming 좌·outgoing 우 + avatar) / CommentImitateList(depth 1·2 들여쓰기 `--comment-indent-depth-2`) / EmailThreadList(flat sender+sent_at+body). `messages.length > 5`일 때 "더 이전 메시지 로드" 버튼(단방향 펼침). attachments는 AttachmentChips 컴포넌트(`<Icon name="image|link" />` + 파일명 truncate, `--attachment-chip-max-width` 160px). 시간 포맷은 기존 `relativeTime()` 재사용.
+- [x] 4-3. OriginInfo (§5-6) — type=post: 썸네일(`--origin-thumb-size` = `--card-thumb-size` alias) + 캡션 + created_at / type=sender: avatar initial + display_name + account_id. AI 축약(`thread.ai_thread_context`)은 OriginInfo 하단 accordion 형태로 PC 3-pane에서만 노출(`@media (max-width: 1023px) { display: none }`). 빈 문자열일 때 미노출. (Origin 수동 tagging CTA는 backlog).
+- [x] 4-4. ReplyArea + SavedReply + AIDraft (§5-7, §6-6) — `primaryCategory(thread)` 도출(business→ops→social→direct_check) → savedReplies.filter(category===primary). chip 클릭 시 textarea 채움. SavedReply.generated_by user/ai 구분 dot indicator(`--saved-reply-chip-dot-size` 6px, ai=`--color-accent-blue` user=`--color-text-tertiary`). AIDraftButton: `MOCK_DATA.ai_drafts[thread.id]`가 있을 때만 enabled, 없으면 `.ai-draft-button--disabled` modifier dim. Icon `sparkle`. ReplyEditor: controlled `useState('')`, Enter 발송 / Shift+Enter 줄바꿈, 빈 문자열 disabled, 발송 버튼 Icon `send`, message_type별 placeholder 분기.
+- [x] 4-5. '처리' 상태 트리거 (§7-3) — 답장 발송: handleSendReply에서 outgoing message 생성 + processedOverrides 추가 + textarea 비우기 + Toast / 무시: handleIgnoreThread에서 processedOverrides 추가 + selectedThreadId=null + Toast / 보관: handleArchiveThread는 처리 trigger 없음(req.md §7-3 mockup) + Toast "준비 중인 기능" + 패널 유지 / 원문 링크: 미구현(req.md §7-3 action 아님). Outgoing message는 `sender_id = channel.connected_sns_accounts.find(acc=>acc.id===origin.user_sns_account_id).account_handle` (spec §4-5-1) + `processed_at = sent_at` (spec §4-5-2) + comment 분기 시 depth=2 + parent_message_id=마지막 incoming.id, dm/email은 depth=1 + parent_message_id=null. id는 `m_runtime_${Date.now()}_${rand}` 형식. MainScreen `outgoingMessageOverrides: Map<threadId, Message[]>` state로 mock data 직접 mutate 차단. `getThreadMessages(thread, overrides)` helper가 base + override 합쳐 시간순 정렬.
+- [x] 4-6. code-reviewer 통합 검증 — 1차 CRITICAL 1건 + FAIL 8건 + WARN 3건 → frontend-dev follow-up fix 11건 정리: (1) `.origin-info__ai-summary` Tier 1 `--border-w-soft` 직접 참조 → `--ai-summary-border` Tier 3 composite로 교체. (2) origin-info thumb 56px raw → `--origin-thumb-size` Tier 3 신설(=`--card-thumb-size` alias). (3) saved-reply-chip dot 6px raw → `--saved-reply-chip-dot-size` Tier 3 신설. (4) opacity 4건(0.85/0.7/0.35) raw → Tier 2 신설 3개(`--opacity-hover` 0.85, `--opacity-disabled-soft` 0.7, `--opacity-disabled-strong` 0.35) + 4건 교체. (5) attachment-chip max-width 160px raw → `--attachment-chip-max-width` Tier 3 신설. (6) spec.md §3-4 Phase 4 Tier 3 토큰 22개 일괄 등록. (7) spec.md §10 Phase 4 entry 추가. (8) `--ai-summary-bg/border` dead token vs CSS rule 불일치 → 토큰 정의를 실 의도(brand-soft / surface-border-soft composite)에 맞게 수정 + CSS rule이 토큰 참조하도록 교체. (W-1) `side-panel-slide-in` animation의 `--transition-normal` composite shorthand → `--motion-duration-normal var(--motion-easing-standard)` 분리 토큰으로 교체(Phase 2 결정사항 일관성). (W-3) message-bubble tail radius `--gap-inline-xs`(gap 의미) → `--message-bubble-tail-radius` Tier 3 신설(=`--radius-sm`). (Fix 9) JSX `objectFit:'cover'` inline → `.origin-info__thumb-image` BEM 클래스 분리. 최종 ESLint 0 errors / 0 warnings(mock-data.js의 사전 directive warning 1건 무관). styles.css 2169→2971(+802) / index.html 1431→2051(+620) / icon-set.js 249→261(+12 / `send` + `sparkle`) / spec.md §3-3 Tier 2 +3 / §3-4 Tier 3 +26 / §10 Phase 4 entry +1.
 
-### 4-2. ThreadHeader / MessageThread (§5-6)
-- 메시지 유형별 3 레이아웃: IG·틱톡 DM bubble / 게시글 댓글 imitate (대댓글 depth 2) / 메일 (TBD)
-- AI 축약 표기는 3단 레이아웃에서만 (req.md §5-3-2)
+### Phase 4 backlog (Phase 5+ 진입 시 처리)
+- Origin 수동 tagging CTA (req.md §5-4 / spec.md §6-4) — OriginInfo 영역 "이 Origin에 태그 규칙 추가" 버튼 미구현. preset 태그 chip selector + origin.tagging_rules push 동작. mock data 구조에 `tagging_rules` 추가 필요할 수 있음
+- SidePanel 내 `business_extracted` 정형 슬롯 노출(현재 PreviewCard.Type1에만 노출). spec 명시 없으나 시연 보강 후보
+- 답장 textarea auto-resize(현재 max-height 제한 + 스크롤). 모바일 UX 보강 후보
+- 스레드 원문 링크 버튼(req.md §8-3) — 미구현. 외부 링크 placeholder Toast로 처리 가능
+- styles.css `:1976` `.preview-card__thumb-platform`의 `--border-w-soft` 직접 참조(Phase 3 잔존 / Phase 4 범위 외) — Tier 1 직접 참조 정리 후보
+- BulkActionBar 모바일 sticky top offset 검토(Phase 3 backlog 이월) — Phase 4에서도 SidePanel overlay 모드에서는 BulkActionBar 자연 분리, PC inline 모드에서는 본 라운드 미점검
+- AI 초안 미정의 thread(약 57건) — 시연 시 AI 초안 버튼이 모두 disabled. mock-data-writer가 ai_drafts 확장 검토 가능
+- TopToolbar PC grid는 `var(--layout-lsb-width) 1fr auto`로 InboxList+SidePanel 영역에 걸쳐 펼쳐짐. SidePanel 열림 시 `var(--layout-lsb-width) var(--layout-inboxlist-width) auto` 3-col로 맞추면 filter bar가 InboxList 폭에 정확히 정렬됨 (Phase 5+ 진입 시 검토)
+- `--origin-thumb-size` Tier 3 토큰(spec.md §3-4)은 ThreadHeader 통합(라운드 3) 후 사용처 사라짐 — `.thread-header__post-thumb`이 `--avatar-size-md` 재사용. dead token cleanup 후보
+- ThreadHeader post 타입 캡션은 `.thread-header__sender` text-overflow: ellipsis로 1줄 truncate. 2줄 이상 clamp 원하면 추가 CSS 필요(backlog)
 
-### 4-3. OriginInfo (§5-6)
-- 게시글 썸네일 / sender 메타 / AI 축약 (스레드 맥락)
+### Phase 4 후속 사용자 브라우저 점검 라운드 1 (2026-05-04)
+- [x] SidePanel width 고정 → 잔여 width 자동 차지로 변경. Tier 1 `--width-inboxlist-pc: 520px` + Tier 2 `--layout-inboxlist-width` 신설. PC `.app-main` 기본 2-col(LSB+1fr) / `.app-main--panel-open` 3-col(LSB+520px+1fr). Tablet overlay-body는 width 고정 → `left: var(--layout-inboxlist-width); right: 0`로 inbox 영역 비우고 우측 잔여 전부.
+- [x] DM outgoing bubble 좌측 정렬 버그 → 우측 정렬. `flex-direction: row-reverse`(단일 자식 모호함) 제거 → `.message-bubble-row--outgoing { justify-content: flex-end }` 명시. JSX wrapper에 `.message-bubble-stack` 클래스 부여.
+- [x] 짧은 outgoing 메시지 강제 줄바꿈("가능합니다" 2줄) → 1줄. `max-width: 72%` 책임을 `.message-bubble`에서 `.message-bubble-stack`으로 이전(`max-width + width: fit-content + min-width: 0`). `.message-bubble`의 `word-break: break-word` → `overflow-wrap: anywhere; word-break: normal`(URL/긴 단어만 분리, 한국어 자연 wrap).
+- 검증: PC panel open/close grid 분기 / Tablet overlay 정렬 / DM outgoing 우측 / 짧은 메시지 1줄 / 긴 메시지 max-width 72% wrap. ESLint 0 errors / 0 warnings.
 
-### 4-4. ReplyArea + SavedReply + AIDraft (§5-7, §6-6)
-- SavedReply chips (카테고리 한정 노출)
-- AI 초안 생성 → 편집 → 발송 / 폐기
+### Phase 4 후속 사용자 브라우저 점검 라운드 4 (2026-05-04)
+- 사용자 사전 변경: ThreadHeader 답장 버튼 주석처리 + 남은 2개 버튼(대응하지 않기 / 저장하기) aria-label/title 갱신.
+- [x] **'대응하지 않기' 버튼 아이콘**: X → 귀여운 유령(`ghost`). icon-set.js에 Lucide `ghost` path 추가(stroke 기반). ThreadHeader 해당 버튼만 `name="x" → name="ghost"` 교체. 다른 X 사용처(닫기 등)는 그대로.
+- [x] **Mobile 햄버거 ↔ 뒤로가기 morph**. SidePanel overlay 레이어링 옵션 B 채택 — `.side-panel--overlay { inset: var(--top-toolbar-height) 0 0 0 }`로 TopToolbar 아래에서 시작(z-index 조작 불필요). 신규 Tier 3 토큰 `--top-toolbar-height: 56px`(touch-target-min 44 + padding 6×2) + `.top-toolbar`에 height 토큰 적용. SidePanel 내부 backup 헤더(`.side-panel-header*` 4 rule) JSX/CSS 전체 제거. TopToolbar에 `showBackButton`/`onCloseSidePanel` prop 추가 → MainScreen에서 `panelOpen && isNarrow` 전달. 햄버거 버튼이 두 아이콘(menu / chevron-left) 동시 렌더 + `.top-toolbar__hamburger--back-mode` 클래스 토글로 90deg rotation + opacity cross-fade 애니메이션. aria-label dynamic("메뉴 열기" / "뒤로가기"). 클릭 핸들러도 동일 분기. dead token cleanup: `--side-panel-header-height`. 검증: Mobile에서 SidePanel 열림 시 햄버거 morph 정상 / TopToolbar 항상 노출 / PC·Tablet 무영향. ESLint 0 errors / 1 warning(`textareaRef` unused — 답장 버튼 주석처리에서 기인. 사용자가 복원할 수 있도록 prop 자체는 유지).
 
-### 4-5. '처리' 상태 트리거 (§7-3)
-- 답장 / 읽음처리 → `processed_at` 기록
-- 저장함 보내기·원문 링크 클릭은 미처리 (req.md §7-3)
-- outgoing message 자동 기록 (sender_id / processed_at)
+### Phase 4 후속 사용자 브라우저 점검 라운드 3 (2026-05-04)
+- [x] **ThreadHeader + OriginInfo 통합**. OriginInfo 컴포넌트 폐기. ThreadHeader가 sender handle sub-line(`.thread-header__sender-handle`) + post 타입 thumb/relative-time(`.thread-header__post-thumb`) + AI 요약 카드(`.thread-header__ai-summary`) 흡수. 중복 avatar/display_name 제거 → 단일 시맨틱 섹션. SidePanel JSX `<OriginInfo>` 삭제, CSS `.origin-info*` 110줄 삭제.
+- [x] **선택된 PreviewCard 테두리 검정 유지**. `.preview-card--active`에서 `border-color` 줄 제거(default 검정 상속). `--card-active-border-color` 토큰 정의도 함께 삭제(orphan). 선택 시 배경색만 변경.
+- [x] **전역 스크롤바 자동 숨김**. `* { scrollbar-width: thin; scrollbar-color: transparent transparent }` + `*::-webkit-scrollbar { width:6px; height:6px }` + thumb transparent. 스크롤 중 `.is-scrolling` 클래스 토글로 thumb 색 노출. App `useEffect` capture-phase scroll 리스너, 700ms debounce. 폭 고정(thin, 6px) 방식으로 reflow 차단. Tier 3 토큰 신설: `--scrollbar-thumb-size: 6px`, `--scrollbar-thumb-color: var(--color-text-muted)`. 기존 per-element scrollbar hide 4곳 제거(global rule로 통합).
+- 검증: sender/post 타입 ThreadHeader 단일 섹션 / PreviewCard 선택 시 검정 border 유지 / 모든 스크롤 영역 평상시 invisible + 스크롤 중 thumb 노출. ESLint 0 errors / 0 warnings.
 
-### 4-6. code-reviewer 검증
-- 메시지 유형별 레이아웃 분기 / AI 축약 노출 위치
-- '처리' 상태 trigger 동작 / outgoing 자동 기록
+### Phase 4 후속 사용자 브라우저 점검 라운드 2 (2026-05-04)
+- [x] **Tablet에서 InboxList dim 처리 → inline 2-col grid 전환**. `isNarrow` 기준 `1024 → 768`로 변경(mobile-only overlay). Tier 1 `--width-inboxlist-tablet: 360px` + Tier 2 `--layout-inboxlist-width-tablet` 신설. tablet용 `@media (max-width:1023px) and (min-width:768px)` 블록 신설: LSB 숨김 + 패널 열림 시 grid `360px 1fr`(InboxList + SidePanel). overlay backdrop 제거. mobile(≤767)만 기존 overlay 유지.
+- [x] **AI 요약 카드 모든 모드 노출 + 색상 + 높이**. `@media (max-width:1023px) display:none` 삭제 → tablet/mobile에서도 노출. 색상 노란(`--color-yellow-soft` 경유) → 퍼플 soft. Tier 1 `--color-purple-soft: #D4C8F8` 신설(기존 yellow-soft/pink-soft 패턴 답습) + Tier 2 `--color-accent-purple-soft` 신설 + Tier 3 `--ai-summary-bg`를 새 토큰에 매핑. padding `gap-inline-md → gap-inline-sm`, line-height `relaxed → normal`로 카드 footprint 축소 → 본문 영역 확보.
+- [x] **메일 본문 잘림 + 스크롤 부재 + 토글 비대칭**. 핵심 fix: `.message-thread > * { flex-shrink: 0 }` 1줄 — 자식(`.email-message`/`.message-bubble-row`/`.comment-item`/load-more)이 flex column에서 균등 shrink되어 contents가 squeeze되던 동작 차단. 이로써 message-thread `overflow-y: auto` 자체 스크롤 정상 동작. 더 보기 버튼: `expanded` true에도 노출 + 라벨 토글(`이전 메시지/댓글/메일 N개 더 보기` ↔ `최근 5개만 보기`). 3개 컴포넌트(DMBubbleList / CommentImitateList / EmailThreadList) 동일 패턴 적용.
+- 검증: 코드 레벨 — Tablet 800~1000px inline 2-col / Mobile ≤767 overlay / PC ≥1024 3-col / AI 요약 모든 모드 보임 / `.message-thread > *` shrink 차단으로 expanded 시 자연 height + 스크롤. ESLint 0 errors / 0 warnings.
 
 ---
 

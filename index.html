@@ -232,7 +232,7 @@
     /* ================================================================
      * TopToolbar — spec.md §5-4
      * ================================================================ */
-    function TopToolbar({ accounts, selectedAccountIds, onToggleAccount, onToggleAll, onOpenLsb, selectedCategory }) {
+    function TopToolbar({ accounts, selectedAccountIds, onToggleAccount, onToggleAll, onOpenLsb, selectedCategory, showBackButton, onCloseSidePanel }) {
       const showToast = useToast();
       const [addModalOpen, setAddModalOpen] = useState(false);
       const [snsFilterPopoverOpen, setSnsFilterPopoverOpen] = useState(false);
@@ -254,13 +254,19 @@
 
       return (
         <header className="top-toolbar safe-area-top">
-          {/* 좌측: 햄버거 */}
+          {/* 좌측: 햄버거 / 뒤로가기 morph */}
           <button
-            className="top-toolbar__hamburger tappable"
-            onClick={onOpenLsb}
-            aria-label="메뉴 열기"
+            type="button"
+            className={`top-toolbar__hamburger tappable${showBackButton ? ' top-toolbar__hamburger--back-mode' : ''}`}
+            onClick={showBackButton ? onCloseSidePanel : onOpenLsb}
+            aria-label={showBackButton ? '뒤로가기' : '메뉴 열기'}
           >
-            <Icon name="menu" size="md" tone="primary" />
+            <span className="top-toolbar__hamburger-icon top-toolbar__hamburger-icon--menu" aria-hidden="true">
+              <Icon name="menu" size="md" tone="primary" />
+            </span>
+            <span className="top-toolbar__hamburger-icon top-toolbar__hamburger-icon--back" aria-hidden="true">
+              <Icon name="chevron-left" size="md" tone="primary" />
+            </span>
           </button>
 
           {/* 가운데: 현재 카테고리명 — Tablet/Mobile에서만 표시 (≤1023px) */}
@@ -575,7 +581,7 @@
     /* ================================================================
      * PreviewCard — Type1 (비즈니스) / Type2 (기본)
      * ================================================================ */
-    function PreviewCard({ thread, selectionMode, isSelected, onCardClick, onCheckboxClick }) {
+    function PreviewCard({ thread, selectionMode, isSelected, onCardClick, onCheckboxClick, isActive }) {
       const { origins, messages, CATEGORIES } = window.MOCK_DATA;
       const longPressRef = useRef(null);
       const [pressing, setPressing] = useState(false);
@@ -636,10 +642,11 @@
       const selectedClass = isSelected ? ' preview-card--selected' : '';
       const selectionModeClass = selectionMode ? ' preview-card--selection-mode-on' : '';
       const pressingClass = pressing ? ' preview-card--pressing' : '';
+      const activeClass = isActive ? ' preview-card--active' : '';
 
       return (
         <button
-          className={`preview-card${stackedClass}${typeClass}${selectableClass}${selectedClass}${selectionModeClass}${pressingClass}`}
+          className={`preview-card${stackedClass}${typeClass}${selectableClass}${selectedClass}${selectionModeClass}${pressingClass}${activeClass}`}
           onClick={handleClick}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -759,10 +766,9 @@
     /* ================================================================
      * SentMessageCard — sent 카테고리용 outgoing 메시지 카드
      * ================================================================ */
-    function SentMessageCard({ msg }) {
+    function SentMessageCard({ msg, onSelectThread }) {
       const { origins, threads } = window.MOCK_DATA;
       const PLATFORM_LOGOS = window.MOCK_DATA.PLATFORM_LOGOS;
-      const showToast = useToast();
 
       // 메시지로부터 thread → origin 조회
       const thread = threads.find((t) => t.id === msg.thread_id);
@@ -774,10 +780,14 @@
         ? { borderColor: `var(--color-platform-${thread.platform === 'naver_mail' ? 'naver' : thread.platform === 'other_mail' ? 'mail' : thread.platform})` }
         : {};
 
+      const handleClick = () => {
+        if (thread && onSelectThread) onSelectThread(thread.id);
+      };
+
       return (
         <button
           className="preview-card preview-card--sent"
-          onClick={() => showToast({ message: 'SidePanel은 Phase 4에서 구현 예정이에요.' })}
+          onClick={handleClick}
           type="button"
         >
           <div className="preview-card__thumb">
@@ -913,7 +923,7 @@
     /* ================================================================
      * InboxList — spec.md §5-5
      * ================================================================ */
-    function InboxList({ selectedCategory, selectedAccountIds, processedOverrides, threadTagOverrides, onProcessThreads, onTagThreads }) {
+    function InboxList({ selectedCategory, selectedAccountIds, processedOverrides, threadTagOverrides, onProcessThreads, onTagThreads, selectedThreadId, onSelectThread }) {
       const { threads, origins, messages, CATEGORIES, TAG_CATALOG } = window.MOCK_DATA;
       const showToast = useToast();
       const [sortMode, setSortMode] = useState('priority'); // 'priority' | 'latest'
@@ -1059,8 +1069,8 @@
             return next;
           });
         } else {
-          // 선택 모드 OFF: SidePanel (Phase 4 stub)
-          showToast({ message: 'SidePanel은 Phase 4에서 구현 예정이에요.' });
+          // 선택 모드 OFF: SidePanel 열기
+          if (onSelectThread) onSelectThread(threadId);
         }
       }, [selectionMode, showToast]);
 
@@ -1183,7 +1193,7 @@
                     />
                   ) : (
                     sentMessages.map((msg) => (
-                      <SentMessageCard key={msg.id} msg={msg} />
+                      <SentMessageCard key={msg.id} msg={msg} onSelectThread={onSelectThread} />
                     ))
                   )
                 ) : filteredThreads.length === 0 ? (
@@ -1199,6 +1209,7 @@
                       thread={thread}
                       selectionMode={selectionMode}
                       isSelected={selectedThreadIds.has(thread.id)}
+                      isActive={selectedThreadId === thread.id}
                       onCardClick={handleCardClick}
                       onCheckboxClick={handleCheckboxClick}
                     />
@@ -1219,6 +1230,452 @@
     }
 
     /* ================================================================
+     * Phase 4 — SidePanel 컴포넌트 트리
+     * ================================================================ */
+
+    // primaryCategory — thread 태그로 카테고리 도출
+    function primaryCategory(thread) {
+      const { TAG_CATALOG } = window.MOCK_DATA;
+      if (thread.tags.some((t) => TAG_CATALOG.business.includes(t))) return 'business';
+      if (thread.tags.some((t) => TAG_CATALOG.ops.includes(t)))      return 'ops';
+      if (thread.tags.some((t) => TAG_CATALOG.social.includes(t)))   return 'social';
+      return 'direct_check';
+    }
+
+    // getThreadMessages — base + outgoing override 합산
+    function getThreadMessages(thread, outgoingOverrides) {
+      const base = thread.message_ids.map((id) => window.MOCK_DATA.messages.find((m) => m.id === id)).filter(Boolean);
+      const extra = outgoingOverrides.get(thread.id) || [];
+      return [...base, ...extra].sort((a, b) => a.sent_at.localeCompare(b.sent_at));
+    }
+
+    // AttachmentChips — 첨부파일 chip 목록
+    function AttachmentChips({ attachments }) {
+      if (!attachments || attachments.length === 0) return null;
+      return (
+        <div className="message-bubble__attachments">
+          {attachments.map((att, idx) => (
+            <span key={idx} className="message-bubble__attachment-chip">
+              <Icon name={att.type === 'image' ? 'image' : 'link'} size="xs" tone="muted" />
+              {att.name}
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // DMBubbleList — DM 버블 레이아웃
+    function DMBubbleList({ messages, origin }) {
+      const [expanded, setExpanded] = useState(false);
+      const shown = !expanded && messages.length > 5 ? messages.slice(-5) : messages;
+
+      return (
+        <>
+          {messages.length > 5 && (
+            <div className="message-thread__load-more">
+              <button
+                type="button"
+                className="message-thread__load-more-btn"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? '최근 5개만 보기' : `이전 메시지 ${messages.length - 5}개 더 보기`}
+              </button>
+            </div>
+          )}
+          {shown.map((msg) => {
+            const isOut = msg.direction === 'outgoing';
+            const initial = isOut ? '나' : (origin ? origin.display_name[0] : '?');
+            return (
+              <div key={msg.id} className={`message-bubble-row${isOut ? ' message-bubble-row--outgoing' : ''}`}>
+                {!isOut && (
+                  <div className="message-bubble__avatar">{initial}</div>
+                )}
+                <div className="message-bubble-stack">
+                  <div className={`message-bubble${isOut ? ' message-bubble--outgoing' : ' message-bubble--incoming'}`}>
+                    {msg.body}
+                    <AttachmentChips attachments={msg.attachments} />
+                  </div>
+                  <span className="message-bubble__time">{relativeTime(msg.sent_at)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      );
+    }
+
+    // CommentImitateList — 댓글 스레드 레이아웃
+    function CommentImitateList({ messages, origin }) {
+      const [expanded, setExpanded] = useState(false);
+      const shown = !expanded && messages.length > 5 ? messages.slice(-5) : messages;
+
+      return (
+        <>
+          {messages.length > 5 && (
+            <div className="message-thread__load-more">
+              <button
+                type="button"
+                className="message-thread__load-more-btn"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? '최근 5개만 보기' : `이전 댓글 ${messages.length - 5}개 더 보기`}
+              </button>
+            </div>
+          )}
+          {shown.map((msg) => {
+            const isOut = msg.direction === 'outgoing';
+            const senderLabel = isOut ? '나' : (origin ? origin.display_name : msg.sender_id);
+            const initial = senderLabel[0] || '?';
+            return (
+              <div key={msg.id} className={`comment-item${msg.depth === 2 ? ' comment-item--depth-2' : ''}`}>
+                <div className="comment-item__avatar">{initial}</div>
+                <div className="comment-item__content">
+                  <span className="comment-item__sender">{senderLabel}</span>
+                  <p className="comment-item__body">
+                    {msg.body}
+                    <AttachmentChips attachments={msg.attachments} />
+                  </p>
+                  <span className="comment-item__time">{relativeTime(msg.sent_at)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      );
+    }
+
+    // EmailThreadList — 메일 스레드 레이아웃
+    function EmailThreadList({ messages }) {
+      const [expanded, setExpanded] = useState(false);
+      const shown = !expanded && messages.length > 5 ? messages.slice(-5) : messages;
+
+      return (
+        <>
+          {messages.length > 5 && (
+            <div className="message-thread__load-more">
+              <button
+                type="button"
+                className="message-thread__load-more-btn"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? '최근 5개만 보기' : `이전 메일 ${messages.length - 5}개 더 보기`}
+              </button>
+            </div>
+          )}
+          {shown.map((msg) => {
+            const isOut = msg.direction === 'outgoing';
+            const senderLabel = isOut ? '나 (발송)' : msg.sender_id;
+            return (
+              <div key={msg.id} className="email-message">
+                <div className="email-message__header">
+                  <span className="email-message__sender">{senderLabel}</span>
+                  <span className="email-message__time">{relativeTime(msg.sent_at)}</span>
+                </div>
+                <div className="email-message__body">
+                  {msg.body}
+                  <AttachmentChips attachments={msg.attachments} />
+                </div>
+              </div>
+            );
+          })}
+        </>
+      );
+    }
+
+    // MessageThread — 유형별 분기
+    function MessageThread({ thread, messages, origin }) {
+      return (
+        <div className="message-thread">
+          {thread.message_type === 'dm' && (
+            <DMBubbleList messages={messages} origin={origin} />
+          )}
+          {thread.message_type === 'comment' && (
+            <CommentImitateList messages={messages} origin={origin} />
+          )}
+          {thread.message_type === 'email' && (
+            <EmailThreadList messages={messages} />
+          )}
+        </div>
+      );
+    }
+
+    // SavedReplyChips — 저장된 답변 chip 목록
+    function SavedReplyChips({ thread, onSelect }) {
+      const { savedReplies } = window.MOCK_DATA;
+      const cat = primaryCategory(thread);
+      const filtered = savedReplies.filter((sr) => sr.category === cat);
+
+      if (filtered.length === 0) return null;
+      return (
+        <div className="reply-area__chips">
+          {filtered.map((sr) => (
+            <button
+              key={sr.id}
+              type="button"
+              className={`saved-reply-chip saved-reply-chip--${sr.generated_by}`}
+              onClick={() => onSelect(sr.text)}
+              title={sr.text}
+            >
+              <span className="saved-reply-chip__dot" />
+              {sr.text}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    // AIDraftButton — AI 초안 버튼
+    function AIDraftButton({ thread, onSelect }) {
+      const draft = window.MOCK_DATA.ai_drafts[thread.id];
+      const disabled = !draft;
+      return (
+        <button
+          type="button"
+          className={`ai-draft-button${disabled ? ' ai-draft-button--disabled' : ''}`}
+          disabled={disabled}
+          onClick={() => { if (draft) onSelect(draft); }}
+          title={disabled ? 'AI 초안이 없어요' : 'AI 초안 불러오기'}
+        >
+          <Icon name="sparkle" size="sm" tone="inherit" />
+          AI 초안
+        </button>
+      );
+    }
+
+    // ReplyEditor — 답장 입력 + 발송
+    function ReplyEditor({ thread, replyText, setReplyText, onSend, textareaRef }) {
+      const placeholder =
+        thread.message_type === 'comment' ? '댓글로 답장하기' :
+        thread.message_type === 'email'   ? '회신 작성' :
+        '메시지 입력';
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (replyText.trim()) onSend();
+        }
+      };
+
+      return (
+        <div className="reply-editor">
+          <textarea
+            ref={textareaRef}
+            className="reply-editor__textarea"
+            placeholder={placeholder}
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={3}
+          />
+          <button
+            type="button"
+            className="reply-editor__send"
+            disabled={!replyText.trim()}
+            onClick={onSend}
+            aria-label="발송"
+          >
+            <Icon name="send" size="md" tone="inherit" />
+          </button>
+        </div>
+      );
+    }
+
+    // ReplyArea — SavedReplyChips + AIDraftButton + ReplyEditor 묶음
+    function ReplyArea({ thread, onSendReply, textareaRef }) {
+      const [replyText, setReplyText] = useState('');
+
+      const handleSelect = useCallback((text) => {
+        setReplyText(text);
+        if (textareaRef && textareaRef.current) textareaRef.current.focus();
+      }, [textareaRef]);
+
+      const handleSend = useCallback(() => {
+        if (!replyText.trim()) return;
+        onSendReply(thread.id, replyText.trim());
+        setReplyText('');
+      }, [replyText, thread.id, onSendReply]);
+
+      return (
+        <div className="reply-area">
+          <div className="reply-area__chips-row">
+            <SavedReplyChips thread={thread} onSelect={handleSelect} />
+            <AIDraftButton thread={thread} onSelect={handleSelect} />
+          </div>
+          <ReplyEditor
+            thread={thread}
+            replyText={replyText}
+            setReplyText={setReplyText}
+            onSend={handleSend}
+            textareaRef={textareaRef}
+          />
+        </div>
+      );
+    }
+
+    // ThreadHeader — 발신자, 플랫폼, 태그, 액션버튼 + 발신자 handle/post 정보 + AI 요약
+    function ThreadHeader({ thread, origin, onClose, onIgnore, onArchive, textareaRef }) {
+      const PLATFORM_LOGOS = window.MOCK_DATA.PLATFORM_LOGOS;
+      const platformLogoKey = PLATFORM_LOGOS[thread.platform] || null;
+      const platformName = {
+        instagram: 'Instagram', youtube: 'YouTube', tiktok: 'TikTok',
+        gmail: 'Gmail', naver_mail: '네이버 메일', other_mail: '메일',
+      }[thread.platform] || thread.platform;
+
+      const isPost = origin && origin.type === 'post';
+
+      return (
+        <div className="thread-header">
+          <div className="thread-header__top-row">
+            {isPost ? (
+              /* post 타입: 썸네일 슬롯 */
+              <div className="thread-header__post-thumb">
+                {origin.post_meta && origin.post_meta.thumbnail_url ? (
+                  <img
+                    src={origin.post_meta.thumbnail_url}
+                    alt="포스트 썸네일"
+                    className="thread-header__post-thumb-image"
+                  />
+                ) : (
+                  <Icon name="image" size="md" tone="muted" />
+                )}
+              </div>
+            ) : (
+              /* sender 타입: 아바타 */
+              <div className="thread-header__avatar">
+                {origin ? origin.display_name[0] : '?'}
+              </div>
+            )}
+            <div className="thread-header__sender-block">
+              <div className="thread-header__sender">
+                {isPost
+                  ? (origin.post_meta && origin.post_meta.caption
+                    ? origin.post_meta.caption
+                    : origin.display_name)
+                  : (origin ? origin.display_name : '알 수 없음')}
+              </div>
+              {isPost ? (
+                <div className="thread-header__sender-handle">
+                  {origin.post_meta && origin.post_meta.created_at
+                    ? relativeTime(origin.post_meta.created_at)
+                    : (platformLogoKey && <Icon name={platformLogoKey} size="xs" tone="muted" />)}
+                </div>
+              ) : (
+                <div className="thread-header__platform">
+                  {platformLogoKey && <Icon name={platformLogoKey} size="xs" tone="muted" />}
+                  {platformName} · {msgTypeLabel(thread.message_type)}
+                </div>
+              )}
+              {!isPost && origin && origin.account_id && (
+                <div className="thread-header__sender-handle">{origin.account_id}</div>
+              )}
+            </div>
+            <div className="thread-header__actions">
+{/*              <button
+                type="button"
+                className="thread-header__action thread-header__action--reply"
+                onClick={() => textareaRef && textareaRef.current && textareaRef.current.focus()}
+                aria-label="답장"
+              >
+                <Icon name="reply" size="sm" tone="inherit" />
+                답장
+              </button>
+*/}              <button
+                type="button"
+                className="thread-header__action"
+                onClick={onIgnore}
+                aria-label="대응하지 않기"
+                title="대응하지 않기"
+              >
+                <Icon name="ghost" size="sm" tone="muted" />
+              </button>
+              <button
+                type="button"
+                className="thread-header__action"
+                onClick={onArchive}
+                aria-label="저장하기"
+                title="저장하기"
+              >
+                <Icon name="star" size="sm" tone="muted" />
+              </button>
+              <button
+                type="button"
+                className="thread-header__action thread-header__action--close"
+                onClick={onClose}
+                aria-label="닫기"
+              >
+                <Icon name="x" size="md" tone="muted" />
+              </button>
+            </div>
+          </div>
+          {thread.tags && thread.tags.length > 0 && (
+            <div className="thread-header__tags">
+              {thread.tags.map((tag) => (
+                <span key={tag} className="thread-header__tag-chip">{tag}</span>
+              ))}
+            </div>
+          )}
+          {thread.ai_thread_context && (
+            <div className="thread-header__ai-summary">
+              <div className="thread-header__ai-label">
+                <Icon name="sparkle" size="xs" tone="muted" />
+                AI 요약
+              </div>
+              <p className="thread-header__ai-text">{thread.ai_thread_context}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // SidePanel — 스레드 상세 패널
+    function SidePanel({ thread, origin, messages, onClose, onIgnore, onArchive, onSendReply, isOverlay }) {
+      const textareaRef = useRef(null);
+
+      // Esc 키로 닫기
+      useEffect(() => {
+        const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+      }, [onClose]);
+
+      const panelContent = (
+        <>
+          <ThreadHeader
+            thread={thread}
+            origin={origin}
+            onClose={onClose}
+            onIgnore={onIgnore}
+            onArchive={onArchive}
+            textareaRef={textareaRef}
+          />
+          <MessageThread thread={thread} messages={messages} origin={origin} />
+          <ReplyArea thread={thread} onSendReply={onSendReply} textareaRef={textareaRef} />
+        </>
+      );
+
+      if (isOverlay) {
+        return (
+          <div className="side-panel side-panel--overlay">
+            <div
+              className="side-panel__overlay-backdrop"
+              onClick={onClose}
+              aria-hidden="true"
+            />
+            <div className="side-panel__overlay-body">
+              {panelContent}
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="side-panel">
+          {panelContent}
+        </div>
+      );
+    }
+
+    /* ================================================================
      * MainScreen — spec.md §5-2
      * ================================================================ */
     function MainScreen() {
@@ -1232,6 +1689,20 @@
       // 일괄 처리 override state — LSB badge + InboxList listing 모두 반영
       const [processedOverrides, setProcessedOverrides] = useState(() => new Set());
       const [threadTagOverrides, setThreadTagOverrides] = useState(() => new Map());
+
+      // Phase 4: SidePanel 상태
+      const [selectedThreadId, setSelectedThreadId] = useState(null);
+      const [outgoingMessageOverrides, setOutgoingMessageOverrides] = useState(() => new Map());
+
+      // 뷰포트 폭 감지 — mobile(≤767px)에서만 overlay 모드
+      const [isNarrow, setIsNarrow] = useState(() => window.innerWidth < 768);
+      useEffect(() => {
+        const onResize = () => setIsNarrow(window.innerWidth < 768);
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+
+      const showToast = useToast();
 
       const handleToggleAccount = useCallback((id) => {
         setSelectedAccountIds((prev) => {
@@ -1254,6 +1725,22 @@
       const handleOpenLsb = useCallback(() => setLsbOpen(true), []);
       const handleCloseLsb = useCallback(() => setLsbOpen(false), []);
 
+      // 전역 스크롤바 자동 숨김 — 스크롤 중에만 .is-scrolling 부여 → CSS thumb 노출
+      useEffect(() => {
+        const timers = new WeakMap();
+        const onScroll = (e) => {
+          const el = e.target;
+          if (!(el instanceof Element)) return;
+          el.classList.add('is-scrolling');
+          const prev = timers.get(el);
+          if (prev) clearTimeout(prev);
+          const t = setTimeout(() => el.classList.remove('is-scrolling'), 700);
+          timers.set(el, t);
+        };
+        document.addEventListener('scroll', onScroll, true);
+        return () => document.removeEventListener('scroll', onScroll, true);
+      }, []);
+
       // 일괄 읽음 처리 — processedOverrides에 thread_id 추가
       const handleProcessThreads = useCallback((threadIds) => {
         setProcessedOverrides((prev) => {
@@ -1275,6 +1762,78 @@
         });
       }, []);
 
+      // SidePanel 핸들러
+      const handleSelectThread = useCallback((threadId) => {
+        setSelectedThreadId(threadId);
+      }, []);
+
+      const handleCloseSidePanel = useCallback(() => {
+        setSelectedThreadId(null);
+      }, []);
+
+      const handleSendReply = useCallback((threadId, body) => {
+        const { channel, origins, threads } = window.MOCK_DATA;
+        const thread = threads.find((t) => t.id === threadId);
+        if (!thread) return;
+        const origin = origins.find((o) => o.id === thread.origin_id);
+        const senderAcc = origin
+          ? channel.connected_sns_accounts.find((acc) => acc.id === origin.user_sns_account_id)
+          : null;
+        const senderId = senderAcc ? senderAcc.account_handle : 'me';
+        const now = new Date().toISOString();
+        const rand = Math.random().toString(36).slice(2, 7);
+        const lastIncoming = (thread.message_ids
+          .map((id) => window.MOCK_DATA.messages.find((m) => m.id === id))
+          .filter(Boolean)
+          .filter((m) => m.direction === 'incoming')
+          .slice(-1)[0]) || null;
+
+        const newMsg = {
+          id: `m_runtime_${Date.now()}_${rand}`,
+          thread_id: threadId,
+          sender_id: senderId,
+          direction: 'outgoing',
+          body,
+          attachments: [],
+          sent_at: now,
+          processed_at: now,
+          read_at: null,
+          depth: thread.message_type === 'comment' ? 2 : 1,
+          parent_message_id: thread.message_type === 'comment' && lastIncoming ? lastIncoming.id : null,
+          tags: [],
+          ai_context_solo: '',
+          ai_context_cumulative: '',
+        };
+
+        setOutgoingMessageOverrides((prev) => {
+          const next = new Map(prev);
+          const existing = next.get(threadId) || [];
+          next.set(threadId, [...existing, newMsg]);
+          return next;
+        });
+        // 답장 발송 → 처리 trigger
+        setProcessedOverrides((prev) => {
+          const next = new Set(prev);
+          next.add(threadId);
+          return next;
+        });
+        showToast({ message: '답장을 보냈어요' });
+      }, [showToast]);
+
+      const handleIgnoreThread = useCallback((threadId) => {
+        setProcessedOverrides((prev) => {
+          const next = new Set(prev);
+          next.add(threadId);
+          return next;
+        });
+        setSelectedThreadId(null);
+        showToast({ message: '스레드를 처리했어요' });
+      }, [showToast]);
+
+      const handleArchiveThread = useCallback(() => {
+        showToast({ message: '저장함은 준비 중인 기능이에요' });
+      }, [showToast]);
+
       // LSB badge count — override 반영 threads
       const threadsWithOverrides = useMemo(() => {
         const { threads } = window.MOCK_DATA;
@@ -1287,13 +1846,31 @@
         });
       }, [processedOverrides, threadTagOverrides]);
 
-      // esc로 LSB 닫기
+      // esc로 LSB 닫기 (SidePanel Esc는 SidePanel 내부에서 처리)
       useEffect(() => {
         if (!lsbOpen) return;
         const handleKey = (e) => { if (e.key === 'Escape') handleCloseLsb(); };
         document.addEventListener('keydown', handleKey);
         return () => document.removeEventListener('keydown', handleKey);
       }, [lsbOpen, handleCloseLsb]);
+
+      // 현재 선택된 thread / origin / messages 도출
+      const selectedThread = useMemo(() => {
+        if (!selectedThreadId) return null;
+        return threadsWithOverrides.find((t) => t.id === selectedThreadId) || null;
+      }, [selectedThreadId, threadsWithOverrides]);
+
+      const selectedOrigin = useMemo(() => {
+        if (!selectedThread) return null;
+        return window.MOCK_DATA.origins.find((o) => o.id === selectedThread.origin_id) || null;
+      }, [selectedThread]);
+
+      const selectedMessages = useMemo(() => {
+        if (!selectedThread) return [];
+        return getThreadMessages(selectedThread, outgoingMessageOverrides);
+      }, [selectedThread, outgoingMessageOverrides]);
+
+      const panelOpen = !!selectedThreadId;
 
       return (
         <div className="app-shell">
@@ -1304,8 +1881,10 @@
             onToggleAll={handleToggleAll}
             onOpenLsb={handleOpenLsb}
             selectedCategory={selectedCategory}
+            showBackButton={panelOpen && isNarrow}
+            onCloseSidePanel={handleCloseSidePanel}
           />
-          <div className="app-main app-main--panel-closed">
+          <div className={`app-main${panelOpen && !isNarrow ? ' app-main--panel-open' : ' app-main--panel-closed'}`}>
             {/* LSB — PC */}
             <aside className="app-main__lsb">
               <LeftSidebar
@@ -1354,11 +1933,38 @@
                 threadTagOverrides={threadTagOverrides}
                 onProcessThreads={handleProcessThreads}
                 onTagThreads={handleTagThreads}
+                selectedThreadId={selectedThreadId}
+                onSelectThread={handleSelectThread}
               />
             </main>
 
-            {/* SidePanel — 기본 닫힘 상태 */}
-            <aside className="app-main__side-panel" />
+            {/* SidePanel — PC: grid 슬롯 inline / Tablet·Mobile: overlay */}
+            {panelOpen && !isNarrow && (
+              <aside className="app-main__side-panel">
+                <SidePanel
+                  thread={selectedThread}
+                  origin={selectedOrigin}
+                  messages={selectedMessages}
+                  onClose={handleCloseSidePanel}
+                  onIgnore={() => handleIgnoreThread(selectedThreadId)}
+                  onArchive={handleArchiveThread}
+                  onSendReply={handleSendReply}
+                  isOverlay={false}
+                />
+              </aside>
+            )}
+            {panelOpen && isNarrow && (
+              <SidePanel
+                thread={selectedThread}
+                origin={selectedOrigin}
+                messages={selectedMessages}
+                onClose={handleCloseSidePanel}
+                onIgnore={() => handleIgnoreThread(selectedThreadId)}
+                onArchive={handleArchiveThread}
+                onSendReply={handleSendReply}
+                isOverlay={true}
+              />
+            )}
           </div>
         </div>
       );

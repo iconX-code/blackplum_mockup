@@ -34,6 +34,7 @@
   --color-green:         #7CB342;
   --color-green-soft:    #B8D88A;
   --color-purple:        #8E6FE0;
+  --color-purple-soft:   #D4C8F8;
   --color-coral:         #FF6B4A;
 
   /* === Tier 1: Color — Neutrals (warm-tinted) === */
@@ -78,9 +79,11 @@
   --space-10: 128px;
 
   /* === Tier 1: Layout Width (3분할 shell — Phase 1-3 도입) === */
-  --width-lsb-pc:        240px;     /* PC 좌측 LSB 고정 폭 */
-  --width-sidepanel-pc:  400px;     /* PC 우측 SidePanel 폭 */
-  --width-container-max: 1440px;    /* 콘텐츠 컨테이너 최대 폭 */
+  --width-lsb-pc:             240px;   /* PC 좌측 LSB 고정 폭 */
+  --width-sidepanel-pc:       400px;   /* PC 우측 SidePanel 폭 */
+  --width-inboxlist-pc:       520px;   /* PC InboxList 고정 폭 (패널 열림 시) */
+  --width-inboxlist-tablet:   360px;   /* Tablet InboxList 고정 폭 (패널 열림 시) */
+  --width-container-max:      1440px;  /* 콘텐츠 컨테이너 최대 폭 */
 
   /* === Tier 1: Radius === */
   --radius-xs:   4px;
@@ -158,8 +161,9 @@
   --color-accent-pink-soft: var(--color-pink-soft);
   --color-accent-blue:      var(--color-blue);
   --color-accent-green:     var(--color-green);
-  --color-accent-purple:    var(--color-purple);
-  --color-accent-coral:     var(--color-coral);
+  --color-accent-purple:      var(--color-purple);
+  --color-accent-purple-soft: var(--color-purple-soft);
+  --color-accent-coral:       var(--color-coral);
 
   /* === Tier 2: Border === */
   --color-border-strong:    var(--color-ink);          /* 2px signature outline */
@@ -252,9 +256,11 @@
   --icon-color-inverse:     var(--color-text-inverse);
 
   /* === Tier 2: Layout (3분할 shell + hit area — Phase 1-3 도입) === */
-  --layout-lsb-width:        var(--width-lsb-pc);
-  --layout-sidepanel-width:  var(--width-sidepanel-pc);
-  --layout-container-max:    var(--width-container-max);
+  --layout-lsb-width:               var(--width-lsb-pc);
+  --layout-sidepanel-width:         var(--width-sidepanel-pc);
+  --layout-inboxlist-width:         var(--width-inboxlist-pc);        /* 패널 열림 시 InboxList 고정 폭 */
+  --layout-inboxlist-width-tablet:  var(--width-inboxlist-tablet);    /* Tablet InboxList 폭 */
+  --layout-container-max:           var(--width-container-max);
   --touch-target-min:        var(--size-44);              /* mobile fat-finger 최소 타겟 */
 
   /* === Tier 2: Motion === */
@@ -285,6 +291,11 @@
   /* === Tier 2: Interaction — press offset (button/card hover lift) === */
   --press-offset-x:         -2px;
   --press-offset-y:         -2px;
+
+  /* === Tier 2: Opacity — semantic intent === */
+  --opacity-hover:           0.85;  /* hover 단계 미세 dim (버튼·CTA) */
+  --opacity-disabled-soft:   0.7;   /* 외형 visible 유지한 disabled (AI 버튼 등) */
+  --opacity-disabled-strong: 0.35;  /* 강한 dim disabled (발송 버튼 비활성 등) */
 }
 
 /* ============================================================
@@ -336,6 +347,30 @@ img,
 svg {
   display: block;
   max-width: 100%;
+}
+
+/* ---- 전역 스크롤바 — thumb 폭은 항상 thin(폭 고정), 색만 transparent ↔ visible 토글 ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*::-webkit-scrollbar {
+  width: var(--scrollbar-thumb-size);
+  height: var(--scrollbar-thumb-size);
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--surface-radius-pill);
+  transition: background var(--motion-duration-normal) var(--motion-easing-standard);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+.is-scrolling {
+  scrollbar-color: var(--scrollbar-thumb-color) transparent;
+}
+.is-scrolling::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-color);
 }
 
 /* ============================================================
@@ -574,6 +609,63 @@ textarea {
 
   /* ---- BulkTagModal component tokens ---- */
   --bulk-tag-chip-height:       32px;
+
+  /* ---- PreviewCard — active (SidePanel 열림 표시) ---- */
+  --card-active-bg:             var(--color-state-selected-bg);
+
+  /* ---- TopToolbar ---- */
+  --top-toolbar-height:         56px;                          /* sticky bar 실효 높이 (touch-target-min 44px + padding 상하 6px×2) */
+
+  /* ---- SidePanel component tokens (Phase 4) ---- */
+  --side-panel-padding-block:   var(--gap-stack-md);
+  --side-panel-padding-inline:  var(--gap-stack-md);
+  --side-panel-z-overlay:       50;                            /* mobile overlay z-index */
+
+  /* ---- ThreadHeader ---- */
+  --thread-header-action-gap:   var(--gap-inline-sm);
+
+  /* ---- Message bubbles (DM) ---- */
+  --message-bubble-radius:      var(--surface-radius-md);
+  --message-bubble-padding-x:   var(--gap-stack-md);
+  --message-bubble-padding-y:   var(--gap-inline-md);
+  --message-bubble-max-width:   72%;
+  --message-bubble-bg-incoming: var(--color-bg-canvas-alt);
+  --message-bubble-bg-outgoing: var(--color-brand-soft);
+
+  /* ---- Comment thread ---- */
+  --comment-indent-depth-2:     var(--gap-stack-lg);           /* depth-2 댓글 들여쓰기 */
+
+  /* ---- Avatar sizes ---- */
+  --avatar-size-sm:             var(--size-28);                /* 댓글·버블 아바타 */
+  --avatar-size-md:             var(--size-32);                /* 스레드 헤더 */
+
+  /* ---- SavedReply chips ---- */
+  --saved-reply-chip-max-width: 200px;
+
+  /* ---- ReplyEditor ---- */
+  --reply-editor-min-height:    80px;
+  --reply-editor-max-height:    200px;
+
+  /* ---- AI summary block ---- */
+  --ai-summary-bg:              var(--color-blue);
+  --ai-summary-border:          var(--border-w-soft) solid var(--color-ink);
+  --ai-summary-padding:         var(--gap-inline-sm);
+
+  /* ---- OriginInfo thumb ---- */
+  --origin-thumb-size:          var(--card-thumb-size);    /* alias — 56px, 의미 분리 */
+
+  /* ---- SavedReply chip dot ---- */
+  --saved-reply-chip-dot-size:  6px;                       /* 상태 표시 dot 크기 */
+
+  /* ---- Attachment chip ---- */
+  --attachment-chip-max-width:  160px;                     /* 메시지 첨부 chip 최대폭 */
+
+  /* ---- Message bubble tail radius ---- */
+  --message-bubble-tail-radius: var(--radius-sm);          /* 말풍선 꼬리쪽 radius */
+
+  /* ---- Scrollbar (전역 overlay 스크롤바) ---- */
+  --scrollbar-thumb-size:       6px;                        /* thumb 폭/높이 — thin 고정 */
+  --scrollbar-thumb-color:      var(--color-text-muted);    /* 스크롤 중 thumb 색 */
 }
 
 /* ============================================================
@@ -598,10 +690,11 @@ html, body {
   background: var(--color-bg-canvas);
 }
 
-/* ---- 3-column grid (PC ≥ 1024px) ---- */
+/* ---- PC grid (≥ 1024px) ---- */
+/* 패널 닫힘 default: LSB + InboxList(1fr) */
 .app-main {
   display: grid;
-  grid-template-columns: var(--layout-lsb-width) 1fr var(--layout-sidepanel-width);
+  grid-template-columns: var(--layout-lsb-width) 1fr;
   grid-template-rows: 1fr;
   flex: 1;
   min-height: 0;
@@ -629,35 +722,37 @@ html, body {
   height: 100%;
 }
 
-/* ---- Tablet (768px ~ 1023px): LSB 숨김, SidePanel push 방식 ---- */
-@media (max-width: 1023px) {
-  .app-main {
-    grid-template-columns: 1fr var(--layout-sidepanel-width);
-  }
-
+/* ---- Tablet (768px ~ 1023px): LSB 숨김, InboxList + SidePanel inline 2-col ---- */
+@media (max-width: 1023px) and (min-width: 768px) {
   .app-main__lsb {
     display: none;
+  }
+
+  /* 패널 닫힘: 단일 컬럼 전체폭 */
+  .app-main {
+    grid-template-columns: 1fr;
   }
 
   .app-main__inbox-list {
     grid-column: 1;
   }
 
-  .app-main__side-panel {
+  /* 패널 열림: InboxList(고정) + SidePanel(잔여) 2-col inline */
+  .app-main--panel-open {
+    grid-template-columns: var(--layout-inboxlist-width-tablet) 1fr;
+  }
+
+  .app-main--panel-open .app-main__inbox-list {
+    grid-column: 1;
+  }
+
+  .app-main--panel-open .app-main__side-panel {
     grid-column: 2;
-  }
-
-  /* SidePanel이 닫힌 상태: 전체폭 inbox */
-  .app-main--panel-closed {
-    grid-template-columns: 1fr;
-  }
-
-  .app-main--panel-closed .app-main__side-panel {
-    display: none;
+    display: block;
   }
 }
 
-/* ---- Mobile (~ 767px): 단일 컬럼 ---- */
+/* ---- Mobile (≤ 767px): 단일 컬럼 + overlay ---- */
 @media (max-width: 767px) {
   .app-main {
     grid-template-columns: 1fr;
@@ -795,7 +890,8 @@ html, body {
   padding: var(--gap-inline-sm) var(--gap-stack-md);
   background: var(--color-bg-canvas);
   border-bottom: var(--surface-border-soft);
-  min-height: var(--touch-target-min);
+  height: var(--top-toolbar-height);
+  min-height: var(--top-toolbar-height);
 }
 
 .top-toolbar__wordmark {
@@ -812,6 +908,42 @@ html, body {
 .top-toolbar__hamburger {
   display: none;
   flex-shrink: 0;
+  position: relative;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+}
+
+/* 햄버거 ↔ 뒤로가기 morph 아이콘 레이어 */
+.top-toolbar__hamburger-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity var(--motion-duration-normal) var(--motion-easing-standard),
+    transform var(--motion-duration-normal) var(--motion-easing-standard);
+  pointer-events: none;
+}
+
+.top-toolbar__hamburger-icon--menu {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.top-toolbar__hamburger-icon--back {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+.top-toolbar__hamburger--back-mode .top-toolbar__hamburger-icon--menu {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+.top-toolbar__hamburger--back-mode .top-toolbar__hamburger-icon--back {
+  opacity: 1;
+  transform: rotate(0deg);
 }
 
 .top-toolbar__filter {
@@ -820,11 +952,6 @@ html, body {
   gap: var(--gap-inline-sm);
   flex: 1;
   overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.top-toolbar__filter::-webkit-scrollbar {
-  display: none;
 }
 
 /* SNS filter chip — max-width transition으로 컨텐츠 기반 폭 + 상한 160px */
@@ -1509,14 +1636,9 @@ html, body {
   padding: var(--gap-inline-sm) var(--card-padding-x);
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none;
   flex-shrink: 0;
   border-bottom: var(--surface-border-soft);
   flex-wrap: nowrap;
-}
-
-.tag-filter-bar::-webkit-scrollbar {
-  display: none;
 }
 
 .tag-filter-chip {
@@ -1573,12 +1695,7 @@ html, body {
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: none;
   flex-wrap: nowrap;
-}
-
-.inbox-list__toolbar-chips::-webkit-scrollbar {
-  display: none;
 }
 
 .inbox-list__toolbar-chips .tag-filter-chip {
@@ -2166,4 +2283,641 @@ html, body {
   width: auto;
   max-width: none;
   padding-right: 0;
+}
+
+/* ============================================================
+ * Phase 4 — SidePanel + ThreadDetail 컴포넌트 스타일
+ * ============================================================ */
+
+/* ---- PreviewCard active state ---- */
+.preview-card--active {
+  background: var(--card-active-bg);
+}
+
+/* ---- SidePanel wrapper ---- */
+/* PC(≥1024px): grid 슬롯에 인라인 렌더 */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg-surface);
+  border-left: var(--surface-border-soft);
+}
+
+/* Tablet/Mobile overlay 모드 */
+.side-panel--overlay {
+  position: fixed;
+  inset: var(--top-toolbar-height) 0 0 0;  /* TopToolbar 아래에서 시작 — 햄버거 morph 버튼 항상 노출 */
+  z-index: var(--side-panel-z-overlay);
+  border-left: none;
+}
+
+.side-panel__overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim-heavy);
+}
+
+.side-panel__overlay-body {
+  position: absolute;
+  top: 0;
+  left: var(--layout-inboxlist-width);   /* InboxList 폭만 비워두고 우측 잔여 전부 */
+  right: 0;
+  bottom: 0;
+  min-width: 320px;                       /* 화면이 좁을 때 최소 폭 보장 */
+  background: var(--color-bg-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: var(--surface-border-soft);
+  animation: side-panel-slide-in var(--motion-duration-normal) var(--motion-easing-standard);
+}
+
+@keyframes side-panel-slide-in {
+  from { transform: translateX(100%); opacity: 0.6; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* Mobile: 전체 너비 */
+@media (max-width: 767px) {
+  .side-panel__overlay-body {
+    left: 0;
+    right: 0;
+    min-width: unset;
+    border-left: none;
+  }
+}
+
+/* ---- ThreadHeader ---- */
+.thread-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+  padding: var(--side-panel-padding-block) var(--side-panel-padding-inline) var(--gap-inline-md);
+  border-bottom: var(--surface-border-soft);
+  flex-shrink: 0;
+}
+
+.thread-header__top-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+}
+
+.thread-header__avatar {
+  width: var(--avatar-size-md);
+  height: var(--avatar-size-md);
+  border-radius: var(--surface-radius-pill);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.thread-header__sender-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.thread-header__sender {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thread-header__platform {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-tertiary);
+}
+
+.thread-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--thread-header-action-gap);
+  flex-shrink: 0;
+}
+
+.thread-header__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--surface-radius-md);
+  gap: var(--gap-inline-xs);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  white-space: nowrap;
+}
+
+.thread-header__action:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+.thread-header__action--reply {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-radius: var(--surface-radius-chip);
+  padding-inline: var(--gap-inline-md);
+}
+
+.thread-header__action--reply:hover {
+  background: var(--color-text-secondary);
+  color: var(--color-text-inverse);
+}
+
+.thread-header__action--close {
+  color: var(--color-text-tertiary);
+}
+
+.thread-header__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-xs);
+}
+
+.thread-header__tag-chip {
+  display: inline-flex;
+  align-items: center;
+  height: var(--card-tag-chip-height);
+  padding-inline: var(--gap-inline-sm);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ---- ThreadHeader — 추가 요소 (sender handle, post thumb, AI summary) ---- */
+
+/* post 타입 썸네일 슬롯 — avatar와 동일 크기, 직사각형 */
+.thread-header__post-thumb {
+  width: var(--avatar-size-md);
+  height: var(--avatar-size-md);
+  flex-shrink: 0;
+  border-radius: var(--surface-radius-md);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  overflow: hidden;
+}
+
+.thread-header__post-thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* sender 타입: account_id / post 타입: relative time */
+.thread-header__sender-handle {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-tertiary);
+}
+
+/* AI 요약 카드 */
+.thread-header__ai-summary {
+  background: var(--ai-summary-bg);
+  border: var(--ai-summary-border);
+  border-radius: var(--surface-radius-md);
+  padding: var(--ai-summary-padding);
+}
+
+.thread-header__ai-label {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--gap-inline-xs);
+}
+
+.thread-header__ai-text {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* ---- MessageThread ---- */
+.message-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--side-panel-padding-block) var(--side-panel-padding-inline);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+}
+
+/* 자식 shrink 차단 — flex container 안에서 메시지들이 squeeze되지 않도록 */
+.message-thread > * {
+  flex-shrink: 0;
+}
+
+.message-thread__load-more {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--gap-inline-sm);
+}
+
+.message-thread__load-more-btn {
+  background: none;
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-chip);
+  padding: var(--gap-inline-xs) var(--gap-inline-md);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+}
+
+.message-thread__load-more-btn:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-secondary);
+}
+
+/* ---- DM bubble layout ---- */
+.message-bubble-row {
+  display: flex;
+  gap: var(--gap-inline-sm);
+  align-items: flex-end;
+}
+
+.message-bubble-row--outgoing {
+  justify-content: flex-end;
+}
+
+.message-bubble-stack {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--message-bubble-max-width);
+  width: fit-content;
+  min-width: 0;
+}
+
+.message-bubble__avatar {
+  width: var(--avatar-size-sm);
+  height: var(--avatar-size-sm);
+  border-radius: var(--surface-radius-pill);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.message-bubble {
+  padding: var(--message-bubble-padding-y) var(--message-bubble-padding-x);
+  border-radius: var(--message-bubble-radius);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  overflow-wrap: anywhere;
+  word-break: normal;
+  border: var(--surface-border-soft);
+}
+
+.message-bubble--incoming {
+  background: var(--message-bubble-bg-incoming);
+  border-bottom-left-radius: var(--message-bubble-tail-radius);
+}
+
+.message-bubble--outgoing {
+  background: var(--message-bubble-bg-outgoing);
+  border-bottom-right-radius: var(--message-bubble-tail-radius);
+}
+
+.message-bubble__time {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin-top: var(--gap-inline-xs);
+  text-align: right;
+  display: block;
+}
+
+.message-bubble__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-xs);
+  margin-top: var(--gap-inline-xs);
+}
+
+.message-bubble__attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  height: var(--card-tag-chip-height);
+  padding-inline: var(--gap-inline-sm);
+  background: var(--color-bg-surface);
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  max-width: var(--attachment-chip-max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Comment thread layout ---- */
+.comment-item {
+  display: flex;
+  gap: var(--gap-inline-sm);
+  align-items: flex-start;
+}
+
+.comment-item--depth-2 {
+  padding-left: var(--comment-indent-depth-2);
+}
+
+.comment-item__avatar {
+  width: var(--avatar-size-sm);
+  height: var(--avatar-size-sm);
+  border-radius: var(--surface-radius-pill);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.comment-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-item__sender {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.comment-item__body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  word-break: break-word;
+  margin-top: var(--gap-inline-xs);
+}
+
+.comment-item__time {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  margin-top: var(--gap-inline-xs);
+}
+
+/* ---- Email thread layout ---- */
+.email-message {
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-md);
+  overflow: hidden;
+}
+
+.email-message__header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+  padding: var(--gap-inline-sm) var(--gap-inline-md);
+  background: var(--color-bg-canvas-alt);
+  border-bottom: var(--surface-border-soft);
+}
+
+.email-message__sender {
+  flex: 1;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email-message__time {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.email-message__body {
+  padding: var(--gap-inline-md);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* ---- ReplyArea ---- */
+.reply-area {
+  padding: var(--side-panel-padding-block) var(--side-panel-padding-inline);
+  border-top: var(--surface-border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+  flex-shrink: 0;
+  background: var(--color-bg-surface);
+}
+
+.reply-area__chips-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+}
+
+.reply-area__chips {
+  display: flex;
+  gap: var(--gap-inline-xs);
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  padding-bottom: var(--gap-inline-xs);
+}
+
+.saved-reply-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  height: var(--inbox-tag-chip-height);
+  padding-inline: var(--gap-inline-sm);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: var(--saved-reply-chip-max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.saved-reply-chip:hover {
+  background: var(--color-brand-soft);
+  color: var(--color-text-primary);
+  border-color: var(--color-state-selected-border);
+}
+
+.saved-reply-chip__dot {
+  width: var(--saved-reply-chip-dot-size);
+  height: var(--saved-reply-chip-dot-size);
+  border-radius: var(--surface-radius-pill);
+  flex-shrink: 0;
+}
+
+.saved-reply-chip--user .saved-reply-chip__dot {
+  background: var(--color-text-tertiary);
+}
+
+.saved-reply-chip--ai .saved-reply-chip__dot {
+  background: var(--color-accent-blue);
+}
+
+/* ---- AI Draft Button ---- */
+.ai-draft-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-inline-xs);
+  height: var(--inbox-tag-chip-height);
+  padding-inline: var(--gap-inline-sm);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ai-draft-button:hover {
+  opacity: var(--opacity-hover);
+}
+
+.ai-draft-button--disabled {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled-soft);
+}
+
+/* ---- ReplyEditor ---- */
+.reply-editor {
+  display: flex;
+  gap: var(--gap-inline-sm);
+  align-items: flex-end;
+}
+
+.reply-editor__textarea {
+  flex: 1;
+  min-height: var(--reply-editor-min-height);
+  max-height: var(--reply-editor-max-height);
+  padding: var(--gap-inline-sm) var(--gap-inline-md);
+  background: var(--color-bg-canvas-alt);
+  border: var(--surface-border-soft);
+  border-radius: var(--surface-radius-md);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  resize: none;
+  outline: none;
+}
+
+.reply-editor__textarea:focus {
+  border-color: var(--color-border-strong);
+}
+
+.reply-editor__textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.reply-editor__send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--surface-radius-pill);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.reply-editor__send:disabled {
+  opacity: var(--opacity-disabled-strong);
+  cursor: not-allowed;
+}
+
+.reply-editor__send:hover:not(:disabled) {
+  opacity: var(--opacity-hover);
+}
+
+/* PC에서 패널 닫힘 상태 — SidePanel 슬롯 자체가 없는 2분할이므로 hide만 보조 */
+.app-main--panel-closed .app-main__side-panel {
+  display: none;
+}
+
+/* PC에서 패널 열림: InboxList 고정 폭 + SidePanel 1fr(잔여 전부) */
+.app-main--panel-open {
+  grid-template-columns: var(--layout-lsb-width) var(--layout-inboxlist-width) 1fr;
+}
+
+/* Mobile: side-panel grid 슬롯 숨김 — overlay는 React가 렌더 */
+@media (max-width: 767px) {
+  .app-main__side-panel {
+    display: none !important;
+  }
 }
