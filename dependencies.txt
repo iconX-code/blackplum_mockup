@@ -29,5 +29,12 @@ GitHub Pages          정적 호스팅 (빌드 불필요)
 ## Dev Tools (로컬)
 브라우저              index.html 직접 열어 테스트
 
+## Claude Code Tooling (개발자 환경 — 코드/배포 무관)
+uv (uvx)              Python 도구 러너 (Homebrew: `brew install uv`). serena MCP 실행에 필요
+serena MCP            Claude Code용 코드 탐색·심볼 분석 MCP 서버 (oraios/serena, GitHub stdio MCP)
+                      등록 명령: `claude mcp add --scope user serena -- /opt/homebrew/bin/uvx --from git+https://github.com/oraios/serena serena start-mcp-server --context ide-assistant`
+                      활성 프로젝트는 첫 호출 시 serena 도구 `activate_project`로 동적 지정
+                      프로젝트 설정: `.serena/project.yml` (commit됨), 캐시: `.serena/cache/` (gitignore됨)
+
 ## 설치
 npm install           # dev dependencies 설치 (eslint)

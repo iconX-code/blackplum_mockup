@@ -1,8 +1,6 @@
 // === blackplum mockup data ===
 // Phase 1-2 — automations / AUTOMATION_TEMPLATES는 Phase 5에서 채움 (현재 빈 배열)
 
-/* eslint-disable */
-
 const TAG_CATALOG = {
   business: ['공구 제안','시딩 제안','광고/협찬 제안','행사/오프라인 제안','기타 제안'],
   ops:      ['구매 문의','배송 문의','CS/환불','제품 질문','링크 요청'],
@@ -103,11 +101,11 @@ const origins = [
   // === OPS/CS POST ORIGINS (IG & YT) ===
   { id:'o13', type:'post', platform:'instagram', user_sns_account_id:'a1',
     media_id:'ig_post_001', display_name:'선크림 추천 TOP5 🌞',
-    post_meta:{ thumbnail_url:'https://placehold.co/120x120?text=P1', caption:'여름 필수템 선크림 TOP5 추천드려요!', created_at:'2026-04-10T10:00:00+09:00' },
+    post_meta:{ thumbnail_url:'https://picsum.photos/seed/igpost001/240/240', caption:'여름 필수템 선크림 TOP5 추천드려요!', created_at:'2026-04-10T10:00:00+09:00' },
     manual_tags:[], engagement_meta:{ likes:4821, views:0, comment_count:203, trend_flag:'rising' } },
   { id:'o14', type:'post', platform:'instagram', user_sns_account_id:'a2',
     media_id:'ig_post_002', display_name:'데일리 스킨케어 루틴 🧴',
-    post_meta:{ thumbnail_url:'https://placehold.co/120x120?text=P2', caption:'아침 스킨케어 루틴 공개해요', created_at:'2026-04-15T09:00:00+09:00' },
+    post_meta:{ thumbnail_url:'https://picsum.photos/seed/igpost002/240/240', caption:'아침 스킨케어 루틴 공개해요', created_at:'2026-04-15T09:00:00+09:00' },
     manual_tags:[], engagement_meta:{ likes:3209, views:0, comment_count:118, trend_flag:null } },
   { id:'o15', type:'post', platform:'youtube',   user_sns_account_id:'a3',
     media_id:'yt_video_001', display_name:'봄 메이크업 튜토리얼',
@@ -115,7 +113,7 @@ const origins = [
     manual_tags:[], engagement_meta:{ likes:9830, views:210000, comment_count:542, trend_flag:'rising' } },
   { id:'o16', type:'post', platform:'instagram', user_sns_account_id:'a1',
     media_id:'ig_post_003', display_name:'공구 오픈! 마스크팩 할인 🎉',
-    post_meta:{ thumbnail_url:'https://placehold.co/120x120?text=P4', caption:'인기 마스크팩 공구 오픈합니다', created_at:'2026-04-20T12:00:00+09:00' },
+    post_meta:{ thumbnail_url:'https://picsum.photos/seed/igpost003/240/240', caption:'인기 마스크팩 공구 오픈합니다', created_at:'2026-04-20T12:00:00+09:00' },
     manual_tags:['이벤트-오픈'], engagement_meta:{ likes:6102, views:0, comment_count:389, trend_flag:'rising' } },
   { id:'o17', type:'post', platform:'youtube',   user_sns_account_id:'a3',
     media_id:'yt_video_002', display_name:'다이어트 식단 7일 챌린지',
@@ -123,7 +121,7 @@ const origins = [
     manual_tags:[], engagement_meta:{ likes:7650, views:180000, comment_count:411, trend_flag:null } },
   { id:'o18', type:'post', platform:'instagram', user_sns_account_id:'a2',
     media_id:'ig_post_004', display_name:'파운데이션 비교 리뷰 💄',
-    post_meta:{ thumbnail_url:'https://placehold.co/120x120?text=P6', caption:'10종 파운데이션 비교 리뷰', created_at:'2026-04-22T11:00:00+09:00' },
+    post_meta:{ thumbnail_url:'https://picsum.photos/seed/igpost004/240/240', caption:'10종 파운데이션 비교 리뷰', created_at:'2026-04-22T11:00:00+09:00' },
     manual_tags:[], engagement_meta:{ likes:2870, views:0, comment_count:95, trend_flag:null } },
   { id:'o19', type:'post', platform:'tiktok',    user_sns_account_id:'a5',
     media_id:'tt_video_001', display_name:'1분 메이크업 챌린지',
@@ -175,8 +173,14 @@ const origins = [
   { id:'o53', type:'sender', platform:'instagram', user_sns_account_id:'a2', account_id:'@user_taeyeon_fan',  display_name:'태연팬', manual_tags:[] },
   { id:'o54', type:'post',   platform:'instagram', user_sns_account_id:'a1',
     media_id:'ig_post_005', display_name:'여름 코디 하울 영상 🌊',
-    post_meta:{ thumbnail_url:'https://placehold.co/120x120?text=P8', caption:'여름 코디 하울 영상 올렸어요', created_at:'2026-04-28T13:00:00+09:00' },
+    post_meta:{ thumbnail_url:'https://picsum.photos/seed/igpost005/240/240', caption:'여름 코디 하울 영상 올렸어요', created_at:'2026-04-28T13:00:00+09:00' },
     manual_tags:[], engagement_meta:{ likes:3500, views:0, comment_count:145, trend_flag:null } },
+
+  // === IG POST ORIGIN 추가 (자동화 target_post_ids 그리드 피커용) ===
+  { id:'o57', type:'post',   platform:'instagram', user_sns_account_id:'a2',
+    media_id:'ig_post_006', display_name:'새 립스틱 라인업 공개 💄',
+    post_meta:{ thumbnail_url:'https://picsum.photos/seed/igpost006/240/240', caption:'지우뷰티 신제품 립스틱 6종 공개!', created_at:'2026-05-01T11:00:00+09:00' },
+    manual_tags:[], engagement_meta:{ likes:2210, views:0, comment_count:87, trend_flag:'rising' } },
   { id:'o55', type:'sender', platform:'instagram', user_sns_account_id:'a1', account_id:'@user_jungho',       display_name:'정호', manual_tags:[] },
   { id:'o56', type:'sender', platform:'instagram', user_sns_account_id:'a2', account_id:'@user_hyunwoo',      display_name:'현우', manual_tags:[] },
 ];
@@ -1649,14 +1653,425 @@ const ai_drafts = {
   't68': '제안 내용 더 구체적으로 알려주시면 검토 후 회신드리겠습니다.',
 };
 
+// ============================================================
+// § 자동화 룰 (7개) — Phase 5-2
+// ============================================================
+
+const automations = [
+  // ─── 룰 #1: 가장 단순한 룰 (P0) ─────────────────────────────
+  // template_key=null / SPECIFIC_POSTS / KEYWORD_MATCH("참여") / SAME / TEXT / 버튼 없음 / reply=CUSTOM / ACTIVE
+  {
+    id: 'auto1',
+    template_key: null,
+    title: '이벤트 참여 자동 안내',
+    status: 'ACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'SPECIFIC_POSTS',
+    target_post_ids: ['ig_post_001'],
+    trigger_mode: 'KEYWORD_MATCH',
+    trigger_keywords: ['참여'],
+    follower_branch: { mode: 'SAME' },
+    message: {
+      type: 'TEXT',
+      body: '안녕하세요! 댓글 감사해요 🙌 이벤트 참여 정보를 DM으로 보내드렸으니 확인해 주세요!',
+      images: [],
+      buttons: [],
+    },
+    reply: {
+      enabled: true,
+      tone: 'CUSTOM',
+      items: ['DM 확인해 주세요! 😊'],
+    },
+    stats: { sent: 1842, read: 1420, clicked: 0 },
+    active_minutes: 64512,
+    created_at: '2026-03-10T09:15:00+09:00',
+    updated_at: '2026-03-15T14:22:00+09:00',
+  },
+
+  // ─── 룰 #2: 템플릿 기반 풀 옵션 (P1) ────────────────────────
+  // template_key=PRODUCT_INFO / SPECIFIC_POSTS / KEYWORD_MATCH("정보","상세") / SAME / TEXT / 버튼 1개 / reply=POLITE(3건) / ACTIVE
+  {
+    id: 'auto2',
+    template_key: 'PRODUCT_INFO',
+    title: '신제품 정보 자동 전달',
+    status: 'ACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'SPECIFIC_POSTS',
+    target_post_ids: ['ig_post_003'],
+    trigger_mode: 'KEYWORD_MATCH',
+    trigger_keywords: ['정보', '상세'],
+    follower_branch: { mode: 'SAME' },
+    message: {
+      type: 'TEXT',
+      body: '마스크팩 공구 상세 정보를 보내드릴게요! 성분, 용량, 공구가는 아래 링크에서 확인하실 수 있어요. 궁금한 점이 있으시면 언제든지 문의해 주세요 :)',
+      images: [],
+      buttons: [
+        {
+          id: 'btn_auto2_1',
+          text: '자세히 보기',
+          action_type: 'URL',
+          url: 'https://example.com/product',
+        },
+      ],
+    },
+    reply: {
+      enabled: true,
+      tone: 'POLITE',
+      items: [
+        'DM으로 자세한 안내를 보내드렸어요. 확인 부탁드립니다 :)',
+        '상품 정보를 DM으로 전달드렸습니다. 검토 후 문의 주세요!',
+        '공구 상세 내용을 디엠으로 보내드렸어요. 감사합니다!',
+      ],
+    },
+    stats: { sent: 2937, read: 2238, clicked: 312 },
+    active_minutes: 39168,
+    created_at: '2026-04-01T10:00:00+09:00',
+    updated_at: '2026-04-20T18:45:00+09:00',
+  },
+
+  // ─── 룰 #3: 이미지 캐러셀 시연 (P1) ─────────────────────────
+  // template_key=COMMENT_EVENT / SPECIFIC_POSTS / KEYWORD_MATCH("이벤트") / SAME / IMAGE_CAROUSEL(3장) / 버튼 없음 / reply=FRIENDLY(4건) / ACTIVE
+  {
+    id: 'auto3',
+    template_key: 'COMMENT_EVENT',
+    title: '여름 스킨케어 이벤트 캐러셀',
+    status: 'ACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'SPECIFIC_POSTS',
+    target_post_ids: ['ig_post_002'],
+    trigger_mode: 'KEYWORD_MATCH',
+    trigger_keywords: ['이벤트'],
+    follower_branch: { mode: 'SAME' },
+    message: {
+      type: 'IMAGE_CAROUSEL',
+      body: '이벤트에 댓글 남겨주셔서 감사해요! 🎉 아래 이미지에서 이벤트 참여 방법을 확인해 주세요~',
+      images: [
+        { url: 'https://placehold.co/600x600/FFB3C6/fff?text=Event+1', order: 0 },
+        { url: 'https://placehold.co/600x600/B3D9FF/fff?text=Event+2', order: 1 },
+        { url: 'https://placehold.co/600x600/B3FFD1/fff?text=Event+3', order: 2 },
+      ],
+      buttons: [],
+    },
+    reply: {
+      enabled: true,
+      tone: 'FRIENDLY',
+      items: [
+        '디엠으로 보냈어요~ 확인해 주세요! 🎁',
+        '이벤트 정보 디엠으로 보냈으니 확인해 줘요!',
+        '디엠 확인해 봐요~ 이벤트 기대해 주세요!',
+        '디엠 왔어요! 이벤트 많이 참여해 줘서 고마워요 💕',
+      ],
+    },
+    stats: { sent: 1104, read: 882, clicked: 0 },
+    active_minutes: 23040,
+    created_at: '2026-04-15T11:30:00+09:00',
+    updated_at: '2026-04-22T09:10:00+09:00',
+  },
+
+  // ─── 룰 #4: 팔로우 분기 — FOLLOWERS_ONLY (P2) ───────────────
+  // template_key=null / SPECIFIC_POSTS / ALL_COMMENTS / FOLLOWERS_ONLY / TEXT / 버튼 1개 / reply=false / ACTIVE
+  {
+    id: 'auto4',
+    template_key: null,
+    title: '팔로워 전용 혜택 자동 안내',
+    status: 'ACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'SPECIFIC_POSTS',
+    target_post_ids: ['ig_post_004'],
+    trigger_mode: 'ALL_COMMENTS',
+    trigger_keywords: [],
+    follower_branch: { mode: 'FOLLOWERS_ONLY' },
+    message: {
+      type: 'TEXT',
+      body: '팔로워 전용 특가 정보를 보내드려요! 🎀 항상 응원해 주셔서 감사해요. 아래 링크에서 팔로워 할인 코드를 확인하세요.',
+      images: [],
+      buttons: [
+        {
+          id: 'btn_auto4_1',
+          text: '팔로워 특가 확인하기',
+          action_type: 'URL',
+          url: 'https://example.com/follower-special',
+        },
+      ],
+    },
+    reply: {
+      enabled: false,
+      tone: 'POLITE',
+      items: [],
+    },
+    stats: { sent: 673, read: 512, clicked: 98 },
+    active_minutes: 34560,
+    created_at: '2026-04-05T14:00:00+09:00',
+    updated_at: '2026-04-05T14:00:00+09:00',
+  },
+
+  // ─── 룰 #5: 팔로우 분기 — DIFFERENT_MESSAGES (P2) ───────────
+  // template_key=null / SPECIFIC_POSTS / KEYWORD_MATCH("구매","주문") / DIFFERENT_MESSAGES / TEXT×2 / reply=POLITE(2건) / ACTIVE
+  {
+    id: 'auto5',
+    template_key: null,
+    title: '구매 안내 (팔로우별 분기)',
+    status: 'ACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'SPECIFIC_POSTS',
+    target_post_ids: ['ig_post_005'],
+    trigger_mode: 'KEYWORD_MATCH',
+    trigger_keywords: ['구매', '주문'],
+    follower_branch: {
+      mode: 'DIFFERENT_MESSAGES',
+      // 팔로워: 친근체
+      follower_message: {
+        type: 'TEXT',
+        body: '구매 문의 남겨줘서 고마워요~ 🛍️ 팔로워 전용 할인가로 주문하는 방법 디엠으로 알려줄게요! 놓치지 마세요!',
+        images: [],
+        buttons: [
+          {
+            id: 'btn_auto5_f1',
+            text: '팔로워 주문 바로가기',
+            action_type: 'URL',
+            url: 'https://example.com/order-follower',
+          },
+        ],
+      },
+      // 비팔로워: 공식 존댓말
+      non_follower_message: {
+        type: 'TEXT',
+        body: '구매 문의 주셔서 감사합니다. 주문 방법 및 상세 안내를 DM으로 전달드렸습니다. 확인 후 추가 문의 사항이 있으시면 언제든지 말씀해 주세요.',
+        images: [],
+        buttons: [],
+      },
+    },
+    message: {
+      type: 'TEXT',
+      body: '',
+      images: [],
+      buttons: [],
+    },
+    reply: {
+      enabled: true,
+      tone: 'POLITE',
+      items: [
+        'DM으로 주문 안내를 보내드렸습니다. 확인 부탁드립니다.',
+        '구매 관련 정보를 DM으로 전달드렸어요. 감사합니다 :)',
+      ],
+    },
+    stats: { sent: 419, read: 329, clicked: 47 },
+    active_minutes: 19584,
+    created_at: '2026-04-18T16:20:00+09:00',
+    updated_at: '2026-04-30T10:55:00+09:00',
+  },
+
+  // ─── 룰 #6: 향후 게시물 자동 적용 — INACTIVE (P2) ───────────
+  // template_key=PURCHASE_AUTH / FUTURE_POSTS / KEYWORD_MATCH("인증") / SAME / TEXT / 버튼 없음 / reply=POLITE(3건) / INACTIVE
+  {
+    id: 'auto6',
+    template_key: 'PURCHASE_AUTH',
+    title: '구매 인증 자동 발급 (향후 게시물)',
+    status: 'INACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'FUTURE_POSTS',
+    target_post_ids: [],
+    trigger_mode: 'KEYWORD_MATCH',
+    trigger_keywords: ['인증'],
+    follower_branch: { mode: 'SAME' },
+    message: {
+      type: 'TEXT',
+      body: '구매 인증 남겨주셔서 감사합니다! 📸 인증 혜택으로 적립금 500원을 지급해 드릴게요. 주문번호와 함께 DM으로 연락 주시면 빠르게 처리해 드리겠습니다.',
+      images: [],
+      buttons: [],
+    },
+    reply: {
+      enabled: true,
+      tone: 'POLITE',
+      items: [
+        '구매 인증 감사드립니다. 혜택 안내를 DM으로 보내드렸어요!',
+        '인증해 주셔서 감사합니다. DM 확인 부탁드려요 :)',
+        '구매 인증 확인했습니다. DM으로 적립금 안내 드릴게요!',
+      ],
+    },
+    stats: { sent: 0, read: 0, clicked: 0 },
+    active_minutes: 120,
+    created_at: '2026-04-25T13:00:00+09:00',
+    updated_at: '2026-04-25T13:00:00+09:00',
+  },
+
+  // ─── 룰 #7: INACTIVE 카드 시각 dim 시연 (optional) ──────────
+  // template_key=null / SPECIFIC_POSTS / KEYWORD_MATCH("좌표") / SAME / TEXT / 버튼 1개 / reply=false / INACTIVE
+  {
+    id: 'auto7',
+    template_key: null,
+    title: '공구 좌표 자동 안내 (시즌 종료)',
+    status: 'INACTIVE',
+    delivery_mode: 'IMMEDIATE',
+    target_mode: 'SPECIFIC_POSTS',
+    target_post_ids: ['ig_post_006'],
+    trigger_mode: 'KEYWORD_MATCH',
+    trigger_keywords: ['좌표'],
+    follower_branch: { mode: 'SAME' },
+    message: {
+      type: 'TEXT',
+      body: '좌표 요청 감사해요! 지도 링크와 위치 정보를 DM으로 보내드릴게요. 찾아오시기 전에 꼭 확인해 주세요 :)',
+      images: [],
+      buttons: [
+        {
+          id: 'btn_auto7_1',
+          text: '지도 보기',
+          action_type: 'URL',
+          url: 'https://map.example.com/location',
+        },
+      ],
+    },
+    reply: {
+      enabled: false,
+      tone: 'POLITE',
+      items: [],
+    },
+    stats: { sent: 23, read: 18, clicked: 2 },
+    active_minutes: 50400,
+    created_at: '2026-03-20T10:00:00+09:00',
+    updated_at: '2026-03-20T10:00:00+09:00',
+  },
+];
+
+// ============================================================
+// § 자동화 템플릿 3종 (§4-8-4)
+// ============================================================
+
+const AUTOMATION_TEMPLATES = [
+  // 댓글 이벤트 템플릿 — COMMENT_EVENT
+  {
+    key: 'COMMENT_EVENT',
+    category_label: '판매 자동화',
+    display_name: '댓글 이벤트 템플릿',
+    prefill: {
+      trigger_keywords: ['이벤트', '참여'],
+      reply: {
+        enabled: true,
+        tone: 'FRIENDLY',
+        items: [
+          '디엠 확인해 주세요~ 이벤트 참여 완료! 🎉',
+          '이벤트 디엠 왔어요! 당첨 기대해 줘요 💛',
+        ],
+      },
+      message: {
+        type: 'TEXT',
+        body: '댓글 이벤트에 참여해 주셔서 감사해요! 🎁 이벤트 안내를 DM으로 보내드릴게요. 확인 후 참여 방법을 따라 주세요~',
+        images: [],
+        buttons: [],
+      },
+    },
+  },
+
+  // 제품 정보 전달 템플릿 — PRODUCT_INFO
+  {
+    key: 'PRODUCT_INFO',
+    category_label: '판매 자동화',
+    display_name: '제품 정보 전달 템플릿',
+    prefill: {
+      trigger_keywords: ['정보', '상세', '궁금'],
+      reply: {
+        enabled: true,
+        tone: 'POLITE',
+        items: [
+          'DM으로 제품 상세 정보를 보내드렸습니다. 확인 부탁드립니다 :)',
+          '제품 정보를 DM으로 전달드렸어요. 궁금한 점은 편하게 문의해 주세요!',
+        ],
+      },
+      message: {
+        type: 'TEXT',
+        body: '제품에 관심 가져주셔서 감사합니다! 성분, 가격, 사용 방법 등 상세 정보를 안내드릴게요. 아래 링크에서 더 자세히 확인하실 수 있습니다.',
+        images: [],
+        buttons: [
+          {
+            id: 'btn_tmpl_pi_1',
+            text: '자세히 보기',
+            action_type: 'URL',
+            url: 'https://example.com/product',
+          },
+        ],
+      },
+    },
+  },
+
+  // 구매 인증 템플릿 — PURCHASE_AUTH
+  {
+    key: 'PURCHASE_AUTH',
+    category_label: '판매 자동화',
+    display_name: '구매 인증 템플릿',
+    prefill: {
+      trigger_keywords: ['인증', '구매완료', '후기'],
+      reply: {
+        enabled: true,
+        tone: 'POLITE',
+        items: [
+          '구매 인증 감사드립니다. 혜택 안내를 DM으로 보내드렸어요!',
+          '인증해 주셔서 감사합니다. DM을 확인해 주세요 :)',
+        ],
+      },
+      message: {
+        type: 'TEXT',
+        body: '구매 인증 남겨주셔서 감사합니다! 📸 인증 혜택 및 적립 안내를 DM으로 보내드릴게요. 주문번호와 함께 확인 부탁드립니다.',
+        images: [],
+        buttons: [],
+      },
+    },
+  },
+];
+
+// ============================================================
+// § 신규 draft 기본값 (§4-8-5)
+// ============================================================
+
+const BLANK_AUTOMATION_DRAFT = {
+  template_key: null,
+  title: null,
+  status: 'INACTIVE',                 // 완료 시 ACTIVE로 전환
+  delivery_mode: 'IMMEDIATE',
+  target_mode: 'SPECIFIC_POSTS',
+  target_post_ids: [],
+  trigger_mode: 'ALL_COMMENTS',
+  trigger_keywords: [],
+  follower_branch: { mode: 'SAME' },
+  message: {
+    type: 'TEXT',
+    body: '',
+    images: [],
+    buttons: [],
+  },
+  reply: { enabled: false, tone: 'POLITE', items: [] },
+  stats: { sent: 0, read: 0, clicked: 0 },
+  active_minutes: 0,
+};
+
+// ============================================================
+// § 자동 답글 톤별 preset (§5-9-8)
+// ============================================================
+
+const AUTOMATION_REPLY_PRESETS = {
+  POLITE: [
+    'DM으로 자세한 안내를 보내드렸어요. 확인 부탁드립니다 :)',
+    '내용을 DM으로 전달드렸습니다. 검토 후 문의 주세요!',
+    'DM을 확인해 주시면 자세한 안내가 있어요. 감사합니다!',
+    '안내 사항을 DM으로 보내드렸으니 확인 부탁드립니다.',
+  ],
+  FRIENDLY: [
+    '디엠으로 보냈어요~ 확인해 주세요! 😊',
+    '디엠 왔어요! 확인해 봐요 💕',
+    '디엠으로 알려드렸어요~ 놓치지 마세요!',
+    '디엠 확인해 줘요~ 궁금한 점 있으면 또 물어봐요!',
+  ],
+};
+
 window.MOCK_DATA = {
   channel,
   origins,
   threads,
   messages,
   savedReplies,
-  automations: [],
-  AUTOMATION_TEMPLATES: [],
+  automations,
+  AUTOMATION_TEMPLATES,
+  BLANK_AUTOMATION_DRAFT,
+  AUTOMATION_REPLY_PRESETS,
   ai_drafts,
   TAG_CATALOG,
   CATEGORIES,

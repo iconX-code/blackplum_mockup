@@ -1,6 +1,6 @@
 # blackplum mockup — Tasks
 
-> 최종 수정: 2026-05-04 (Phase 4 완료 — SidePanel 스레드 상세)
+> 최종 수정: 2026-05-05 (Phase 5 후속 사용자 브라우저 점검 라운드 4)
 
 ---
 
@@ -160,44 +160,90 @@
 > 사양 출처: spec.md §4-8 / §4-11-1 / §5-9 / §3-2~§3-4 신설 토큰 (Phase D-2에서 작성 완료)
 > 위임: frontend-dev (5-1, 5-3, 5-4, 5-5) + mock-data-writer (5-2). 5-1은 5-3·5-4의 선행. 5-2는 5-3·5-4와 병렬 가능.
 
-### 5-1. styles.css 토큰 적용 (frontend-dev)
-- spec.md §3-2/§3-3/§3-4에 신설된 토큰 28개 (Tier 1: 2 + Tier 2: 11 + Tier 3: 15)
-- 컴포넌트 BEM 클래스는 5-3·5-4와 함께 작성
-- code-reviewer로 토큰 reference / Tier discipline 점검
+### 5-1. styles.css 토큰 적용 (frontend-dev) — 완료
+- spec.md §3-2/§3-3/§3-4에 신설된 토큰 28개 (Tier 1: 2 + Tier 2: 11 + Tier 3: 15) — 2026-05-05 완료
 
-### 5-2. AUTOMATION_TEMPLATES + automations[] mock 데이터 (mock-data-writer)
+### 5-2. AUTOMATION_TEMPLATES + automations[] mock 데이터 (mock-data-writer) — 완료
 - spec.md §4-11-1의 7개 룰 시연 포인트 표 그대로 작성
 - `AUTOMATION_TEMPLATES` 3종 (COMMENT_EVENT / PRODUCT_INFO / PURCHASE_AUTH) prefill 데이터
 - 자동 답글 톤별 mock preset (POLITE / FRIENDLY 후보 문구)
-- 게시물 ref: `origins[]` 중 platform=instagram AND type=post의 media_id 차용 (별도 게시물 mock 신설 X)
-- BLANK_AUTOMATION_DRAFT 기본값 (spec.md §4-8-5)
+- BLANK_AUTOMATION_DRAFT 기본값 (spec.md §4-8-5) — Round 1에서 완료
 
-### 5-3. AutomationListView + AutomationCard (frontend-dev)
-- spec.md §5-9-1 컴포넌트 트리 상위 절반
-- 템플릿 캐러셀 / 카운트 + `+ 자동화 추가하기` / 정렬 토글 / 카드 리스트
-- AutomationCard 슬롯 8종 (req.md §6-2-5)
-- 카드 인터랙션 (§5-9-6): 본문 클릭 → wizard step 5 / 토글 / `...` 메뉴 (편집·복제·삭제)
+### 5-3. AutomationListView + AutomationCard (frontend-dev) — 완료
+- spec.md §5-9-1 컴포넌트 트리 상위 절반 구현
+- 템플릿 캐러셀(Blank+3종) / 요약바 / 정렬 Popover / 카드 리스트
+- AutomationCard: 썸네일/제목/키워드/상태+토글/미리보기/통계/메뉴 구현
+- 카드 인터랙션: 본문 클릭→wizard step 5 / 토글 즉시 toggle / 메뉴 편집·복제·삭제
 
-### 5-4. MacroBuilderWizard (frontend-dev)
-- spec.md §5-9-1 컴포넌트 트리 하위 절반
-- WizardState `useReducer` (§5-9-4) 9개 action
-- step 1~5 (§5-9-9): 트리거 / 답글 / 팔로우 분기 / 메시지·버튼 / 최종 확인
-- step별 검증 (§5-9-5) + isAutomationValid (§4-8-2)
-- DIFFERENT_MESSAGES → FollowerVariantTabs (한 step 안 분기)
-- ButtonEditSheet (PC inline / 모바일 bottom sheet)
-- LinkBlockImportButton disabled + Toast "준비 중인 기능이에요"
-- PC/모바일 step indicator 분기 (dot navigation / progress bar)
+### 5-4. MacroBuilderWizard (frontend-dev) — 완료
+- wizardReducer useReducer 9개 action + WIZARD_INITIAL_STATE
+- step 1~5 전체 구현(WizardStepTrigger/Reply/FollowerBranch/Message/Review)
+- step별 검증 + isAutomationValid/isMessageValid helper
+- DIFFERENT_MESSAGES → FollowerVariantTabs 분기
+- ButtonEditSheet bottom sheet / LinkBlockImportButton disabled Toast
+- PC dot navigation(visited step jump) / mobile progress bar
+- dirty tracking + confirm dialog / ReviewBodyInlineEditor / title input at step 5
 
-### 5-5. LSB DM자동화 진입 통합 (frontend-dev)
-- LSB "DM 자동화" 클릭 → InboxList view 전환 (Phase 3에서 이미 stub 작성된 분기 활성화)
-- AutomationListView → 카드 클릭 → SidePanel에 wizard
-- `+ 자동화 추가하기` / 템플릿 카드 → 신규 wizard 진입
+### 5-5. LSB DM자동화 진입 통합 (frontend-dev) — 완료
+- AutomationListView 활성화(EmptyState stub 교체)
+- MainScreen: wizardState useReducer + automation mutation state + getDisplayedAutomations()
+- selectedThreadId ↔ wizardState.mode mutually exclusive 정책 구현
+- 카테고리 전환 시 wizard 자동 종료, 삭제 confirm Modal 전역 연결
 
-### 5-6. code-reviewer 통합 검증
-- 토큰 contract / 검증 함수 정합성: req.md §6-2-6 ↔ spec.md §4-8-2 ↔ 실제 `isAutomationValid` 일치
-- 7개 mock 룰 전체가 wizard step 1~5를 정상 통과
-- LSB → 리스트 → wizard 진입 흐름 / DIFFERENT_MESSAGES variant 입력
-- 모바일 768px 미만 SidePanel 풀스크린 / 콘솔 에러 0건
+### 5-6. code-reviewer 통합 검증 — 완료 (2026-05-05)
+- 1차 결과 CRITICAL 4 카테고리 + FAIL 3 + WARN 4 발견 → frontend-dev follow-up fix 일괄 정리
+- **CRITICAL 처리**: (C-1) `.toggle-switch__knob` raw rgba shadow → `--toggle-knob-shadow` Tier 3 + `--shadow-elevation-soft` Tier 1 신설. (C-2) Tier 1 `--radius-sm` 직접 참조 4건 → `--media-thumb-radius` Tier 3 신설. (C-3) Tier 1 `--border-w-*` 직접 참조 6건 → `--surface-border-default/soft` Tier 2 교체 + width-only Tier 3 2개 신설(`--ig-post-grid-cell-border-w`/`-selected`). (C-4) raw px 17건 → Tier 3 토큰 17개 신설(중복값 통합 — `--icon-button-size` 28×28 4건 통합 등)
+- **FAIL 처리**: (F-1) LSB 카테고리 변경 시 dirty wizard confirm 누락 → `pendingCategoryChange` state + Modal 추가. (F-2) `SET_ERRORS` action spec §5-9-4 미등재 → 9→10 action으로 갱신. (F-3) keyword chip height 20/28 불일치 → `--keyword-chip-compact-height`/`--keyword-chip-height` 분리 토큰화
+- **WARN 처리**: (W-1) Tier 2 `--color-scrim-light/heavy` raw rgba 잔존 + Phase 5 `--color-overlay-scrim` 중복 → Tier 1 `--color-overlay-scrim`/`--color-overlay-scrim-strong` 단일 source 정리, Tier 2는 reference로 재매핑. (W-2) Round 2 Tier 3 토큰 15개 spec.md §3-4 미등재 → 일괄 등재. (W-3) `mock-data.js:4` 불필요 eslint-disable 제거. (W-4) spec §4-11-1에 `buttons=[]` 룰 `clicked=0` 예외 문구 추가
+- **CLAUDE.md 항구화**: 토큰 명명 원칙(속성·용처 기반, 색명 노출 금지) 절대 원칙 절에 1줄 추가. memory에도 feedback type 저장
+- 최종 ESLint 0 errors / 1 pre-existing warning(`textareaRef` Phase 4 잔존, 보존)
+- 신설 토큰 합계: Tier 1 +2 / Tier 3 +21 / Tier 2 reference 정리 +2 (Phase 5 전체 누계 — Round 1 28 + Round 2 15 + follow-up 23 = 66)
+
+### Phase 5 후속 사용자 브라우저 점검 라운드 3 (2026-05-05)
+- [x] **AutomationCard 전면 재구성**: 좌측 80px 썸네일(SPECIFIC_POSTS=실제 thumbnail, FUTURE_POSTS=placeholder 일러스트) + 우측 3-zone(top·title·meta-line·footer-meta).
+- [x] **Top row 재구성**: SNS 로고 + @account_handle + " · Instagram" + 활성 토글 (stopPropagation). FUTURE_POSTS는 "Instagram · 향후 게시물 자동 적용".
+- [x] **L1 규칙명**: `automation.title` semibold body-lg, 1줄 ellipsis. fallback "(미설정)".
+- [x] **L1 종류·키워드 inline**: "댓글 자동화" + " · " + `"키워드"` 따옴표 inline. ALL_COMMENTS는 `"모든 댓글"`.
+- [x] **L2 footer 메타**: 등록 X일 전 · 활성 X일째 · 작동 X회. INACTIVE 시 "활성 X일 누적" 또는 "휴면 중". `active_minutes` → 일/시간 변환.
+- [x] **카드 dim**: `.automation-card--inactive` opacity 유지. 토글 wrapper에 inverse opacity로 dim 면제.
+- [x] **제거**: `...` 메뉴 + Popover + 편집/복제/삭제 + 삭제 confirm Modal + 메시지 미리보기 + 통계(전송/읽음/클릭) + 상태 라벨.
+- [x] **State/handler 제거**: `deletedAutomationIds` / `deleteConfirmId` / `handleAutomationDuplicate` / `handleAutomationDelete` / `handleDeleteConfirm`. `getDisplayedAutomations`에서 deletedAutomationIds 참조 제거.
+- [x] **Props 제거**: `AutomationCard`의 `onDuplicate`/`onDelete`. `AutomationListView`의 `onDuplicate`/`onDelete`. `InboxList`의 `onDuplicateAutomation`/`onDeleteAutomation`. MainScreen JSX에서 관련 prop 제거.
+- [x] **CSS 정리**: `.automation-card__menu*` / `.automation-card__keyword-chip*` / `.automation-card__stats*` / `.automation-card__stat-divider` / `.automation-card__body`(미리보기) / `.automation-card__status-row*` / `.automation-card__header` / `.automation-card__content` 삭제. 신규 BEM 클래스 추가(thumb/thumb-image/thumb-future/body/top/account/platform/toggle/title/meta-line/type-label/keyword/meta-sep/footer-meta/footer-meta-item).
+- [x] **토큰 정리**: `--automation-card-stat-divider`/`--keyword-chip-compact-height`/`--card-stat-divider-w/h`/`--automation-card-thumb-size` 폐기. `--automation-card-thumb-w`/`--automation-card-thumb-w-mobile`/`--automation-card-future-bg` 신설.
+- [x] **모바일 미디어쿼리**: ≤767px 시 thumb 64px(`--automation-card-thumb-w-mobile`).
+- [x] spec.md §5-9-1 컴포넌트 트리 + §3-4 Tier 3 표 + §10 working log 동기화.
+- [x] req.md §6-2-5 카드 표기 표 전면 갱신.
+- [x] tasks.md 헤더 일자 갱신.
+- ESLint 0 errors / 1 pre-existing warning(textareaRef) 유지.
+
+### Phase 5 후속 사용자 브라우저 점검 라운드 2 (2026-05-05)
+- [x] **WizardHeader 뒤로가기 버튼 제거**: `currentStep > 1 && <button .wizard-header__back>` JSX 블록 삭제. `.wizard-header__back` CSS 룰 삭제.
+- [x] **dot indicator + mobile progress bar + WizardFooter 폐기**: 3개 JSX 블록 제거, CSS 룰 일괄 삭제. `progressPct` 변수 제거.
+- [x] **신규 WizardStepNav 구현**: `STEP_NAV_LABELS` 상수 신설. `[‹] [Step 1~5] [›]` 1행 통합 — role=tablist, visited 기반 점프, step 1 좌측 chevron disabled, step 5 우측 morph 완료 CTA. `.wizard-step-nav*` CSS 신설.
+- [x] **`.wizard-button--primary/secondary` 공용 클래스 신설**: wizard confirm modal 3곳(dirty-close/delete/category-change) + step 5 완료 CTA에서 공용 사용.
+- [x] **토큰 정리**: 9개 deprecated, 2개 신설(`--wizard-tab-underline-w`, `--wizard-tab-mobile-px-x`). spec.md §5-9-7 표 동기화.
+- [x] **spec.md 동기화**: §5-9-1 트리(WizardStepIndicator→WizardStepNav, WizardFooter 삭제), §5-9-3 표(step 진행 표기/닫기 행 갱신), §5-9-9 footer 표 재기술, §10 working log entry 추가.
+- ESLint 0 errors / 1 pre-existing warning(textareaRef) 유지.
+
+### Phase 5 후속 사용자 브라우저 점검 라운드 1 (2026-05-05)
+- [x] **DM 자동화 SNS 필터 동작 변경**: `dm_automation` 진입 시 `snsFilterSnapshotRef` snapshot + 비-IG 자동 OFF, 이탈 시 restore. TopToolbar `disabledAccountIds` prop → 비-IG chip `.top-toolbar__chip--disabled`. `전체` chip automation view 숨김. `ruleMatchesIgAccountFilter` helper 신설. `activeIgAccountIds` useMemo → AutomationListView/MacroBuilderWizard prop 주입. IgPostGridPicker `igOrigins` prop 실시간 갱신. EmptyState 2종(모든 IG OFF / 매칭 룰 0건). spec §5-9-10 SNS 필터 동작 명세 신설.
+- [x] **AutomationListHeader title 제거**: title 노드(`<Icon>` + `<span>DM 자동화</span>`) JSX 제거. `.automation-list-header__title` CSS 룰 제거. banner는 유지.
+- [x] **AutomationListSummaryBar + AutomationSortToggle 제거**: 두 영역 JSX 제거. `sortMode`/`sortPopoverOpen`/`sortBtnRef` + sort handler 제거. `.automation-list-summary-bar*` CSS 3개 + `.automation-sort-toggle` CSS 1개 삭제. 기본 정렬 = mock array 순서. spec §5-9-1 컴포넌트 트리 동기화.
+- ESLint 0 errors / 1 pre-existing warning(textareaRef) 유지.
+
+### Phase 5 후속 사용자 브라우저 점검 라운드 4 (2026-05-05)
+- [x] **(1-A) 모바일 뒤로가기 dirty confirm 매핑**: `MacroBuilderWizard`에 `onCloseAttemptRef` prop 추가. `handleCloseAttempt`를 `useEffect`로 ref에 동기화. MainScreen에 `wizardCloseAttemptRef` 신설. `handleTopBarBack`에서 wizard 분기 시 ref 경유. overlay backdrop 클릭도 ref 경유.
+- [x] **(1-B) dirty confirm modal 모바일 가운데 배치**: `Modal`에 `centered` bool prop 추가 → `.modal--center` modifier. `styles.css` 모바일 분기 `.modal:not(.modal--center)` 선택자로 bottom-sheet를 비-center modal에만 적용. wizard dirty confirm에 `centered` 적용.
+- [x] **(2) ReplyToneTabs 매 클릭 preset 교체**: `toneInitializedRef` 제거. POLITE/FRIENDLY 매 클릭마다 preset deep copy로 items 교체. CUSTOM은 직전 items 유지. spec §5-9-8 갱신.
+- [x] **(3) ReviewSummaryList ellipsis → wrap**: `.review-summary-row__value` truncate 룰 제거 → `white-space:normal / overflow-wrap:anywhere`. row 높이 자연 증가.
+- ESLint 0 errors / 1 pre-existing warning(textareaRef) 유지.
+
+### Phase 5 backlog (Phase 6+ 진입 시 처리)
+- spec §5-9-7 표(라인 1481~1516)는 Phase D-2 시점 토큰 카탈로그 — 본 phase에서 신설된 추가 Tier 3 36개(Round 2 15 + follow-up 21)는 §3-4에는 등재됐으나 §5-9-7 표는 갱신되지 않음. 일관성 cleanup 후보
+- ButtonEditSheet bottom sheet의 모바일 슬라이드업 애니메이션은 본 phase에서 inline 정의 — 향후 modal 류 공통 패턴화 후보
+- 7개 mock 룰 외 dynamic stats 변동 시연 (시연 시 stats 정적 → 활성 토글에도 변동 없음. 사용자 시나리오에서 수정 의향이 있을 수 있음)
+- Automation schema에 `trigger_type: 'COMMENT' | 'DM'` 필드 신설 검토 — 현 mockup은 'COMMENT' 단일이지만 향후 DM trigger 룰 확장 시 schema 분리 필요
 
 ---
 

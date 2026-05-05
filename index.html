@@ -20,6 +20,7 @@
     const {
       useState, useEffect, useRef, useMemo,
       useCallback, useContext, createContext,
+      useReducer,
     } = React;
 
     /* ================================================================
@@ -84,7 +85,7 @@
     /* ================================================================
      * Modal — spec.md §5-8
      * ================================================================ */
-    function Modal({ isOpen, onClose, title, children }) {
+    function Modal({ isOpen, onClose, title, children, centered }) {
       const dialogRef = useRef(null);
 
       useEffect(() => {
@@ -116,7 +117,7 @@
       if (!isOpen) return null;
 
       return (
-        <div className="modal">
+        <div className={`modal${centered ? ' modal--center' : ''}`}>
           <div
             className="modal__backdrop"
             onClick={onClose}
@@ -232,7 +233,7 @@
     /* ================================================================
      * TopToolbar — spec.md §5-4
      * ================================================================ */
-    function TopToolbar({ accounts, selectedAccountIds, onToggleAccount, onToggleAll, onOpenLsb, selectedCategory, showBackButton, onCloseSidePanel }) {
+    function TopToolbar({ accounts, selectedAccountIds, onToggleAccount, onToggleAll, onOpenLsb, selectedCategory, showBackButton, onCloseSidePanel, disabledAccountIds }) {
       const showToast = useToast();
       const [addModalOpen, setAddModalOpen] = useState(false);
       const [snsFilterPopoverOpen, setSnsFilterPopoverOpen] = useState(false);
@@ -251,6 +252,38 @@
 
       const allActive = selectedAccountIds.size === accounts.length;
       const categoryLabel = CATEGORIES[selectedCategory] ? CATEGORIES[selectedCategory].display : selectedCategory;
+
+      // chip 렌더 헬퍼 — isAutomationView(disabledAccountIds 존재) 시 비-IG disabled 처리
+      const renderAccountChip = (account, key) => {
+        const logoIcon = PLATFORM_LOGOS[account.platform];
+        const isActive = selectedAccountIds.has(account.id);
+        const isDisabled = disabledAccountIds ? disabledAccountIds.has(account.id) : false;
+        const chipStyle = account.accent_color
+          ? { borderColor: account.accent_color }
+          : {};
+
+        return (
+          <button
+            key={key || account.id}
+            className={`top-toolbar__chip tappable${isActive ? ' top-toolbar__chip--active' : ''}${isDisabled ? ' top-toolbar__chip--disabled' : ''}`}
+            onClick={isDisabled ? undefined : () => onToggleAccount(account.id)}
+            aria-pressed={isActive}
+            aria-disabled={isDisabled || undefined}
+            aria-label={account.display_name}
+            style={chipStyle}
+          >
+            <span className="top-toolbar__chip-icon-cell">
+              {logoIcon
+                ? <Icon name={logoIcon} size="sm" tone="inherit" />
+                : <span className="top-toolbar__chip-initial">{account.initial || account.display_name[0]}</span>
+              }
+            </span>
+            <span className="top-toolbar__chip-label-cell">
+              <span>{account.display_name}</span>
+            </span>
+          </button>
+        );
+      };
 
       return (
         <header className="top-toolbar safe-area-top">
@@ -277,49 +310,24 @@
 
           {/* 글로벌 SNS 필터 chips — PC에서만 표시 (≥1024px) */}
           <div className="top-toolbar__filter" role="group" aria-label="SNS 계정 필터">
-            {/* 전체 토글 chip */}
-            <button
-              className={`top-toolbar__chip top-toolbar__chip--all tappable${allActive ? ' top-toolbar__chip--active' : ''}`}
-              onClick={onToggleAll}
-              aria-pressed={allActive}
-              aria-label={allActive ? '전체 해제' : '전체 선택'}
-            >
-              <span className="top-toolbar__chip-icon-cell">
-                <Icon name={allActive ? 'circle-check' : 'circle'} size="sm" tone="inherit" />
-              </span>
-              <span className="top-toolbar__chip-label-cell">
-                <span>전체</span>
-              </span>
-            </button>
+            {/* 전체 토글 chip — automation view에서는 숨김 */}
+            {!disabledAccountIds && (
+              <button
+                className={`top-toolbar__chip top-toolbar__chip--all tappable${allActive ? ' top-toolbar__chip--active' : ''}`}
+                onClick={onToggleAll}
+                aria-pressed={allActive}
+                aria-label={allActive ? '전체 해제' : '전체 선택'}
+              >
+                <span className="top-toolbar__chip-icon-cell">
+                  <Icon name={allActive ? 'circle-check' : 'circle'} size="sm" tone="inherit" />
+                </span>
+                <span className="top-toolbar__chip-label-cell">
+                  <span>전체</span>
+                </span>
+              </button>
+            )}
 
-            {accounts.map((account) => {
-              const logoIcon = PLATFORM_LOGOS[account.platform];
-              const isActive = selectedAccountIds.has(account.id);
-              const chipStyle = account.accent_color
-                ? { borderColor: account.accent_color }
-                : {};
-
-              return (
-                <button
-                  key={account.id}
-                  className={`top-toolbar__chip tappable${isActive ? ' top-toolbar__chip--active' : ''}`}
-                  onClick={() => onToggleAccount(account.id)}
-                  aria-pressed={isActive}
-                  aria-label={account.display_name}
-                  style={chipStyle}
-                >
-                  <span className="top-toolbar__chip-icon-cell">
-                    {logoIcon
-                      ? <Icon name={logoIcon} size="sm" tone="inherit" />
-                      : <span className="top-toolbar__chip-initial">{account.initial || account.display_name[0]}</span>
-                    }
-                  </span>
-                  <span className="top-toolbar__chip-label-cell">
-                    <span>{account.display_name}</span>
-                  </span>
-                </button>
-              );
-            })}
+            {accounts.map((account) => renderAccountChip(account))}
           </div>
 
           {/* 우측: 연결 계정 버튼 + 검색 (Tablet/Mobile) / (+) + 검색 (PC) */}
@@ -384,50 +392,25 @@
           >
             <div className="sns-filter-popover">
               <div className="sns-filter-modal__chips">
-                {/* 전체 토글 */}
-                <button
-                  className={`top-toolbar__chip top-toolbar__chip--all tappable${allActive ? ' top-toolbar__chip--active' : ''}`}
-                  onClick={onToggleAll}
-                  aria-pressed={allActive}
-                  aria-label={allActive ? '전체 해제' : '전체 선택'}
-                >
-                  <span className="top-toolbar__chip-icon-cell">
-                    <Icon name={allActive ? 'circle-check' : 'circle'} size="sm" tone="inherit" />
-                  </span>
-                  <span className="top-toolbar__chip-label-cell">
-                    <span>전체</span>
-                  </span>
-                </button>
+                {/* 전체 토글 — automation view에서는 숨김 */}
+                {!disabledAccountIds && (
+                  <button
+                    className={`top-toolbar__chip top-toolbar__chip--all tappable${allActive ? ' top-toolbar__chip--active' : ''}`}
+                    onClick={onToggleAll}
+                    aria-pressed={allActive}
+                    aria-label={allActive ? '전체 해제' : '전체 선택'}
+                  >
+                    <span className="top-toolbar__chip-icon-cell">
+                      <Icon name={allActive ? 'circle-check' : 'circle'} size="sm" tone="inherit" />
+                    </span>
+                    <span className="top-toolbar__chip-label-cell">
+                      <span>전체</span>
+                    </span>
+                  </button>
+                )}
 
                 {/* 계정별 chip */}
-                {accounts.map((account) => {
-                  const logoIcon = PLATFORM_LOGOS[account.platform];
-                  const isActive = selectedAccountIds.has(account.id);
-                  const chipStyle = account.accent_color
-                    ? { borderColor: account.accent_color }
-                    : {};
-
-                  return (
-                    <button
-                      key={account.id}
-                      className={`top-toolbar__chip tappable${isActive ? ' top-toolbar__chip--active' : ''}`}
-                      onClick={() => onToggleAccount(account.id)}
-                      aria-pressed={isActive}
-                      aria-label={account.display_name}
-                      style={chipStyle}
-                    >
-                      <span className="top-toolbar__chip-icon-cell">
-                        {logoIcon
-                          ? <Icon name={logoIcon} size="sm" tone="inherit" />
-                          : <span className="top-toolbar__chip-initial">{account.initial || account.display_name[0]}</span>
-                        }
-                      </span>
-                      <span className="top-toolbar__chip-label-cell">
-                        <span>{account.display_name}</span>
-                      </span>
-                    </button>
-                  );
-                })}
+                {accounts.map((account) => renderAccountChip(account, account.id + '_popover'))}
 
                 {/* (+) 추가 버튼 */}
                 <button
@@ -923,7 +906,7 @@
     /* ================================================================
      * InboxList — spec.md §5-5
      * ================================================================ */
-    function InboxList({ selectedCategory, selectedAccountIds, processedOverrides, threadTagOverrides, onProcessThreads, onTagThreads, selectedThreadId, onSelectThread }) {
+    function InboxList({ selectedCategory, selectedAccountIds, processedOverrides, threadTagOverrides, onProcessThreads, onTagThreads, selectedThreadId, onSelectThread, automations, activeIgAccountIds, onOpenWizardNew, onOpenWizardTemplate, onOpenWizardEdit, onToggleAutomationStatus }) {
       const { threads, origins, messages, CATEGORIES, TAG_CATALOG } = window.MOCK_DATA;
       const showToast = useToast();
       const [sortMode, setSortMode] = useState('priority'); // 'priority' | 'latest'
@@ -1123,10 +1106,13 @@
 
           {/* DM 자동화 분기 */}
           {selectedCategory === 'dm_automation' ? (
-            <EmptyState
-              icon="category-dm-automation"
-              title="DM 자동화"
-              description="Phase 5에서 활성화됩니다."
+            <AutomationListView
+              automations={automations || []}
+              activeIgAccountIds={activeIgAccountIds || new Set()}
+              onOpenWizardNew={onOpenWizardNew}
+              onOpenWizardTemplate={onOpenWizardTemplate}
+              onOpenWizardEdit={onOpenWizardEdit}
+              onToggleStatus={onToggleAutomationStatus}
             />
           ) : (
             <>
@@ -1225,6 +1211,1425 @@
             onClose={() => setTagModalOpen(false)}
             onApply={handleTagApply}
           />
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — 매크로 빌더 Helper / 검증 함수
+     * spec.md §4-8-2
+     * ================================================================ */
+
+    function isMessageValid(m) {
+      if (!m || !m.body || m.body.trim() === '') return false;
+      if (m.type === 'IMAGE_CAROUSEL' && m.images.length < 1) return false;
+      for (const b of m.buttons) {
+        if (!b.text || b.text.trim() === '') return false;
+        if (!b.url || b.url.trim() === '') return false;
+      }
+      return true;
+    }
+
+    function isAutomationValid(a) {
+      if (a.target_mode === 'SPECIFIC_POSTS' && a.target_post_ids.length < 1) return false;
+      if (a.trigger_mode === 'KEYWORD_MATCH' && a.trigger_keywords.length < 1) return false;
+      if (a.reply.enabled && a.reply.items.length < 1) return false;
+      if (a.follower_branch.mode === 'DIFFERENT_MESSAGES') {
+        if (!isMessageValid(a.follower_branch.follower_message)) return false;
+        if (!isMessageValid(a.follower_branch.non_follower_message)) return false;
+      } else {
+        if (!isMessageValid(a.message)) return false;
+      }
+      return true;
+    }
+
+    // 숫자 포맷 (stat 표시용)
+    function fmtStat(n) {
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(n);
+    }
+
+    // path 기반 immutable update helper
+    // path 예: 'reply.items[2]', 'message.body', 'follower_branch.mode'
+    function setPath(obj, path, value) {
+      const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+      const result = JSON.parse(JSON.stringify(obj));
+      let cur = result;
+      for (let i = 0; i < keys.length - 1; i++) {
+        cur = cur[keys[i]];
+      }
+      cur[keys[keys.length - 1]] = value;
+      return result;
+    }
+
+    // 깊은 merge (template prefill 용)
+    function deepMerge(base, override) {
+      const result = JSON.parse(JSON.stringify(base));
+      for (const key of Object.keys(override)) {
+        if (override[key] !== null && typeof override[key] === 'object' && !Array.isArray(override[key])) {
+          result[key] = deepMerge(result[key] || {}, override[key]);
+        } else {
+          result[key] = override[key];
+        }
+      }
+      return result;
+    }
+
+    /* ================================================================
+     * Phase 5 — WizardState reducer
+     * spec.md §5-9-4
+     * ================================================================ */
+
+    const WIZARD_INITIAL_STATE = {
+      mode: null,
+      sourceAutomationId: null,
+      draft: null,
+      currentStep: 1,
+      visitedSteps: new Set(),
+      isDirty: false,
+      errors: {},
+    };
+
+    function wizardReducer(state, action) {
+      const blank = JSON.parse(JSON.stringify(window.MOCK_DATA.BLANK_AUTOMATION_DRAFT));
+      switch (action.type) {
+        case 'OPEN_NEW': {
+          const draft = blank;
+          return {
+            ...WIZARD_INITIAL_STATE,
+            mode: 'new',
+            sourceAutomationId: null,
+            draft,
+            currentStep: 1,
+            visitedSteps: new Set([1]),
+            isDirty: false,
+            errors: {},
+          };
+        }
+        case 'OPEN_TEMPLATE': {
+          const tmpl = window.MOCK_DATA.AUTOMATION_TEMPLATES.find((t) => t.key === action.key);
+          const draft = tmpl ? deepMerge(blank, tmpl.prefill) : blank;
+          return {
+            ...WIZARD_INITIAL_STATE,
+            mode: 'new',
+            sourceAutomationId: null,
+            draft,
+            currentStep: 1,
+            visitedSteps: new Set([1]),
+            isDirty: false,
+            errors: {},
+          };
+        }
+        case 'OPEN_EDIT': {
+          const draft = JSON.parse(JSON.stringify(action.automation));
+          return {
+            ...WIZARD_INITIAL_STATE,
+            mode: 'edit',
+            sourceAutomationId: action.automation.id,
+            draft,
+            currentStep: action.startStep || 5,
+            visitedSteps: new Set([1, 2, 3, 4, 5]),
+            isDirty: false,
+            errors: {},
+          };
+        }
+        case 'UPDATE_FIELD': {
+          const newDraft = setPath(state.draft, action.path, action.value);
+          return { ...state, draft: newDraft, isDirty: action.isDirty !== undefined ? action.isDirty : true, errors: {} };
+        }
+        case 'GOTO_STEP': {
+          const step = action.step;
+          if (!state.visitedSteps.has(step) && step !== state.currentStep) return state;
+          const next = new Set(state.visitedSteps);
+          next.add(step);
+          return { ...state, currentStep: step, visitedSteps: next, errors: {} };
+        }
+        case 'NEXT_STEP': {
+          if (state.currentStep >= 5) return state;
+          const next = new Set(state.visitedSteps);
+          const nextStep = state.currentStep + 1;
+          next.add(nextStep);
+          return { ...state, currentStep: nextStep, visitedSteps: next, errors: {} };
+        }
+        case 'PREV_STEP': {
+          if (state.currentStep <= 1) return state;
+          return { ...state, currentStep: state.currentStep - 1, errors: {} };
+        }
+        case 'SET_ERRORS': {
+          return { ...state, errors: action.errors };
+        }
+        case 'SAVE': {
+          return { ...state, mode: null, draft: null, errors: {} };
+        }
+        case 'CLOSE': {
+          return { ...WIZARD_INITIAL_STATE };
+        }
+        default:
+          return state;
+      }
+    }
+
+    /* ================================================================
+     * Phase 5 — ToggleSwitch
+     * ================================================================ */
+    function ToggleSwitch({ on, onToggle, label }) {
+      return (
+        <label className={`toggle-switch${on ? ' toggle-switch--on' : ''}`} aria-label={label}>
+          <input
+            type="checkbox"
+            className="toggle-switch__input"
+            checked={on}
+            onChange={(e) => { e.stopPropagation(); onToggle(e.target.checked); }}
+          />
+          <span className="toggle-switch__track" />
+          <span className="toggle-switch__knob" />
+        </label>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — AutomationCard
+     * spec.md §5-9-1 / §5-9-6
+     * ================================================================ */
+    function AutomationCard({ automation, igOrigins, onToggleStatus, onOpenWizardEdit }) {
+      const isActive = automation.status === 'ACTIVE';
+      const isFuture = automation.target_mode === 'FUTURE_POSTS';
+      const PLATFORM_LOGOS = window.MOCK_DATA.PLATFORM_LOGOS;
+      const accounts = window.MOCK_DATA.channel.connected_sns_accounts;
+      const allOrigins = window.MOCK_DATA.origins;
+
+      // 대상 게시물 썸네일 — SPECIFIC_POSTS: target_post_ids[0] → origin
+      const thumbOrigin = !isFuture && automation.target_post_ids && automation.target_post_ids.length > 0
+        ? (igOrigins || allOrigins).find((o) => o.media_id === automation.target_post_ids[0])
+        : null;
+
+      // 계정 정보 — thumbOrigin의 user_sns_account_id → channel account
+      const targetAccount = thumbOrigin
+        ? accounts.find((a) => a.id === thumbOrigin.user_sns_account_id)
+        : null;
+
+      const title = automation.title || null;
+
+      // 활성 일수 계산 (active_minutes 기반)
+      const activeMins = automation.active_minutes || 0;
+      const activeDays = Math.floor(activeMins / 1440);
+      const activeHours = Math.floor(activeMins / 60);
+      const activeLabel = (() => {
+        if (!isActive) {
+          if (activeDays > 0) return `활성 ${activeDays}일 누적`;
+          return '휴면 중';
+        }
+        if (activeDays > 0) return `활성 ${activeDays}일째`;
+        if (activeHours > 0) return `활성 ${activeHours}시간째`;
+        return '활성 중';
+      })();
+
+      // 등록 일수
+      const createdDays = automation.created_at
+        ? Math.floor((Date.now() - new Date(automation.created_at)) / 86400000)
+        : 0;
+      const createdLabel = createdDays > 0 ? `등록 ${createdDays}일 전` : '오늘 등록';
+
+      // 작동 횟수
+      const sentLabel = `작동 ${fmtStat(automation.stats.sent)}회`;
+
+      const handleCardClick = (e) => {
+        if (e.target.closest('.toggle-switch')) return;
+        onOpenWizardEdit(automation, 5);
+      };
+
+      return (
+        <div
+          className={`automation-card${!isActive ? ' automation-card--inactive' : ''}`}
+          onClick={handleCardClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(e); } }}
+        >
+          {/* 좌측 썸네일 */}
+          <div className="automation-card__thumb">
+            {isFuture ? (
+              <div className="automation-card__thumb-future">
+                <Icon name="category-dm-automation" size="md" tone="muted" />
+              </div>
+            ) : thumbOrigin && thumbOrigin.post_meta && thumbOrigin.post_meta.thumbnail_url ? (
+              <img
+                className="automation-card__thumb-image"
+                src={thumbOrigin.post_meta.thumbnail_url}
+                alt={thumbOrigin.display_name || '게시물 썸네일'}
+              />
+            ) : (
+              <div className="automation-card__thumb-future">
+                <Icon name="logo-instagram" size="md" tone="muted" />
+              </div>
+            )}
+          </div>
+
+          {/* 우측 정보 stack */}
+          <div className="automation-card__body">
+
+            {/* Top row: 계정 + 토글 */}
+            <div className="automation-card__top">
+              <div className="automation-card__account">
+                {isFuture ? (
+                  <span className="automation-card__platform">
+                    <Icon name={PLATFORM_LOGOS.instagram} size="xs" tone="muted" />
+                    <span>Instagram · 향후 게시물 자동 적용</span>
+                  </span>
+                ) : targetAccount ? (
+                  <span className="automation-card__platform">
+                    <Icon name={PLATFORM_LOGOS.instagram} size="xs" tone="muted" />
+                    <span className="automation-card__account-handle">{targetAccount.account_handle}</span>
+                    <span> · Instagram</span>
+                  </span>
+                ) : (
+                  <span className="automation-card__platform">
+                    <Icon name={PLATFORM_LOGOS.instagram} size="xs" tone="muted" />
+                    <span>Instagram</span>
+                  </span>
+                )}
+              </div>
+              <div className="automation-card__toggle" onClick={(e) => e.stopPropagation()}>
+                <ToggleSwitch
+                  on={isActive}
+                  onToggle={(val) => { onToggleStatus(automation.id, val ? 'ACTIVE' : 'INACTIVE'); }}
+                  label={isActive ? '자동화 비활성화' : '자동화 활성화'}
+                />
+              </div>
+            </div>
+
+            {/* L1: 규칙명 */}
+            <span className={`automation-card__title${!title ? ' automation-card__title--untitled' : ''}`}>
+              {title || '(미설정)'}
+            </span>
+
+            {/* L1: 종류 + 키워드 inline */}
+            <div className="automation-card__meta-line">
+              <span className="automation-card__type-label">댓글 자동화</span>
+              <span className="automation-card__meta-sep"> · </span>
+              {automation.trigger_mode === 'ALL_COMMENTS' ? (
+                <span className="automation-card__keyword">&quot;모든 댓글&quot;</span>
+              ) : automation.trigger_keywords && automation.trigger_keywords.length > 0 ? (
+                automation.trigger_keywords.map((kw, i) => (
+                  <span key={kw}>
+                    {i > 0 && <span> </span>}
+                    <span className="automation-card__keyword">&quot;{kw}&quot;</span>
+                  </span>
+                ))
+              ) : null}
+            </div>
+
+            {/* L2: 메타 (등록·활성·작동) */}
+            <div className="automation-card__footer-meta">
+              <span className="automation-card__footer-meta-item">{createdLabel}</span>
+              <span className="automation-card__meta-sep"> · </span>
+              <span className="automation-card__footer-meta-item">{activeLabel}</span>
+              <span className="automation-card__meta-sep"> · </span>
+              <span className="automation-card__footer-meta-item">{sentLabel}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — WizardStepTrigger (step 1)
+     * ================================================================ */
+    function WizardStepTrigger({ draft, onChange, errors, igOrigins }) {
+      const [kw, setKw] = useState('');
+      // igOrigins prop이 없으면 전체 IG post로 fallback (wizard 외부에서 activeIg 필터 후 주입)
+      const posts = igOrigins || window.MOCK_DATA.origins.filter((o) => o.platform === 'instagram' && o.type === 'post');
+
+      const addKeyword = () => {
+        const trimmed = kw.trim();
+        if (!trimmed) return;
+        if (draft.trigger_keywords.includes(trimmed)) { setKw(''); return; }
+        onChange('trigger_keywords', [...draft.trigger_keywords, trimmed]);
+        setKw('');
+      };
+
+      const removeKeyword = (idx) => {
+        onChange('trigger_keywords', draft.trigger_keywords.filter((_, i) => i !== idx));
+      };
+
+      const handleKwKeyDown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addKeyword(); }
+      };
+
+      const selectPost = (mediaId) => {
+        const already = draft.target_post_ids.includes(mediaId);
+        onChange('target_post_ids', already ? [] : [mediaId]);
+      };
+
+      return (
+        <div className="wizard-step-trigger">
+          {/* 대상 게시물 */}
+          <div>
+            <p className="wizard-section-label">어떤 게시물에서 보낼까요?</p>
+            <div className="wizard-radio-group">
+              {[
+                { value: 'SPECIFIC_POSTS', label: '직접 선택', desc: '특정 게시물의 댓글에만 반응해요' },
+                { value: 'FUTURE_POSTS', label: '향후 게시물', desc: '앞으로 올릴 게시물의 댓글에 자동으로 반응해요' },
+              ].map(({ value, label, desc }) => (
+                <label
+                  key={value}
+                  className={`wizard-radio-option${draft.target_mode === value ? ' wizard-radio-option--selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    style={{ display: 'none' }}
+                    name="target_mode"
+                    value={value}
+                    checked={draft.target_mode === value}
+                    onChange={() => onChange('target_mode', value)}
+                  />
+                  <span className="wizard-radio-option__radio">
+                    <Icon name={draft.target_mode === value ? 'radio-dot' : 'circle'} size="sm" tone="inherit" />
+                  </span>
+                  <span>
+                    <span className="wizard-radio-option__label">{label}</span>
+                    {desc && <span style={{ display: 'block' }} className="wizard-radio-option__desc">{desc}</span>}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {draft.target_mode === 'SPECIFIC_POSTS' && (
+              <div style={{ marginTop: 'var(--gap-inline-sm)' }}>
+                <p className="wizard-section-hint">게시물을 선택해 주세요 (1개)</p>
+                <div className="ig-post-grid-picker">
+                  {posts.map((o) => {
+                    const selected = draft.target_post_ids.includes(o.media_id);
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        className={`ig-post-grid-picker__cell${selected ? ' ig-post-grid-picker__cell--selected' : ''}`}
+                        onClick={() => selectPost(o.media_id)}
+                        aria-pressed={selected}
+                        aria-label={o.display_name}
+                      >
+                        <div className="ig-post-grid-picker__cell-placeholder">
+                          <Icon name="logo-instagram" size="sm" tone="muted" />
+                          <span className="ig-post-grid-picker__cell-name">{o.display_name}</span>
+                        </div>
+                        {selected && (
+                          <span className="ig-post-grid-picker__cell-check">
+                            <Icon name="check" size="xs" tone="inverse" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {errors.target_post_ids && <p className="wizard-field-error">{errors.target_post_ids}</p>}
+              </div>
+            )}
+          </div>
+
+          {/* 댓글 트리거 */}
+          <div>
+            <p className="wizard-section-label">어떤 댓글에 반응할까요?</p>
+            <div className="wizard-radio-group">
+              {[
+                { value: 'ALL_COMMENTS', label: '모든 댓글', desc: '어떤 댓글이든 자동으로 반응해요' },
+                { value: 'KEYWORD_MATCH', label: '특정 키워드', desc: '댓글에 키워드가 포함되었을 때만 반응해요' },
+              ].map(({ value, label, desc }) => (
+                <label
+                  key={value}
+                  className={`wizard-radio-option${draft.trigger_mode === value ? ' wizard-radio-option--selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    style={{ display: 'none' }}
+                    name="trigger_mode"
+                    value={value}
+                    checked={draft.trigger_mode === value}
+                    onChange={() => onChange('trigger_mode', value)}
+                  />
+                  <span className="wizard-radio-option__radio">
+                    <Icon name={draft.trigger_mode === value ? 'radio-dot' : 'circle'} size="sm" tone="inherit" />
+                  </span>
+                  <span>
+                    <span className="wizard-radio-option__label">{label}</span>
+                    {desc && <span style={{ display: 'block' }} className="wizard-radio-option__desc">{desc}</span>}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {draft.trigger_mode === 'KEYWORD_MATCH' && (
+              <div style={{ marginTop: 'var(--gap-inline-sm)' }}>
+                <div className="keyword-chip-input">
+                  <div className="keyword-chip-input__row">
+                    <input
+                      type="text"
+                      className="keyword-chip-input__field"
+                      placeholder="발송하시는 키워드를 입력해주세요"
+                      value={kw}
+                      onChange={(e) => setKw(e.target.value)}
+                      onKeyDown={handleKwKeyDown}
+                    />
+                    <button type="button" className="keyword-chip-input__add-btn" onClick={addKeyword} aria-label="키워드 추가">
+                      <Icon name="plus" size="sm" tone="inverse" />
+                    </button>
+                  </div>
+                  <p className="wizard-section-hint">플러스(+)나 엔터를 눌러서 추가할 수 있어요</p>
+                  {draft.trigger_keywords.length > 0 && (
+                    <div className="keyword-chip-input__chips">
+                      {draft.trigger_keywords.map((kw, i) => (
+                        <span key={kw} className="keyword-chip">
+                          {kw}
+                          <button type="button" className="keyword-chip__remove" onClick={() => removeKeyword(i)} aria-label={`키워드 ${kw} 삭제`}>
+                            <Icon name="x" size="xs" tone="inherit" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {errors.trigger_keywords && <p className="wizard-field-error">{errors.trigger_keywords}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — WizardStepReply (step 2)
+     * ================================================================ */
+    function WizardStepReply({ draft, onChange, errors }) {
+      const PRESETS = window.MOCK_DATA.AUTOMATION_REPLY_PRESETS;
+
+      const handleToneSelect = (tone) => {
+        onChange('reply.tone', tone);
+        // POLITE / FRIENDLY → 매 클릭마다 해당 톤의 preset으로 items 교체
+        if (tone === 'POLITE' || tone === 'FRIENDLY') {
+          onChange('reply.items', [...PRESETS[tone]]);
+        }
+        // CUSTOM → 직전 items 그대로 유지 (사용자 직접 입력 모드)
+      };
+
+      const updateItem = (idx, val) => {
+        const next = [...draft.reply.items];
+        next[idx] = val;
+        onChange('reply.items', next);
+      };
+
+      const removeItem = (idx) => {
+        onChange('reply.items', draft.reply.items.filter((_, i) => i !== idx));
+      };
+
+      const addItem = () => {
+        onChange('reply.items', [...draft.reply.items, '']);
+      };
+
+      return (
+        <div className="wizard-step-reply">
+          <p className="wizard-section-label">자동 답글을 달까요?</p>
+          <div className="wizard-radio-group">
+            {[
+              { value: false, label: '아니요', desc: '댓글에 자동 답글 없이 DM만 발송해요' },
+              { value: true, label: '네', desc: '댓글에 자동으로 답글을 남겨요' },
+            ].map(({ value, label, desc }) => (
+              <label
+                key={String(value)}
+                className={`wizard-radio-option${draft.reply.enabled === value ? ' wizard-radio-option--selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  style={{ display: 'none' }}
+                  name="reply_enabled"
+                  checked={draft.reply.enabled === value}
+                  onChange={() => onChange('reply.enabled', value)}
+                />
+                <span className="wizard-radio-option__radio">
+                  <Icon name={draft.reply.enabled === value ? 'radio-dot' : 'circle'} size="sm" tone="inherit" />
+                </span>
+                <span>
+                  <span className="wizard-radio-option__label">{label}</span>
+                  {desc && <span style={{ display: 'block' }} className="wizard-radio-option__desc">{desc}</span>}
+                </span>
+              </label>
+            ))}
+          </div>
+
+          {draft.reply.enabled && (
+            <div style={{ marginTop: 'var(--gap-inline-sm)', display: 'flex', flexDirection: 'column', gap: 'var(--wizard-section-gap)' }}>
+              <div>
+                <p className="wizard-section-label">답글 톤을 선택해 주세요</p>
+                <div className="reply-tone-tabs">
+                  {[
+                    { key: 'POLITE', label: '공손하게' },
+                    { key: 'FRIENDLY', label: '친근하게' },
+                    { key: 'CUSTOM', label: '직접 입력' },
+                  ].map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`reply-tone-tab${draft.reply.tone === key ? ' reply-tone-tab--active' : ''}`}
+                      onClick={() => handleToneSelect(key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="wizard-section-label">답글 후보 목록</p>
+                <p className="wizard-section-hint">여러 개 입력하면 발송 시 랜덤으로 1건이 선택돼요</p>
+                <div className="reply-item-list" style={{ marginTop: 'var(--gap-inline-xs)' }}>
+                  {draft.reply.items.map((item, idx) => (
+                    <div key={idx} className="reply-item-row">
+                      <textarea
+                        className="reply-item-row__textarea"
+                        value={item}
+                        onChange={(e) => updateItem(idx, e.target.value)}
+                        placeholder="답글 내용을 입력해주세요"
+                        rows={2}
+                      />
+                      <button type="button" className="reply-item-row__remove" onClick={() => removeItem(idx)} aria-label="답글 삭제">
+                        <Icon name="minus" size="xs" tone="inherit" />
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className="reply-item-add-btn" onClick={addItem}>
+                    <Icon name="plus" size="sm" tone="inherit" />
+                    새로운 답글 추가하기
+                  </button>
+                </div>
+                {errors['reply.items'] && <p className="wizard-field-error">{errors['reply.items']}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — WizardStepFollowerBranch (step 3)
+     * ================================================================ */
+    function WizardStepFollowerBranch({ draft, onChange }) {
+      const options = [
+        { value: 'SAME', label: '모두에게 같은 메시지', desc: '팔로워/비팔로워 구분 없이 동일하게 발송해요' },
+        { value: 'FOLLOWERS_ONLY', label: '팔로워에게만', desc: '이미 팔로우하는 사람에게만 DM을 보내요' },
+        { value: 'NON_FOLLOWERS_ONLY', label: '비팔로워에게만', desc: '아직 팔로우하지 않는 사람에게만 DM을 보내요' },
+        { value: 'DIFFERENT_MESSAGES', label: '팔로워/비팔로워 다른 메시지', desc: '두 그룹에 각각 다른 내용으로 발송해요' },
+      ];
+
+      return (
+        <div className="wizard-step-follower-branch">
+          <p className="wizard-section-label">팔로우 여부에 따라 다르게 보낼까요?</p>
+          <div className="wizard-radio-group">
+            {options.map(({ value, label, desc }) => (
+              <label
+                key={value}
+                className={`wizard-radio-option${draft.follower_branch.mode === value ? ' wizard-radio-option--selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  style={{ display: 'none' }}
+                  name="follower_branch_mode"
+                  value={value}
+                  checked={draft.follower_branch.mode === value}
+                  onChange={() => {
+                    onChange('follower_branch.mode', value);
+                    // DIFFERENT_MESSAGES 선택 시 두 variant 초기화 (없으면)
+                    if (value === 'DIFFERENT_MESSAGES') {
+                      if (!draft.follower_branch.follower_message) {
+                        onChange('follower_branch.follower_message', { type: 'TEXT', body: '', images: [], buttons: [] });
+                      }
+                      if (!draft.follower_branch.non_follower_message) {
+                        onChange('follower_branch.non_follower_message', { type: 'TEXT', body: '', images: [], buttons: [] });
+                      }
+                    }
+                  }}
+                />
+                <span className="wizard-radio-option__radio">
+                  <Icon name={draft.follower_branch.mode === value ? 'radio-dot' : 'circle'} size="sm" tone="inherit" />
+                </span>
+                <span>
+                  <span className="wizard-radio-option__label">{label}</span>
+                  {desc && <span style={{ display: 'block' }} className="wizard-radio-option__desc">{desc}</span>}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — ButtonEditSheet
+     * ================================================================ */
+    function ButtonEditSheet({ isOpen, onClose, onSave, initial }) {
+      const [btnText, setBtnText] = useState('');
+      const [btnUrl, setBtnUrl] = useState('');
+      const showToast = useToast();
+
+      useEffect(() => {
+        if (isOpen) {
+          setBtnText(initial ? initial.text : '');
+          setBtnUrl(initial ? initial.url : '');
+        }
+      }, [isOpen, initial]);
+
+      const handleSave = () => {
+        if (!btnText.trim() || !btnUrl.trim()) return;
+        onSave({ text: btnText.trim(), url: btnUrl.trim() });
+      };
+
+      const handleImportClick = () => {
+        showToast({ message: '준비 중인 기능이에요' });
+      };
+
+      if (!isOpen) return null;
+
+      return (
+        <div className="button-edit-sheet-overlay">
+          <div className="button-edit-sheet-overlay__backdrop" onClick={onClose} aria-hidden="true" />
+          <div className="button-edit-sheet" role="dialog" aria-label="버튼 편집">
+            <div className="button-edit-sheet__handle" />
+            <p className="button-edit-sheet__title">버튼 설정</p>
+
+            <button type="button" className="button-edit-sheet__import-btn" onClick={handleImportClick} disabled>
+              <Icon name="link" size="sm" tone="inherit" />
+              링크 블록에서 가져오기
+            </button>
+
+            <div className="button-edit-sheet__field">
+              <label className="button-edit-sheet__label">버튼 텍스트</label>
+              <input
+                type="text"
+                className="button-edit-sheet__input"
+                placeholder="예: 자세히 보기"
+                value={btnText}
+                onChange={(e) => setBtnText(e.target.value)}
+              />
+            </div>
+
+            <div className="button-edit-sheet__field">
+              <label className="button-edit-sheet__label">URL</label>
+              <input
+                type="url"
+                className="button-edit-sheet__input"
+                placeholder="https://"
+                value={btnUrl}
+                onChange={(e) => setBtnUrl(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="button"
+              className="button-edit-sheet__save"
+              onClick={handleSave}
+              disabled={!btnText.trim() || !btnUrl.trim()}
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — MessageInputPanel (공통 — DIFFERENT_MESSAGES 양쪽에 재활용)
+     * ================================================================ */
+    function MessageInputPanel({ message, onChangeMessage, errors }) {
+      const [sheetOpen, setSheetOpen] = useState(false);
+      const [editingBtnIdx, setEditingBtnIdx] = useState(null);
+
+      const MOCK_IMAGES = [
+        'https://picsum.photos/seed/auto1/300/300',
+        'https://picsum.photos/seed/auto2/300/300',
+        'https://picsum.photos/seed/auto3/300/300',
+        'https://picsum.photos/seed/auto4/300/300',
+        'https://picsum.photos/seed/auto5/300/300',
+      ];
+
+      const handleBodyChange = (e) => onChangeMessage({ ...message, body: e.target.value });
+      const handleTypeChange = (type) => onChangeMessage({ ...message, type });
+
+      const addImage = () => {
+        if (message.images.length >= 10) return;
+        const mockUrl = MOCK_IMAGES[message.images.length % MOCK_IMAGES.length];
+        onChangeMessage({
+          ...message,
+          images: [...message.images, { url: mockUrl, order: message.images.length }],
+        });
+      };
+
+      const removeImage = (idx) => {
+        onChangeMessage({
+          ...message,
+          images: message.images.filter((_, i) => i !== idx).map((img, i) => ({ ...img, order: i })),
+        });
+      };
+
+      const openAddBtn = () => { setEditingBtnIdx(null); setSheetOpen(true); };
+      const openEditBtn = (idx) => { setEditingBtnIdx(idx); setSheetOpen(true); };
+      const removeBtn = (idx) => {
+        onChangeMessage({ ...message, buttons: message.buttons.filter((_, i) => i !== idx) });
+      };
+
+      const handleSheetSave = ({ text, url }) => {
+        const newBtn = {
+          id: `btn_runtime_${Date.now()}`,
+          text,
+          action_type: 'URL',
+          url,
+        };
+        if (editingBtnIdx !== null) {
+          const next = [...message.buttons];
+          next[editingBtnIdx] = { ...next[editingBtnIdx], text, url };
+          onChangeMessage({ ...message, buttons: next });
+        } else {
+          onChangeMessage({ ...message, buttons: [...message.buttons, newBtn] });
+        }
+        setSheetOpen(false);
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-inline-sm)' }}>
+          {/* 탭 전환 */}
+          <div className="message-tab-switcher">
+            <button
+              type="button"
+              className={`message-tab-switcher__tab${message.type === 'TEXT' ? ' message-tab-switcher__tab--active' : ''}`}
+              onClick={() => handleTypeChange('TEXT')}
+            >
+              <Icon name="text" size="sm" tone="inherit" />
+              텍스트
+            </button>
+            <button
+              type="button"
+              className={`message-tab-switcher__tab${message.type === 'IMAGE_CAROUSEL' ? ' message-tab-switcher__tab--active' : ''}`}
+              onClick={() => handleTypeChange('IMAGE_CAROUSEL')}
+            >
+              <Icon name="carousel" size="sm" tone="inherit" />
+              이미지 캐러셀
+            </button>
+          </div>
+
+          {/* 본문 미리보기 */}
+          <div className="message-bubble-preview">
+            <span className="message-bubble-preview__label">미리보기</span>
+            {message.type === 'IMAGE_CAROUSEL' && message.images.length > 0 && (
+              <div className="message-bubble-preview__image-row">
+                {message.images.map((img, i) => (
+                  <img key={i} className="message-bubble-preview__image-thumb" src={img.url} alt={`이미지 ${i + 1}`} />
+                ))}
+              </div>
+            )}
+            {message.body ? (
+              <span className="message-bubble-preview__bubble">{message.body}</span>
+            ) : (
+              <span className="message-bubble-preview__empty">메시지를 입력해주세요</span>
+            )}
+          </div>
+
+          {/* 본문 입력 */}
+          <textarea
+            className="message-body-input"
+            placeholder="고객에게 보낼 메시지를 입력해주세요"
+            value={message.body}
+            onChange={handleBodyChange}
+            rows={4}
+          />
+          {errors && errors.body && <p className="wizard-field-error">{errors.body}</p>}
+
+          {/* 이미지 업로더 */}
+          {message.type === 'IMAGE_CAROUSEL' && (
+            <div className="message-image-uploader">
+              <p className="wizard-section-label">이미지 ({message.images.length}/10)</p>
+              <div className="message-image-uploader__images">
+                {message.images.map((img, i) => (
+                  <div key={i} className="message-image-uploader__thumb">
+                    <img src={img.url} alt={`업로드 이미지 ${i + 1}`} />
+                    <button type="button" className="message-image-uploader__thumb-remove" onClick={() => removeImage(i)} aria-label="이미지 삭제">
+                      <Icon name="x" size="xs" tone="inverse" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="message-image-uploader__add-btn"
+                  onClick={addImage}
+                  disabled={message.images.length >= 10}
+                  aria-label="이미지 추가"
+                >
+                  <Icon name="upload" size="sm" tone="muted" />
+                  추가
+                </button>
+              </div>
+              {errors && errors.images && <p className="wizard-field-error">{errors.images}</p>}
+            </div>
+          )}
+
+          {/* 버튼 목록 */}
+          <div>
+            <p className="wizard-section-label">버튼 (선택)</p>
+            <div className="message-button-list">
+              {message.buttons.map((btn, i) => (
+                <div key={btn.id} className="button-row">
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="button-row__text">{btn.text}</div>
+                    <div className="button-row__url">{btn.url}</div>
+                  </div>
+                  <div className="button-row__actions">
+                    <button type="button" className="button-row__action" onClick={() => openEditBtn(i)} aria-label="버튼 편집">
+                      <Icon name="edit" size="xs" tone="muted" />
+                    </button>
+                    <button type="button" className="button-row__action" onClick={() => removeBtn(i)} aria-label="버튼 삭제">
+                      <Icon name="trash" size="xs" tone="muted" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <button type="button" className="button-add-trigger" onClick={openAddBtn}>
+                <Icon name="plus" size="sm" tone="inherit" />
+                버튼 추가하기
+              </button>
+            </div>
+          </div>
+
+          <ButtonEditSheet
+            isOpen={sheetOpen}
+            onClose={() => setSheetOpen(false)}
+            onSave={handleSheetSave}
+            initial={editingBtnIdx !== null ? message.buttons[editingBtnIdx] : null}
+          />
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — WizardStepMessage (step 4)
+     * ================================================================ */
+    function WizardStepMessage({ draft, onChange, errors }) {
+      const [variantTab, setVariantTab] = useState('follower'); // 'follower' | 'non_follower'
+      const isDiff = draft.follower_branch.mode === 'DIFFERENT_MESSAGES';
+
+      const handleSingleChange = (msg) => {
+        onChange('message', msg);
+      };
+
+      const handleVariantChange = (variant, msg) => {
+        if (variant === 'follower') onChange('follower_branch.follower_message', msg);
+        else onChange('follower_branch.non_follower_message', msg);
+      };
+
+      if (isDiff) {
+        const followerMsg = draft.follower_branch.follower_message || { type: 'TEXT', body: '', images: [], buttons: [] };
+        const nonFollowerMsg = draft.follower_branch.non_follower_message || { type: 'TEXT', body: '', images: [], buttons: [] };
+        const currentMsg = variantTab === 'follower' ? followerMsg : nonFollowerMsg;
+
+        return (
+          <div className="wizard-step-message">
+            <p className="wizard-section-label">자동화할 메시지를 설정해주세요</p>
+            <div className="follower-variant-tabs">
+              <div className="follower-variant-tabs__header">
+                <button
+                  type="button"
+                  className={`follower-variant-tabs__tab${variantTab === 'follower' ? ' follower-variant-tabs__tab--active' : ''}`}
+                  onClick={() => setVariantTab('follower')}
+                >
+                  팔로워
+                </button>
+                <button
+                  type="button"
+                  className={`follower-variant-tabs__tab${variantTab === 'non_follower' ? ' follower-variant-tabs__tab--active' : ''}`}
+                  onClick={() => setVariantTab('non_follower')}
+                >
+                  비팔로워
+                </button>
+              </div>
+              <div className="follower-variant-tabs__body">
+                <MessageInputPanel
+                  message={currentMsg}
+                  onChangeMessage={(msg) => handleVariantChange(variantTab, msg)}
+                  errors={errors}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="wizard-step-message">
+          <p className="wizard-section-label">자동화할 메시지를 설정해주세요</p>
+          <MessageInputPanel
+            message={draft.message}
+            onChangeMessage={handleSingleChange}
+            errors={errors}
+          />
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — WizardStepReview (step 5)
+     * ================================================================ */
+    function WizardStepReview({ draft, onGotoStep, onChange }) {
+      const igOrigins = window.MOCK_DATA.origins.filter((o) => o.platform === 'instagram' && o.type === 'post');
+
+      const postNames = draft.target_mode === 'FUTURE_POSTS'
+        ? '향후 게시물'
+        : draft.target_post_ids.map((id) => {
+          const o = igOrigins.find((o) => o.media_id === id);
+          return o ? o.display_name : id;
+        }).join(', ') || '미선택';
+
+      const triggerSummary = draft.trigger_mode === 'ALL_COMMENTS'
+        ? '모든 댓글'
+        : draft.trigger_keywords.length > 0
+          ? draft.trigger_keywords.join(', ')
+          : '키워드 미입력';
+
+      const replySummary = !draft.reply.enabled
+        ? '답글 없음'
+        : `${draft.reply.tone === 'POLITE' ? '공손하게' : draft.reply.tone === 'FRIENDLY' ? '친근하게' : '직접 입력'} · ${draft.reply.items.length}개`;
+
+      const branchSummary = {
+        SAME: '모두에게 같은 메시지',
+        FOLLOWERS_ONLY: '팔로워에게만',
+        NON_FOLLOWERS_ONLY: '비팔로워에게만',
+        DIFFERENT_MESSAGES: '팔로워/비팔로워 다른 메시지',
+      }[draft.follower_branch.mode];
+
+      const mainMessage = draft.follower_branch.mode === 'DIFFERENT_MESSAGES'
+        ? draft.follower_branch.follower_message || draft.message
+        : draft.message;
+
+      return (
+        <div className="wizard-step-review">
+          {/* 타이틀 입력 */}
+          <div>
+            <p className="wizard-section-label">자동화 이름 (선택)</p>
+            <input
+              type="text"
+              className="wizard-title-input"
+              placeholder="예: 마스크팩 공구 이벤트"
+              value={draft.title || ''}
+              onChange={(e) => onChange('title', e.target.value || null)}
+            />
+          </div>
+
+          {/* 요약 목록 */}
+          <div>
+            <p className="wizard-section-label">설정 요약</p>
+            <div className="review-summary-list">
+              <div className="review-summary-row">
+                <span className="review-summary-row__step-label">STEP 1</span>
+                <div className="review-summary-row__content">
+                  <span className="review-summary-row__value" style={{ whiteSpace: 'normal' }}>
+                    <strong>게시물:</strong> {postNames}<br />
+                    <strong>댓글:</strong> {triggerSummary}
+                  </span>
+                </div>
+                <button type="button" className="review-summary-row__edit" onClick={() => onGotoStep(1)}>편집</button>
+              </div>
+              <div className="review-summary-row">
+                <span className="review-summary-row__step-label">STEP 2</span>
+                <div className="review-summary-row__content">
+                  <span className="review-summary-row__value">{replySummary}</span>
+                </div>
+                <button type="button" className="review-summary-row__edit" onClick={() => onGotoStep(2)}>편집</button>
+              </div>
+              <div className="review-summary-row">
+                <span className="review-summary-row__step-label">STEP 3</span>
+                <div className="review-summary-row__content">
+                  <span className="review-summary-row__value">{branchSummary}</span>
+                </div>
+                <button type="button" className="review-summary-row__edit" onClick={() => onGotoStep(3)}>편집</button>
+              </div>
+              <div className="review-summary-row">
+                <span className="review-summary-row__step-label">STEP 4</span>
+                <div className="review-summary-row__content">
+                  <span className="review-summary-row__value" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {draft.follower_branch.mode === 'DIFFERENT_MESSAGES' ? '팔로워/비팔로워 각각 설정됨' : (mainMessage.body || '메시지 미입력')}
+                  </span>
+                </div>
+                <button type="button" className="review-summary-row__edit" onClick={() => onGotoStep(4)}>편집</button>
+              </div>
+            </div>
+          </div>
+
+          {/* 메시지 미리보기 */}
+          <div>
+            <p className="wizard-section-label">최종 메시지 미리보기</p>
+            <div className="message-bubble-preview">
+              {mainMessage.type === 'IMAGE_CAROUSEL' && mainMessage.images.length > 0 && (
+                <div className="message-bubble-preview__image-row">
+                  {mainMessage.images.map((img, i) => (
+                    <img key={i} className="message-bubble-preview__image-thumb" src={img.url} alt={`이미지 ${i + 1}`} />
+                  ))}
+                </div>
+              )}
+              {mainMessage.body ? (
+                <span className="message-bubble-preview__bubble">{mainMessage.body}</span>
+              ) : (
+                <span className="message-bubble-preview__empty">메시지 본문이 없어요</span>
+              )}
+            </div>
+          </div>
+
+          {/* 본문 인라인 수정 */}
+          {draft.follower_branch.mode !== 'DIFFERENT_MESSAGES' && (
+            <div className="review-body-inline-editor">
+              <p className="review-body-inline-editor__label">본문 수정</p>
+              <textarea
+                className="review-body-inline-editor__textarea"
+                value={mainMessage.body}
+                onChange={(e) => onChange('message.body', e.target.value)}
+                placeholder="본문을 여기서 바로 수정할 수 있어요"
+                rows={3}
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — MacroBuilderWizard
+     * spec.md §5-9
+     * ================================================================ */
+    function MacroBuilderWizard({ wizardState, dispatch, onSave, onClose, igOrigins, onCloseAttemptRef }) {
+      const initialSnapshotRef = useRef(null);
+      const [confirmClose, setConfirmClose] = useState(false);
+      const showToast = useToast();
+      const { draft, currentStep, visitedSteps, errors, mode } = wizardState;
+
+      // 진입 시 snapshot 저장
+      useEffect(() => {
+        if (draft && !initialSnapshotRef.current) {
+          initialSnapshotRef.current = JSON.stringify(draft);
+        }
+      }, [draft]);
+
+      // mode null → 컴포넌트 자체가 숨겨지면 ref 초기화
+      useEffect(() => {
+        if (!mode) initialSnapshotRef.current = null;
+      }, [mode]);
+
+      const handleFieldChange = useCallback((path, value) => {
+        dispatch({ type: 'UPDATE_FIELD', path, value });
+      }, [dispatch]);
+
+      // step 1 검증
+      const validateStep1 = () => {
+        const errs = {};
+        if (draft.target_mode === 'SPECIFIC_POSTS' && draft.target_post_ids.length < 1) {
+          errs.target_post_ids = '게시물을 1개 이상 선택해주세요';
+        }
+        if (draft.trigger_mode === 'KEYWORD_MATCH' && draft.trigger_keywords.length < 1) {
+          errs.trigger_keywords = '키워드를 1개 이상 입력해주세요';
+        }
+        return errs;
+      };
+
+      // step 2 검증
+      const validateStep2 = () => {
+        const errs = {};
+        if (draft.reply.enabled) {
+          if (draft.reply.items.length < 1) errs['reply.items'] = '답글을 1개 이상 입력해주세요';
+          else if (draft.reply.items.some((s) => !s.trim())) errs['reply.items'] = '빈 답글이 있어요. 내용을 채워주세요';
+        }
+        return errs;
+      };
+
+      // step 4 검증
+      const validateStep4 = () => {
+        const errs = {};
+        if (draft.follower_branch.mode === 'DIFFERENT_MESSAGES') {
+          if (!isMessageValid(draft.follower_branch.follower_message)) errs.body = '팔로워 메시지 본문을 입력해주세요';
+          if (!isMessageValid(draft.follower_branch.non_follower_message)) errs.body = '비팔로워 메시지 본문을 입력해주세요';
+        } else {
+          if (!isMessageValid(draft.message)) {
+            const m = draft.message;
+            if (!m.body || !m.body.trim()) errs.body = '메시지 본문을 입력해주세요';
+            else if (m.type === 'IMAGE_CAROUSEL' && m.images.length < 1) errs.images = '이미지를 1장 이상 추가해주세요';
+            else errs.body = '버튼 텍스트와 URL을 모두 입력해주세요';
+          }
+        }
+        return errs;
+      };
+
+      const handleNext = () => {
+        let errs = {};
+        if (currentStep === 1) errs = validateStep1();
+        else if (currentStep === 2) errs = validateStep2();
+        else if (currentStep === 4) errs = validateStep4();
+
+        if (Object.keys(errs).length > 0) {
+          dispatch({ type: 'SET_ERRORS', errors: errs });
+          return;
+        }
+        dispatch({ type: 'NEXT_STEP' });
+      };
+
+      const handlePrev = () => dispatch({ type: 'PREV_STEP' });
+
+      const handleGotoStep = (step) => {
+        dispatch({ type: 'GOTO_STEP', step });
+      };
+
+      const handleSave = () => {
+        if (!isAutomationValid(draft)) {
+          showToast({ message: '필수 항목을 모두 채워주세요' });
+          return;
+        }
+        onSave(draft);
+        dispatch({ type: 'SAVE' });
+        showToast({ message: '자동화가 등록되었어요' });
+      };
+
+      const handleCloseAttempt = () => {
+        const currentSnap = JSON.stringify(draft);
+        const dirty = initialSnapshotRef.current && currentSnap !== initialSnapshotRef.current;
+        if (dirty) {
+          setConfirmClose(true);
+        } else {
+          onClose();
+          dispatch({ type: 'CLOSE' });
+        }
+      };
+
+      // 모바일 뒤로가기 버튼 등 외부 진입점에 동일 dirty-check 흐름 노출
+      useEffect(() => {
+        if (onCloseAttemptRef) onCloseAttemptRef.current = handleCloseAttempt;
+        return () => { if (onCloseAttemptRef) onCloseAttemptRef.current = null; };
+      });
+
+      const handleConfirmClose = () => {
+        setConfirmClose(false);
+        onClose();
+        dispatch({ type: 'CLOSE' });
+      };
+
+      if (!draft || !mode) return null;
+
+      const STEP_NAV_LABELS = ['Step 1', 'Step 2', 'Step 3', 'Step 4', 'Step 5'];
+
+      const stepTitles = [
+        '어떤 댓글에 메시지를 보낼까요?',
+        '댓글에 답글도 남겨볼까요?',
+        '팔로우 여부에 따라 다르게 보낼까요?',
+        '자동화할 메시지를 설정해주세요.',
+        '규칙을 최종 점검해봐요.',
+      ];
+
+      // step별 onChange (직접 path 처리 단순화)
+      const step1Change = (key, value) => handleFieldChange(key, value);
+      // reply 관련: onChange('reply.enabled', val), onChange('reply.tone', val), onChange('reply.items', val)
+      const step2Change = (path, value) => handleFieldChange(path, value);
+      const step3Change = (path, value) => handleFieldChange(path, value);
+      const step4Change = (path, value) => {
+        if (path === 'message') handleFieldChange('message', value);
+        else if (path === 'follower_branch.follower_message') handleFieldChange('follower_branch.follower_message', value);
+        else if (path === 'follower_branch.non_follower_message') handleFieldChange('follower_branch.non_follower_message', value);
+        else handleFieldChange(path, value);
+      };
+
+      return (
+        <div className="macro-builder-wizard">
+          {/* 헤더 */}
+          <div className="wizard-header">
+            <span className="wizard-header__title">{stepTitles[currentStep - 1]}</span>
+            <button type="button" className="wizard-header__close" onClick={handleCloseAttempt} aria-label="닫기">
+              <Icon name="x" size="md" tone="muted" />
+            </button>
+          </div>
+
+          {/* Step nav — segmented tabs + 양 끝 chevron */}
+          <div className="wizard-step-nav" role="tablist" aria-label="단계 탐색">
+            <button
+              type="button"
+              className="wizard-step-nav__chevron"
+              onClick={handlePrev}
+              disabled={currentStep === 1}
+              aria-label="이전 단계"
+            >
+              <Icon name="chevron-left" size="sm" />
+            </button>
+            <div className="wizard-step-nav__tabs">
+              {[1, 2, 3, 4, 5].map((s) => {
+                const isActive = s === currentStep;
+                const isReachable = visitedSteps.has(s);
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    disabled={!isReachable && !isActive}
+                    className={
+                      'wizard-step-nav__tab' +
+                      (isActive ? ' wizard-step-nav__tab--active' : '') +
+                      (!isReachable && !isActive ? ' wizard-step-nav__tab--disabled' : '')
+                    }
+                    onClick={() => isReachable && handleGotoStep(s)}
+                  >
+                    {STEP_NAV_LABELS[s - 1]}
+                  </button>
+                );
+              })}
+            </div>
+            {currentStep < 5 ? (
+              <button
+                type="button"
+                className="wizard-step-nav__chevron"
+                onClick={handleNext}
+                aria-label="다음 단계"
+              >
+                <Icon name="chevron-right" size="sm" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="wizard-button--primary"
+                onClick={handleSave}
+                disabled={!isAutomationValid(draft)}
+              >
+                완료
+              </button>
+            )}
+          </div>
+
+          {/* Step body */}
+          <div className="wizard-step-body">
+            {currentStep === 1 && (
+              <WizardStepTrigger draft={draft} onChange={step1Change} errors={errors} igOrigins={igOrigins} />
+            )}
+            {currentStep === 2 && (
+              <WizardStepReply draft={draft} onChange={step2Change} errors={errors} />
+            )}
+            {currentStep === 3 && (
+              <WizardStepFollowerBranch draft={draft} onChange={step3Change} errors={errors} />
+            )}
+            {currentStep === 4 && (
+              <WizardStepMessage draft={draft} onChange={step4Change} errors={errors} />
+            )}
+            {currentStep === 5 && (
+              <WizardStepReview draft={draft} onGotoStep={handleGotoStep} onChange={(key, val) => handleFieldChange(key, val)} />
+            )}
+          </div>
+
+          {/* dirty 닫기 confirm */}
+          <Modal
+            isOpen={confirmClose}
+            onClose={() => setConfirmClose(false)}
+            title="변경사항 버리기"
+            centered
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-stack-md)' }}>
+              <p className="t-body">변경사항을 버리고 닫을까요? 저장되지 않은 내용은 사라져요.</p>
+              <div style={{ display: 'flex', gap: 'var(--gap-inline-sm)', justifyContent: 'flex-end' }}>
+                <button type="button" className="wizard-button--secondary" onClick={() => setConfirmClose(false)}>취소</button>
+                <button type="button" className="wizard-button--primary" onClick={handleConfirmClose}>버리고 닫기</button>
+              </div>
+            </div>
+          </Modal>
+        </div>
+      );
+    }
+
+    /* ================================================================
+     * Phase 5 — AutomationListView
+     * spec.md §5-9-1 / §5-9-10 SNS 필터 동작
+     * ================================================================ */
+
+    // IG 계정 필터 기반 룰 매칭 helper (spec §5-9-10)
+    function ruleMatchesIgAccountFilter(automation, activeIgAccountIds, origins) {
+      if (activeIgAccountIds.size === 0) return false;
+      if (automation.target_mode === 'FUTURE_POSTS') return true;
+      return automation.target_post_ids.some((media_id) => {
+        const origin = origins.find((o) => o.media_id === media_id);
+        return origin && activeIgAccountIds.has(origin.user_sns_account_id);
+      });
+    }
+
+    function AutomationListView({ automations, activeIgAccountIds, onOpenWizardNew, onOpenWizardTemplate, onOpenWizardEdit, onToggleStatus }) {
+      const TEMPLATES = window.MOCK_DATA.AUTOMATION_TEMPLATES;
+      const origins = window.MOCK_DATA.origins;
+
+      // IG 계정 필터 적용한 룰 리스트 (mock array 순서 그대로)
+      const filteredAutomations = useMemo(() => {
+        if (!activeIgAccountIds) return automations;
+        return automations.filter((a) => ruleMatchesIgAccountFilter(a, activeIgAccountIds, origins));
+      }, [automations, activeIgAccountIds, origins]);
+
+      // IgPostGridPicker에 전달할 visiblePosts — activeIgAccountIds 실시간 반영
+      const visiblePosts = useMemo(() => {
+        if (!activeIgAccountIds || activeIgAccountIds.size === 0) return [];
+        return origins.filter(
+          (o) => o.platform === 'instagram' && o.type === 'post' && activeIgAccountIds.has(o.user_sns_account_id)
+        );
+      }, [activeIgAccountIds, origins]);
+
+      return (
+        <div className="automation-list">
+          {/* 헤더 (안내 배너만 — title은 LSB에 표시됨) */}
+          <div className="automation-list-header">
+            <div className="automation-list-header__banner">
+              <Icon name="info" size="sm" tone="muted" />
+              <span className="automation-list-header__banner-text">
+                인스타그램 게시물의 댓글에 키워드가 포함되면 자동으로 DM을 발송해요. 팔로워 여부에 따라 다른 메시지를 보낼 수도 있어요.
+              </span>
+            </div>
+          </div>
+
+          {/* 템플릿 캐러셀 */}
+          <div className="automation-template-carousel">
+            {/* Blank 카드 */}
+            <button type="button" className="automation-template-card automation-template-card--blank" onClick={onOpenWizardNew}>
+              <Icon name="plus" size="lg" tone="muted" />
+              <span className="automation-template-card__blank-label">직접 만들기</span>
+            </button>
+            {/* 템플릿 카드 3종 */}
+            {TEMPLATES.map((tmpl) => (
+              <button
+                key={tmpl.key}
+                type="button"
+                className="automation-template-card"
+                onClick={() => onOpenWizardTemplate(tmpl.key)}
+              > 
+                <span className="automation-template-card__category">{tmpl.category_label}</span>
+                <span className="automation-template-card__name">{tmpl.display_name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* 카드 리스트 or EmptyState */}
+          {activeIgAccountIds !== null && activeIgAccountIds.size === 0 ? (
+            <EmptyState
+              icon="category-dm-automation"
+              title="표시할 자동화가 없어요"
+              description="상단 SNS 필터에서 인스타그램 계정을 켜주세요."
+            />
+          ) : filteredAutomations.length === 0 ? (
+            <EmptyState
+              icon="category-dm-automation"
+              title="연결된 자동화 룰이 없어요"
+              description="위 템플릿에서 시작하거나 빈 카드를 눌러 새로 만들어보세요."
+            />
+          ) : (
+            <div className="automation-card-list">
+              {filteredAutomations.map((a) => (
+                <AutomationCard
+                  key={a.id}
+                  automation={a}
+                  igOrigins={visiblePosts}
+                  onToggleStatus={onToggleStatus}
+                  onOpenWizardEdit={onOpenWizardEdit}
+                />
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -1694,6 +3099,21 @@
       const [selectedThreadId, setSelectedThreadId] = useState(null);
       const [outgoingMessageOverrides, setOutgoingMessageOverrides] = useState(() => new Map());
 
+      // Phase 5: Wizard 상태
+      const [wizardState, wizardDispatch] = useReducer(wizardReducer, WIZARD_INITIAL_STATE);
+
+      // Phase 5: Automation mock data mutation state
+      const [automationStatusOverrides, setAutomationStatusOverrides] = useState(() => new Map());
+      const [automationOverrides, setAutomationOverrides] = useState(() => new Map());
+      const [addedAutomations, setAddedAutomations] = useState([]);
+      const [pendingCategoryChange, setPendingCategoryChange] = useState(null);
+
+      // Phase 5 Round 1: SNS 필터 snapshot ref (dm_automation 진입/이탈 복원용)
+      const snsFilterSnapshotRef = useRef(null);
+
+      // Phase 5 Round 4: wizard의 handleCloseAttempt를 외부에서 호출할 수 있도록 ref 보관
+      const wizardCloseAttemptRef = useRef(null);
+
       // 뷰포트 폭 감지 — mobile(≤767px)에서만 overlay 모드
       const [isNarrow, setIsNarrow] = useState(() => window.innerWidth < 768);
       useEffect(() => {
@@ -1724,6 +3144,127 @@
 
       const handleOpenLsb = useCallback(() => setLsbOpen(true), []);
       const handleCloseLsb = useCallback(() => setLsbOpen(false), []);
+
+      // getDisplayedAutomations — base + override 합성
+      const getDisplayedAutomations = useCallback(() => {
+        const base = window.MOCK_DATA.automations;
+        const merged = base.map((a) => {
+          const statusOverride = automationStatusOverrides.get(a.id);
+          const fullOverride = automationOverrides.get(a.id);
+          if (fullOverride) return { ...fullOverride, status: statusOverride || fullOverride.status };
+          if (statusOverride) return { ...a, status: statusOverride };
+          return a;
+        });
+        const extras = addedAutomations.map((a) => {
+          const statusOverride = automationStatusOverrides.get(a.id);
+          const fullOverride = automationOverrides.get(a.id);
+          if (fullOverride) return { ...fullOverride, status: statusOverride || fullOverride.status };
+          if (statusOverride) return { ...a, status: statusOverride };
+          return a;
+        });
+        return [...merged, ...extras];
+      }, [automationStatusOverrides, automationOverrides, addedAutomations]);
+
+      // Wizard handlers
+      const handleWizardOpenNew = useCallback(() => {
+        setSelectedThreadId(null);
+        wizardDispatch({ type: 'OPEN_NEW' });
+      }, []);
+
+      const handleWizardOpenTemplate = useCallback((key) => {
+        setSelectedThreadId(null);
+        wizardDispatch({ type: 'OPEN_TEMPLATE', key });
+      }, []);
+
+      const handleWizardOpenEdit = useCallback((automation, startStep) => {
+        setSelectedThreadId(null);
+        wizardDispatch({ type: 'OPEN_EDIT', automation, startStep });
+      }, []);
+
+      const handleWizardClose = useCallback(() => {
+        wizardDispatch({ type: 'CLOSE' });
+      }, []);
+
+      const handleWizardSave = useCallback((draft) => {
+        const now = new Date().toISOString();
+        if (wizardState.mode === 'edit' && wizardState.sourceAutomationId) {
+          const updated = { ...draft, status: 'ACTIVE', updated_at: now };
+          setAutomationOverrides((prev) => new Map(prev).set(wizardState.sourceAutomationId, updated));
+        } else {
+          const newAuto = {
+            ...draft,
+            id: `auto_runtime_${Date.now()}`,
+            status: 'ACTIVE',
+            created_at: now,
+            updated_at: now,
+          };
+          setAddedAutomations((prev) => [...prev, newAuto]);
+        }
+      }, [wizardState.mode, wizardState.sourceAutomationId]);
+
+      const handleAutomationToggle = useCallback((id, status) => {
+        setAutomationStatusOverrides((prev) => new Map(prev).set(id, status));
+      }, []);
+
+      // LSB 카테고리 변경 시 wizard 종료 — dirty 상태면 confirm 후 닫음
+      // + dm_automation 진입/이탈 시 SNS 필터 snapshot/restore (spec §5-9-10)
+      const handleSelectCategory = useCallback((cat) => {
+        if (wizardState.mode !== null && cat !== 'dm_automation') {
+          if (wizardState.isDirty) {
+            // dirty → pendingCategoryChange 저장 후 confirm modal 노출
+            setPendingCategoryChange(cat);
+            return;
+          }
+          wizardDispatch({ type: 'CLOSE' });
+        }
+        const prevCat = selectedCategory;
+        setSelectedCategory(cat);
+        if (selectedThreadId && cat === 'dm_automation') {
+          setSelectedThreadId(null);
+        }
+
+        if (cat === 'dm_automation' && prevCat !== 'dm_automation') {
+          // 진입: 현재 set을 통째로 snapshot 저장 후 비-IG 제거
+          setSelectedAccountIds((prev) => {
+            snsFilterSnapshotRef.current = new Set(prev);
+            const igIds = new Set(
+              accounts
+                .filter((a) => a.platform === 'instagram')
+                .map((a) => a.id)
+            );
+            return new Set([...prev].filter((id) => igIds.has(id)));
+          });
+        } else if (prevCat === 'dm_automation' && cat !== 'dm_automation') {
+          // 이탈: snapshot restore
+          if (snsFilterSnapshotRef.current !== null) {
+            setSelectedAccountIds(new Set(snsFilterSnapshotRef.current));
+            snsFilterSnapshotRef.current = null;
+          }
+        }
+      }, [wizardState.mode, wizardState.isDirty, selectedThreadId, selectedCategory, accounts]);
+
+      // pendingCategoryChange confirm — 사용자가 "버리고 이동" 선택
+      const handlePendingCategoryConfirm = useCallback(() => {
+        const cat = pendingCategoryChange;
+        setPendingCategoryChange(null);
+        wizardDispatch({ type: 'CLOSE' });
+        // dm_automation 이탈 처리
+        if (selectedCategory === 'dm_automation' && cat !== 'dm_automation') {
+          if (snsFilterSnapshotRef.current !== null) {
+            setSelectedAccountIds(new Set(snsFilterSnapshotRef.current));
+            snsFilterSnapshotRef.current = null;
+          }
+        }
+        setSelectedCategory(cat);
+        if (selectedThreadId && cat === 'dm_automation') {
+          setSelectedThreadId(null);
+        }
+      }, [pendingCategoryChange, selectedCategory, selectedThreadId]);
+
+      // pendingCategoryChange 취소 — wizard 유지
+      const handlePendingCategoryCancel = useCallback(() => {
+        setPendingCategoryChange(null);
+      }, []);
 
       // 전역 스크롤바 자동 숨김 — 스크롤 중에만 .is-scrolling 부여 → CSS thumb 노출
       useEffect(() => {
@@ -1871,6 +3412,43 @@
       }, [selectedThread, outgoingMessageOverrides]);
 
       const panelOpen = !!selectedThreadId;
+      const wizardOpen = wizardState.mode !== null;
+      // wizard 또는 thread panel이 열린 경우 SidePanel 슬롯 점유
+      const sidePanelSlotOpen = (panelOpen || wizardOpen) && !isNarrow;
+      const sidePanelOverlay = (panelOpen || wizardOpen) && isNarrow;
+
+      const displayedAutomations = getDisplayedAutomations();
+
+      // dm_automation 뷰 전용 — 활성 IG 계정 ID set + 비-IG disabled set
+      const isAutomationView = selectedCategory === 'dm_automation';
+      const activeIgAccountIds = useMemo(() => {
+        if (!isAutomationView) return null;
+        return new Set(
+          accounts
+            .filter((a) => a.platform === 'instagram' && selectedAccountIds.has(a.id))
+            .map((a) => a.id)
+        );
+      }, [isAutomationView, accounts, selectedAccountIds]);
+
+      const disabledAccountIds = useMemo(() => {
+        if (!isAutomationView) return null;
+        return new Set(
+          accounts
+            .filter((a) => a.platform !== 'instagram')
+            .map((a) => a.id)
+        );
+      }, [isAutomationView, accounts]);
+
+      // TopToolbar 뒤로가기 조건: mobile에서 panel 또는 wizard가 열려 있을 때
+      const showBackButton = (panelOpen || wizardOpen) && isNarrow;
+      const handleTopBarBack = () => {
+        if (panelOpen) handleCloseSidePanel();
+        else if (wizardOpen) {
+          // wizard dirty-check 흐름을 타도록 — ref에 저장된 handleCloseAttempt 호출
+          if (wizardCloseAttemptRef.current) wizardCloseAttemptRef.current();
+          else handleWizardClose();
+        }
+      };
 
       return (
         <div className="app-shell">
@@ -1881,15 +3459,16 @@
             onToggleAll={handleToggleAll}
             onOpenLsb={handleOpenLsb}
             selectedCategory={selectedCategory}
-            showBackButton={panelOpen && isNarrow}
-            onCloseSidePanel={handleCloseSidePanel}
+            showBackButton={showBackButton}
+            onCloseSidePanel={handleTopBarBack}
+            disabledAccountIds={disabledAccountIds}
           />
-          <div className={`app-main${panelOpen && !isNarrow ? ' app-main--panel-open' : ' app-main--panel-closed'}`}>
+          <div className={`app-main${sidePanelSlotOpen ? ' app-main--panel-open' : ' app-main--panel-closed'}`}>
             {/* LSB — PC */}
             <aside className="app-main__lsb">
               <LeftSidebar
                 selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
+                onSelectCategory={handleSelectCategory}
                 threadsOverride={threadsWithOverrides}
               />
             </aside>
@@ -1915,7 +3494,7 @@
                   </div>
                   <LeftSidebar
                     selectedCategory={selectedCategory}
-                    onSelectCategory={setSelectedCategory}
+                    onSelectCategory={handleSelectCategory}
                     onClose={handleCloseLsb}
                     threadsOverride={threadsWithOverrides}
                     hideBrand
@@ -1935,37 +3514,91 @@
                 onTagThreads={handleTagThreads}
                 selectedThreadId={selectedThreadId}
                 onSelectThread={handleSelectThread}
+                automations={displayedAutomations}
+                activeIgAccountIds={activeIgAccountIds}
+                onOpenWizardNew={handleWizardOpenNew}
+                onOpenWizardTemplate={handleWizardOpenTemplate}
+                onOpenWizardEdit={handleWizardOpenEdit}
+                onToggleAutomationStatus={handleAutomationToggle}
               />
             </main>
 
-            {/* SidePanel — PC: grid 슬롯 inline / Tablet·Mobile: overlay */}
-            {panelOpen && !isNarrow && (
+            {/* SidePanel / Wizard — PC: grid 슬롯 inline / Tablet·Mobile: overlay */}
+            {sidePanelSlotOpen && (
               <aside className="app-main__side-panel">
-                <SidePanel
-                  thread={selectedThread}
-                  origin={selectedOrigin}
-                  messages={selectedMessages}
-                  onClose={handleCloseSidePanel}
-                  onIgnore={() => handleIgnoreThread(selectedThreadId)}
-                  onArchive={handleArchiveThread}
-                  onSendReply={handleSendReply}
-                  isOverlay={false}
-                />
+                {wizardOpen ? (
+                  <MacroBuilderWizard
+                    wizardState={wizardState}
+                    dispatch={wizardDispatch}
+                    onSave={handleWizardSave}
+                    onClose={handleWizardClose}
+                    igOrigins={activeIgAccountIds ? window.MOCK_DATA.origins.filter(
+                      (o) => o.platform === 'instagram' && o.type === 'post' && activeIgAccountIds.has(o.user_sns_account_id)
+                    ) : undefined}
+                    onCloseAttemptRef={wizardCloseAttemptRef}
+                  />
+                ) : panelOpen ? (
+                  <SidePanel
+                    thread={selectedThread}
+                    origin={selectedOrigin}
+                    messages={selectedMessages}
+                    onClose={handleCloseSidePanel}
+                    onIgnore={() => handleIgnoreThread(selectedThreadId)}
+                    onArchive={handleArchiveThread}
+                    onSendReply={handleSendReply}
+                    isOverlay={false}
+                  />
+                ) : null}
               </aside>
             )}
-            {panelOpen && isNarrow && (
-              <SidePanel
-                thread={selectedThread}
-                origin={selectedOrigin}
-                messages={selectedMessages}
-                onClose={handleCloseSidePanel}
-                onIgnore={() => handleIgnoreThread(selectedThreadId)}
-                onArchive={handleArchiveThread}
-                onSendReply={handleSendReply}
-                isOverlay={true}
-              />
+            {sidePanelOverlay && (
+              <>
+                {wizardOpen ? (
+                  <div className="side-panel side-panel--overlay">
+                    <div className="side-panel__overlay-backdrop" onClick={() => { if (wizardCloseAttemptRef.current) wizardCloseAttemptRef.current(); else handleWizardClose(); }} aria-hidden="true" />
+                    <div className="side-panel__overlay-body">
+                      <MacroBuilderWizard
+                        wizardState={wizardState}
+                        dispatch={wizardDispatch}
+                        onSave={handleWizardSave}
+                        onClose={handleWizardClose}
+                        igOrigins={activeIgAccountIds ? window.MOCK_DATA.origins.filter(
+                          (o) => o.platform === 'instagram' && o.type === 'post' && activeIgAccountIds.has(o.user_sns_account_id)
+                        ) : undefined}
+                        onCloseAttemptRef={wizardCloseAttemptRef}
+                      />
+                    </div>
+                  </div>
+                ) : panelOpen ? (
+                  <SidePanel
+                    thread={selectedThread}
+                    origin={selectedOrigin}
+                    messages={selectedMessages}
+                    onClose={handleCloseSidePanel}
+                    onIgnore={() => handleIgnoreThread(selectedThreadId)}
+                    onArchive={handleArchiveThread}
+                    onSendReply={handleSendReply}
+                    isOverlay={true}
+                  />
+                ) : null}
+              </>
             )}
           </div>
+
+          {/* 카테고리 변경 시 dirty wizard 닫기 confirm (F-1) */}
+          <Modal
+            isOpen={pendingCategoryChange !== null}
+            onClose={handlePendingCategoryCancel}
+            title="변경사항 버리기"
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap-stack-md)' }}>
+              <p className="t-body">변경사항을 버리고 다른 카테고리로 이동할까요? 저장되지 않은 내용은 사라져요.</p>
+              <div style={{ display: 'flex', gap: 'var(--gap-inline-sm)', justifyContent: 'flex-end' }}>
+                <button type="button" className="wizard-button--secondary" onClick={handlePendingCategoryCancel}>취소</button>
+                <button type="button" className="wizard-button--primary" onClick={handlePendingCategoryConfirm}>버리고 이동</button>
+              </div>
+            </div>
+          </Modal>
         </div>
       );
     }

@@ -22,6 +22,7 @@ Instagram DM/댓글, YouTube 댓글, Gmail, 틱톡 DM/댓글, 네이버 메일, 
 - 코드 수정이 포함된 작업 단위(phase/task)가 완료될 때마다 반드시 `code-reviewer` agent로 검증. 단순 문서 수정만 있는 경우는 제외
 - sub-agent 정의 파일(`.claude/agents/*.md`) 추가·수정 시 frontmatter에 `name`(lowercase+hyphens, 필수) / `description`(필수) 두 필드를 반드시 포함. 누락 시 세션에 등록 거부됨. 변경 후에는 세션 재시작 또는 `/agents` 슬래시 명령으로 리로드
 - **spec 참조 정책**: spec.md / req.md는 1500+ / 580+ 줄로 통째로 Read 시 컨텍스트 폭발(60k+) → 응답 사이클 지연 + watchdog stall 사고 패턴(실제 발생 이력). main thread는 sub-agent 위임 시 가능하면 정확한 섹션 위치를 핀포인트로 지정(예: "spec.md §4-3 / 라인 626~655만 Read"). 또는 schema/토큰 등 핵심 정보를 위임 프롬프트에 inline 제공하여 agent의 spec 재읽기를 차단. 자세한 정책은 spec.md §0 / sub-agent 정의 참조
+- **Serena MCP 활용 정책**: 코드 탐색은 1순위로 Serena 도구 사용 (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, `search_for_pattern`, `list_dir` 등). symbol-level 탐색이 grep/Read 통째 읽기보다 컨텍스트 효율 우수. **단, 본 프로젝트의 React 컴포넌트는 `index.html` 내 `<script type="text/babel">` 블록에 위치하여 TypeScript LSP가 인식하지 못함 → index.html 내부 JSX/컴포넌트 탐색은 Serena의 `search_for_pattern`(regex 기반) 또는 핀포인트 Read로 우회**. symbol 도구가 효과적인 영역: `mock-data.js`, `icon-set.js`, `eslint.config.js` 등 .js 파일. spec.md / req.md 핀포인트 정책에도 Serena `search_for_pattern`을 통째 Read 회피 보조 수단으로 활용. 첫 세션에서 `activate_project` 첫 호출 시 typescript-language-server 자동 다운로드/인덱싱으로 수십 초~1분 소요(1회성, 이후 캐시됨)
 
 ## 기술 스택
 - 프론트엔드: React 18 (CDN, UMD) + Babel Standalone (CDN, JSX 런타임 트랜스파일)
@@ -54,6 +55,7 @@ Instagram DM/댓글, YouTube 댓글, Gmail, 틱톡 DM/댓글, 네이버 메일, 
 - 폰트는 `--font-family-primary` 등 semantic 토큰을 통해서만 사용. 컴포넌트에 폰트명 직접 명시 금지
 - 아이콘 사이즈/색상은 `--icon-size-*` / `--icon-color-*` 토큰으로만 통제. raw px 금지
 - 새 디자인 표현이 필요한데 토큰이 누락된 경우: 토큰을 spec.md §3에 추가한 뒤 사용. 임시 raw 값 우회 금지
+- **토큰 명명 원칙**: Tier 2 / Tier 3 토큰명은 **속성(property) + 용처(usage)** 만으로 구성. 색명(grey/blue/yellow/pink 등) 또는 hex 의미를 토큰명에 직접 노출 금지. ✅ `--toggle-on-bg`, `--keyword-chip-bg`, `--reply-remove-fg` / ❌ `--toggle-on-bg-blue`, `--keyword-chip-grey-100`, `--pink-soft-bg`. 의미적 변형(soft/strong/hover/disabled/light/heavy)은 정도 표현이라 허용. Tier 1(primitive)만 raw 값을 보유하므로 색명 등장 허용. 이유: swap 시 색이 바뀌면 토큰명이 거짓말이 되어 hex 하드코딩과 동일한 결과
 - 디자인시스템 swap 시 영향 범위는 Tier 1 값 + `icon-set.js` SVG mapping + 폰트 `<link>`로 한정되어야 한다. UI 코드 변경이 필요하면 토큰화 누락이라는 신호
 - 자세한 토큰 체계와 swap 절차는 spec.md §3 참조
 
