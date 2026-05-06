@@ -219,7 +219,7 @@
               <Icon name={icon} size="lg" tone="muted" />
             </div>
           )}
-          <p className="empty-state__title t-h4">{title}</p>
+          <p className="empty-state__title t-display-md">{title}</p>
           {description && (
             <p className="empty-state__desc t-body">{description}</p>
           )}
@@ -573,9 +573,6 @@
       const origin = origins.find((o) => o.id === thread.origin_id);
       const lastMsg = messages.find((m) => m.id === thread.message_ids[thread.message_ids.length - 1]);
 
-      // Type1 판정
-      const useType1 = thread.business_extracted && categoryFilter(CATEGORIES.business, thread);
-
       // 썸네일
       const thumbUrl = origin && origin.type === 'post'
         ? origin.post_meta && origin.post_meta.thumbnail_url
@@ -620,7 +617,6 @@
       };
 
       const stackedClass = thread.is_stacked ? ' preview-card--stacked' : '';
-      const typeClass = useType1 ? ' preview-card--type-business' : '';
       const selectableClass = ' preview-card--selectable';
       const selectedClass = isSelected ? ' preview-card--selected' : '';
       const selectionModeClass = selectionMode ? ' preview-card--selection-mode-on' : '';
@@ -629,7 +625,7 @@
 
       return (
         <button
-          className={`preview-card${stackedClass}${typeClass}${selectableClass}${selectedClass}${selectionModeClass}${pressingClass}${activeClass}`}
+          className={`preview-card${stackedClass}${selectableClass}${selectedClass}${selectionModeClass}${pressingClass}${activeClass}`}
           onClick={handleClick}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
@@ -670,57 +666,30 @@
 
           {/* 본문 */}
           <div className="preview-card__body">
-            {useType1 ? (
-              <PreviewCardType1Body thread={thread} origin={origin} lastMsg={lastMsg} />
-            ) : (
-              <PreviewCardType2Body thread={thread} origin={origin} lastMsg={lastMsg} />
-            )}
+            <PreviewCardType2Body thread={thread} origin={origin} lastMsg={lastMsg} />
           </div>
         </button>
       );
     }
 
-    function PreviewCardType1Body({ thread }) {
-      const biz = thread.business_extracted;
-      // 상단 행: 회사/브랜드 + 시각
-      return (
-        <>
-          <div className="preview-card__body-row">
-            <span className="preview-card__biz-company">
-              {biz.brand || biz.company}
-            </span>
-            <span className="preview-card__time">{relativeTime(thread.last_message_at)}</span>
-          </div>
-          {biz.contact_person && (
-            <span className="preview-card__biz-person">{biz.contact_person}</span>
-          )}
-          {biz.proposal_summary && (
-            <p className="preview-card__biz-summary">{biz.proposal_summary}</p>
-          )}
-          {biz.product && (
-            <span className="preview-card__biz-product">{biz.product}</span>
-          )}
-          <div className="preview-card__biz-footer">
-            <TagChips tags={thread.tags} max={2} />
-            {biz.conditions && (
-              <span className="preview-card__biz-conditions">{biz.conditions}</span>
-            )}
-          </div>
-        </>
-      );
-    }
+    const AI_PICK_PRIORITY_THRESHOLD = 85;
 
     function PreviewCardType2Body({ thread, origin, lastMsg }) {
       const senderName = origin ? origin.display_name : '알 수 없음';
       const preview = lastMsg ? lastMsg.body : '';
+      const isAiPick = thread.priority_score >= AI_PICK_PRIORITY_THRESHOLD;
+      const typeLabelClass = `preview-card__type-label preview-card__type-label--${thread.message_type === 'email' ? 'mail' : thread.message_type}`;
 
       return (
         <>
           <div className="preview-card__body-row">
-            <span className="preview-card__sender">{senderName}</span>
+            <span className="preview-card__sender">
+              {isAiPick && <Icon name="sparkle" size="sm" tone="accent" />}
+              <span className="preview-card__sender-text">{senderName}</span>
+            </span>
             <span className="preview-card__time">{relativeTime(thread.last_message_at)}</span>
           </div>
-          <span className="preview-card__type-label">{msgTypeLabel(thread.message_type)}</span>
+          <span className={typeLabelClass}>{msgTypeLabel(thread.message_type)}</span>
           {preview && (
             <p className="preview-card__preview">{preview}</p>
           )}
@@ -3618,9 +3587,13 @@
         <div className="landing-screen">
           <div className="landing-screen__inner">
             <div className="landing-screen__brand">
-              <span className="t-display-md">blackplum</span>
-              <p className="t-body-lg landing-screen__tagline">
-                처리해야 할 메시지를 한 곳에서
+              <span className="t-display-md landing-screen__wordmark">blackplum</span>
+              <h1 className="t-display-xl landing-screen__headline">
+                받은편지함이 아닌{' '}
+                <span className="landing-screen__highlight">업무 큐</span>
+              </h1>
+              <p className="t-body-lg landing-screen__sub">
+                인스타 DM·댓글, 유튜브 댓글, 메일까지 — 처리할 일만 골라드려요
               </p>
             </div>
             <div className="landing-screen__buttons stack-y-md">
