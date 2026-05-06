@@ -73,68 +73,62 @@ Instagram DM/댓글, YouTube 댓글, Gmail, 틱톡 DM/댓글, 네이버 메일, 
 
 ---
 
-## 행동 원칙 (Behavioral Guidelines)
-
+## Behavioral Guidelines
 LLM 코딩의 흔한 실수를 줄이기 위한 행동 지침. 위 프로젝트별 지침과 함께 적용.
 
-**Tradeoff:** 이 원칙들은 속도보다 신중함을 우선시함. 사소한 작업에는 판단껏 적용.
+## 1. Think Before Coding
 
-### 1. Think Before Coding (코딩 전에 생각하라)
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-**가정하지 말고, 혼란을 숨기지 말고, 트레이드오프를 드러내라.**
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-구현 전에:
-- 가정을 명시적으로 진술. 불확실하면 질문.
-- 여러 해석이 가능하면 모두 제시 — 임의로 선택하지 말 것.
-- 더 단순한 접근이 있다면 말할 것. 필요시 push back.
-- 불명확한 점이 있으면 멈추고, 무엇이 혼란스러운지 명명하고, 질문할 것.
+## 2. Simplicity First
 
-### 2. Simplicity First (단순함이 우선)
+**Minimum code that solves the problem. Nothing speculative.**
 
-**문제를 해결하는 최소한의 코드. 추측성 코드 금지.**
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-- 요청되지 않은 기능 추가 금지.
-- 단일 사용 코드에 추상화 금지.
-- 요청되지 않은 "유연성"이나 "설정 가능성" 금지.
-- 불가능한 시나리오에 대한 에러 핸들링 금지.
-- 200줄을 작성했는데 50줄로 가능하다면 다시 작성.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-자문할 것: "시니어 엔지니어가 이걸 보면 과하게 복잡하다고 할까?" 그렇다면 단순화.
+## 3. Surgical Changes
 
-### 3. Surgical Changes (외과적 수정)
+**Touch only what you must. Clean up only your own mess.**
 
-**필요한 것만 건드릴 것. 본인이 만든 어지러움만 정리할 것.**
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
 
-기존 코드를 수정할 때:
-- 인접한 코드, 주석, 포맷을 "개선"하지 말 것.
-- 망가지지 않은 것을 리팩토링하지 말 것.
-- 다르게 했을 법해도 기존 스타일에 맞출 것.
-- 무관한 dead code를 발견하면 언급만 하고 삭제하지 말 것.
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
 
-본인 변경으로 고아(orphan)가 생긴 경우:
-- 본인 변경으로 unused가 된 import/변수/함수만 제거.
-- 사전에 존재하던 dead code는 요청 없이 제거하지 말 것.
+The test: Every changed line should trace directly to the user's request.
 
-테스트: 변경된 모든 줄이 사용자 요청에 직접 연결되어야 함.
+## 4. Goal-Driven Execution
 
-### 4. Goal-Driven Execution (목표 기반 실행)
+**Define success criteria. Loop until verified.**
 
-**성공 기준을 정의하고, 검증될 때까지 반복.**
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
 
-작업을 검증 가능한 목표로 변환:
-- "validation 추가" → "잘못된 입력에 대한 테스트 작성 후 통과시킬 것"
-- "버그 수정" → "버그를 재현하는 테스트 작성 후 통과시킬 것"
-- "X 리팩토링" → "리팩토링 전후 테스트 통과 보장"
-
-다단계 작업은 간단한 계획을 명시:
+For multi-step tasks, state a brief plan:
 ```
-1. [단계] → 검증: [확인]
-2. [단계] → 검증: [확인]
-3. [단계] → 검증: [확인]
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-강한 성공 기준은 독립적 루프를 가능하게 함. 약한 기준("작동하게 만들어")은 지속적인 명확화를 요구.
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
----
-
-**이 원칙들이 작동하고 있다는 신호:** diff에 불필요한 변경이 줄어들고, 과하게 복잡해서 다시 쓰는 일이 줄어들며, 명확화 질문이 실수 후가 아닌 구현 전에 나옴.
