@@ -2,12 +2,12 @@
  * styles.css — blackplum mockup
  *
  * 3-tier 디자인 토큰 시스템 + 베이스 리셋 + 아이콘 유틸 + 타이포그래피 헬퍼.
- * 1차 외부 디자인시스템 swap: "Streamtime theme" (warm cream paper + ink black + halftone shapes).
+ * 2차 외부 디자인시스템 swap: "Zapier theme" (warm cream paper + warm near-black + sand 1px borders + single orange accent).
  * 토큰 정의는 spec.md §3 (Tier 1: §3-2 / Tier 2: §3-3) 의 contract를 따른다.
  * 컴포넌트 CSS는 Phase 1 작업 — 본 파일에서는 다루지 않는다.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
 
@@ -18,11 +18,11 @@
 :root {
   /* === Tier 1: Color — Foundations === */
   /* === [LIGHT MODE — 활성] === */
-  --color-ink:           #0F0F0F;   /* near-black body / display copy */
-  --color-ink-soft:      #1F1F1F;
-  --color-paper:         #F5EFE3;   /* warm cream — page floor */
-  --color-paper-warm:    #EFE7D6;   /* slightly deeper cream */
-  --color-paper-cool:    #ECE9E2;   /* desaturated alt cream */
+  --color-ink:           #201515;   /* Zapier Black — warm near-black w/ reddish undertone */
+  --color-ink-soft:      #36342e;   /* Dark Charcoal */
+  --color-paper:         #fffefb;   /* Cream White — paper-like warmth, NOT pure white */
+  --color-paper-warm:    #fffdf9;   /* Off-White, secondary surface */
+  --color-paper-cool:    #eceae3;   /* Light Sand */
   --color-white:         #FFFFFF;   /* card interior only — NOT page floor */
   /* === [DARK MODE — 보존] === */
   /* --color-ink:           #F0EAE0; */  /* DM v1: 너무 stark — 고대비 모드 인상. 보더/텍스트 톤 다운으로 v2로 교체 */
@@ -33,35 +33,35 @@
   /* --color-paper-warm:    #1F1D14; */  /* slightly elevated dark band */
   /* --color-paper-cool:    #1B1A12; */
   /* --color-white:         #26241B; */  /* card interior — elevated surface */
-  /* 주의: --color-ink-fixed는 라이트 모드에서도 #1A1410 그대로 사용 — revert 시 유지 */
-  --color-ink-fixed:     #1A1410;   /* 테마 무관 always-dark — brand surface 위 텍스트 contrast 보장 */
+  /* 주의: --color-ink-fixed는 라이트 모드에서도 always-dark — revert 시 유지 */
+  --color-ink-fixed:     #201515;   /* 테마 무관 always-dark — brand surface 위 텍스트 contrast 보장 */
 
-  /* === Tier 1: Color — Brand primaries (halftone shape palette) === */
+  /* === Tier 1: Color — Brand primaries (Zapier orange palette) === */
   /* === [LIGHT MODE — 활성, -soft variants] === */
-  --color-yellow:        #FFD23F;   /* signature yellow */
-  --color-yellow-soft:   #FFE680;
-  --color-blue:          #4FC3F7;
-  --color-blue-deep:     #2196F3;
-  --color-pink:          #FF8FA3;
-  --color-pink-soft:     #FFC2CD;
-  --color-green:         #7CB342;
-  --color-green-soft:    #B8D88A;
-  --color-purple:        #8E6FE0;
-  --color-purple-soft:   #D4C8F8;
-  --color-coral:         #FF6B4A;
+  --color-orange:        #ff4f00;   /* Zapier signature orange */
+  --color-orange-soft:   #ffece4;   /* orange tint, selected-bg 용 */
+  --color-blue:          #5fb4f0;   /* gmail platform 용, warm-shift */
+  --color-blue-deep:     #3f8de0;
+  --color-pink:          #e8748a;   /* instagram platform 용, warm-shift */
+  --color-pink-soft:     #fadce4;
+  --color-green:         #6da33a;   /* naver platform */
+  --color-green-soft:    #c8d8a3;
+  --color-purple:        #7d63c8;
+  --color-purple-soft:   #d8cef0;
+  --color-coral:         #cc3924;   /* YouTube platform — more red-shift to distinguish from orange */
   /* === [DARK MODE — 보존, -soft variants] === */
-  /* --color-yellow-soft:   #4D3D00; */  /* dark amber — chip/selected bg on dark */
+  /* --color-orange-soft:   #4D2000; */  /* dark orange — chip/selected bg on dark */
   /* --color-pink-soft:     #4D2D33; */
   /* --color-green-soft:    #2D4D1F; */
   /* --color-purple-soft:   #3D2F5C; */
 
-  /* === Tier 1: Color — Neutrals (warm-tinted) === */
+  /* === Tier 1: Color — Neutrals (Zapier sand palette) === */
   /* === [LIGHT MODE — 활성] === */
-  --color-grey-100:      #E8E4DA;
-  --color-grey-200:      #C9C4B8;
-  --color-grey-300:      #9D998E;
-  --color-grey-400:      #6B6862;
-  --color-grey-500:      #3D3B36;
+  --color-grey-100:      #eceae3;   /* Light Sand — secondary buttons, subtle backgrounds */
+  --color-grey-200:      #c5c0b1;   /* Sand — Zapier 시그니처 보더 색 */
+  --color-grey-300:      #b5b2aa;   /* Mid Warm */
+  --color-grey-400:      #939084;   /* Warm Gray — muted text */
+  --color-grey-500:      #36342e;   /* Dark Charcoal — secondary text, footer */
   /* === [DARK MODE — 보존] === */
   /* --color-grey-100:      #36342B; */  /* soft divider on dark */
   /* --color-grey-200:      #4A4740; */
@@ -70,7 +70,7 @@
   /* --color-grey-500:      #C9C4B8; */
 
   /* === Tier 1: Font Family === */
-  --font-display:        'Hanken Grotesk', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
+  --font-display:        'Manrope', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
   --font-body:           'Inter', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
   --font-mono:           ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
 
@@ -107,34 +107,34 @@
   --width-container-max:      1440px;  /* 콘텐츠 컨테이너 최대 폭 */
 
   /* === Tier 1: Radius === */
-  --radius-xs:   4px;
-  --radius-sm:   8px;
-  --radius-md:   16px;
-  --radius-lg:   24px;
-  --radius-xl:   32px;
+  --radius-xs:   4px;    /* Zapier orange CTA radius — 유지 */
+  --radius-sm:   5px;    /* Zapier 표준 카드/링크 radius */
+  --radius-md:   8px;    /* Zapier featured card / large button */
+  --radius-lg:   8px;    /* chunky 회피, md와 동일 */
+  --radius-xl:   14px;   /* Zapier social icon scale */
   --radius-pill: 9999px;
 
   /* === Tier 1: Border Width === */
-  --border-w-default: 2px;       /* signature ink-black outline */
-  --border-w-soft:    1.5px;     /* hairline (chips, dividers) */
+  --border-w-default: 1px;       /* Zapier 1px sand border */
+  --border-w-soft:    1px;       /* 모두 1px 통합 */
 
-  /* === Tier 1: Shadow — hard-edge offset only (no soft blur) === */
-  --shadow-card:            0 1px 0 0 var(--color-ink);
-  --shadow-press:           4px 4px 0 0 var(--color-ink);
-  --shadow-press-lg:        6px 6px 0 0 var(--color-ink);
+  /* === Tier 1: Shadow — border-forward (hard-edge offset 폐기) === */
+  --shadow-card:            0 0 0 0 transparent;
+  --shadow-press:           0 0 0 0 transparent;
+  --shadow-press-lg:        0 0 0 0 transparent;
   /* === Tier 1: Shadow — soft elevation (blur-based, UI element lift) === */
-  --shadow-elevation-soft:  0 1px 3px rgba(0,0,0,0.18);  /* 토글 knob 등 소형 UI 요소 lift */
+  --shadow-elevation-soft:  0 1px 2px rgba(32, 21, 21, 0.08);  /* warm subtle shadow — toggle knob 등 소형 lift */
 
   /* === Tier 1: Letter-spacing (tracking) === */
-  --tracking-display-xl:  -0.04em;    /* 88px+ hero */
-  --tracking-display-md:  -0.03em;    /* 44px display */
+  --tracking-display-xl:  -0.01em;    /* 88px+ hero — Zapier display weak negative tracking */
+  --tracking-display-md:  -0.01em;    /* 44px display */
   --tracking-tight:       -0.02em;
   --tracking-snug:        -0.015em;
   --tracking-normal:      0;
   --tracking-wide:        0.04em;     /* eyebrow */
 
   /* === Tier 1: Line-height (leading) === */
-  --leading-display:  0.92;
+  --leading-display:  0.90;   /* Zapier hero 압축형 */
   --leading-tight:    1.05;
   --leading-snug:     1.2;
   --leading-normal:   1.4;
@@ -186,8 +186,8 @@
   --color-text-on-brand:    var(--color-ink-fixed);    /* always-dark — brand(노랑/파랑/핑크) bg에서 양 테마 공통 가독 보장 */
 
   /* === Tier 2: Brand & accents === */
-  --color-brand:            var(--color-yellow);       /* signature accent */
-  --color-brand-soft:       var(--color-yellow-soft);
+  --color-brand:            var(--color-orange);       /* signature accent */
+  --color-brand-soft:       var(--color-orange-soft);
   --color-accent-pink:      var(--color-pink);
   --color-accent-pink-soft: var(--color-pink-soft);
   --color-accent-blue:      var(--color-blue);
@@ -297,8 +297,8 @@
   --motion-easing-standard: var(--easing-standard);
 
   /* === Tier 2: State — selection === */
-  --color-state-selected-bg:   var(--color-yellow-soft);   /* 선택된 카드 배경 */
-  --color-state-selected-border: var(--color-yellow);      /* 선택된 카드 테두리 */
+  --color-state-selected-bg:   var(--color-orange-soft);   /* 선택된 카드 배경 */
+  --color-state-selected-border: var(--color-orange);      /* 선택된 카드 테두리 */
   --color-state-checkbox-on:   var(--color-ink);           /* 체크박스 on 색 */
   --color-state-checkbox-off:  var(--color-grey-300);      /* 체크박스 off 색 */
 
@@ -550,7 +550,7 @@ textarea {
 }
 
 ::selection {
-  background: var(--color-brand);
+  background: var(--color-state-selected-bg);
   color: var(--color-text-primary);
 }
 
@@ -643,7 +643,7 @@ textarea {
   /* ---- PreviewCard — typography ramp ---- */
   --card-sender-font-size:       clamp(var(--size-18), 5vw, var(--font-size-h3));
   /* ---- PreviewCard — type chip colors ---- */
-  --card-type-chip-bg-business: var(--color-yellow-soft);
+  --card-type-chip-bg-business: var(--color-orange-soft);
   --card-type-chip-bg-dm:       var(--color-pink-soft);
   --card-type-chip-bg-comment:  var(--color-pink-soft);
   --card-type-chip-bg-mail:     var(--color-purple-soft);
