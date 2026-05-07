@@ -17,58 +17,57 @@
  * ============================================================ */
 :root {
   /* === Tier 1: Color — Foundations === */
-  /* === [LIGHT MODE — 보존] === */
-  /* --color-ink:           #0F0F0F; */  /* near-black body / display copy */
-  /* --color-ink-soft:      #1F1F1F; */
-  /* --color-paper:         #F5EFE3; */  /* warm cream — page floor */
-  /* --color-paper-warm:    #EFE7D6; */  /* slightly deeper cream */
-  /* --color-paper-cool:    #ECE9E2; */  /* desaturated alt cream */
-  /* --color-white:         #FFFFFF; */  /* card interior only — NOT page floor */
-  /* (신규 토큰: --color-ink-fixed — DM 추가됨, 라이트 모드에서도 #1A1410 사용) */
-  /* === [DARK MODE — 활성] === */
+  /* === [LIGHT MODE — 활성] === */
+  --color-ink:           #0F0F0F;   /* near-black body / display copy */
+  --color-ink-soft:      #1F1F1F;
+  --color-paper:         #F5EFE3;   /* warm cream — page floor */
+  --color-paper-warm:    #EFE7D6;   /* slightly deeper cream */
+  --color-paper-cool:    #ECE9E2;   /* desaturated alt cream */
+  --color-white:         #FFFFFF;   /* card interior only — NOT page floor */
+  /* === [DARK MODE — 보존] === */
   /* --color-ink:           #F0EAE0; */  /* DM v1: 너무 stark — 고대비 모드 인상. 보더/텍스트 톤 다운으로 v2로 교체 */
-  --color-ink:           #D5CFC2;   /* DM v2: warm bone — 보더 soft, text 가독 유지 */
+  /* --color-ink:           #D5CFC2; */  /* DM v2: warm bone — 보더 soft, text 가독 유지 */
   /* --color-ink-soft:      #D9D3C7; */  /* DM v1 */
-  --color-ink-soft:      #B8B2A5;   /* DM v2: ink 톤 다운에 맞춰 비례 조정 */
-  --color-paper:         #16140C;   /* warm near-black — page floor */
-  --color-paper-warm:    #1F1D14;   /* slightly elevated dark band */
-  --color-paper-cool:    #1B1A12;
-  --color-white:         #26241B;   /* card interior — elevated surface */
+  /* --color-ink-soft:      #B8B2A5; */  /* DM v2: ink 톤 다운에 맞춰 비례 조정 */
+  /* --color-paper:         #16140C; */  /* warm near-black — page floor */
+  /* --color-paper-warm:    #1F1D14; */  /* slightly elevated dark band */
+  /* --color-paper-cool:    #1B1A12; */
+  /* --color-white:         #26241B; */  /* card interior — elevated surface */
   /* 주의: --color-ink-fixed는 라이트 모드에서도 #1A1410 그대로 사용 — revert 시 유지 */
   --color-ink-fixed:     #1A1410;   /* 테마 무관 always-dark — brand surface 위 텍스트 contrast 보장 */
 
   /* === Tier 1: Color — Brand primaries (halftone shape palette) === */
-  /* === [LIGHT MODE — 보존] === */
-  /* --color-yellow-soft:   #FFE680; */
-  /* --color-pink-soft:     #FFC2CD; */
-  /* --color-green-soft:    #B8D88A; */
-  /* --color-purple-soft:   #D4C8F8; */
-  /* === [DARK MODE — 활성] === */
+  /* === [LIGHT MODE — 활성, -soft variants] === */
   --color-yellow:        #FFD23F;   /* signature yellow */
-  --color-yellow-soft:   #4D3D00;   /* dark amber — chip/selected bg on dark */
+  --color-yellow-soft:   #FFE680;
   --color-blue:          #4FC3F7;
   --color-blue-deep:     #2196F3;
   --color-pink:          #FF8FA3;
-  --color-pink-soft:     #4D2D33;
+  --color-pink-soft:     #FFC2CD;
   --color-green:         #7CB342;
-  --color-green-soft:    #2D4D1F;
+  --color-green-soft:    #B8D88A;
   --color-purple:        #8E6FE0;
-  --color-purple-soft:   #3D2F5C;
+  --color-purple-soft:   #D4C8F8;
   --color-coral:         #FF6B4A;
+  /* === [DARK MODE — 보존, -soft variants] === */
+  /* --color-yellow-soft:   #4D3D00; */  /* dark amber — chip/selected bg on dark */
+  /* --color-pink-soft:     #4D2D33; */
+  /* --color-green-soft:    #2D4D1F; */
+  /* --color-purple-soft:   #3D2F5C; */
 
   /* === Tier 1: Color — Neutrals (warm-tinted) === */
-  /* === [LIGHT MODE — 보존] === */
-  /* --color-grey-100:      #E8E4DA; */
-  /* --color-grey-200:      #C9C4B8; */
-  /* --color-grey-300:      #9D998E; */
-  /* --color-grey-400:      #6B6862; */
-  /* --color-grey-500:      #3D3B36; */
-  /* === [DARK MODE — 활성] === */
-  --color-grey-100:      #36342B;   /* soft divider on dark */
-  --color-grey-200:      #4A4740;
-  --color-grey-300:      #6E6A60;
-  --color-grey-400:      #8F8C84;
-  --color-grey-500:      #C9C4B8;
+  /* === [LIGHT MODE — 활성] === */
+  --color-grey-100:      #E8E4DA;
+  --color-grey-200:      #C9C4B8;
+  --color-grey-300:      #9D998E;
+  --color-grey-400:      #6B6862;
+  --color-grey-500:      #3D3B36;
+  /* === [DARK MODE — 보존] === */
+  /* --color-grey-100:      #36342B; */  /* soft divider on dark */
+  /* --color-grey-200:      #4A4740; */
+  /* --color-grey-300:      #6E6A60; */
+  /* --color-grey-400:      #8F8C84; */
+  /* --color-grey-500:      #C9C4B8; */
 
   /* === Tier 1: Font Family === */
   --font-display:        'Hanken Grotesk', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
@@ -157,13 +156,13 @@
   --easing-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* === Tier 1: Overlay / Opacity (§5-9 매크로 빌더 도입) === */
-  /* === [LIGHT MODE — 보존] === */
-  /* --color-overlay-scrim:        rgba(15, 15, 15, 0.4); */  /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
-  /* --color-overlay-scrim-strong: rgba(15, 15, 15, 0.5); */  /* modal backdrop dim (더 강한 dim) */
-  /* === [DARK MODE — 활성] === */
-  --color-overlay-scrim:       rgba(0, 0, 0, 0.55);   /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
-  --color-overlay-scrim-strong: rgba(0, 0, 0, 0.65);  /* modal backdrop dim (더 강한 dim) */
-  --opacity-disabled:          0.45;                    /* INACTIVE / disabled 시각 dim */
+  /* === [LIGHT MODE — 활성] === */
+  --color-overlay-scrim:        rgba(15, 15, 15, 0.4);   /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
+  --color-overlay-scrim-strong: rgba(15, 15, 15, 0.5);   /* modal backdrop dim (더 강한 dim) */
+  --opacity-disabled:           0.45;                     /* INACTIVE / disabled 시각 dim */
+  /* === [DARK MODE — 보존] === */
+  /* --color-overlay-scrim:        rgba(0, 0, 0, 0.55); */  /* sheet/drawer backdrop dim */
+  /* --color-overlay-scrim-strong: rgba(0, 0, 0, 0.65); */  /* modal backdrop dim (더 강한 dim) */
 }
 
 /* ============================================================
@@ -697,10 +696,8 @@ textarea {
   --reply-editor-max-height:    200px;
 
   /* ---- AI summary block ---- */
-  /* === [LIGHT MODE — 보존] === */
   /* --ai-summary-bg:              var(--color-blue); */
-  /* === [DARK MODE — 활성] === */
-  --ai-summary-bg:              var(--color-purple-soft);   /* 다크모드: 밝은파랑 → 다크 보라(=#3D2F5C) AI 블록 vibe 유지하며 cream 텍스트 가독 확보 */
+  --ai-summary-bg:              var(--color-purple-soft);   /* purple soft accent — AI 블록 vibe + body 가독 */
   --ai-summary-border:          var(--border-w-soft) solid var(--color-ink);
   --ai-summary-padding:         var(--gap-inline-sm);
 
