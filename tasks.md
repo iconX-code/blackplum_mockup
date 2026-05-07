@@ -282,6 +282,20 @@
 
 ---
 
+## 작업 효율화 — 파일 분할 (2026-05-07) — 완료
+
+> 트리거: `index.html` (3643줄) / `styles.css` (4373줄) / `spec.md` (1887줄)이 sub-agent 작업 시 토큰 폭발 + 응답 지연 야기. 위험도 높은 spec.md 분할은 보류, CSS 분할(저위험) + SPEC_MAP.md 도입(zero-risk additive)으로 절감.
+
+- [x] **styles.css @import 분할** (frontend-dev) — 4373→38줄, `styles/{tokens, base, icon, responsive, components/*}.css` 12개 파일. 내용 cut/paste 0 변경, cascade 보존.
+- [x] **`.claude/SPEC_MAP.md` 도입** (general-purpose) — §N/§N-M 라인 범위 표. 3개 sub-agent + CLAUDE.md spec 참조 정책 갱신. spec.md 본문 무수정.
+- [x] **`frontend-dev.md` 담당 파일 범위 갱신** — `styles/**/*.css` 추가.
+
+### 후속 백로그
+
+- **index.html 분할 (가능성 검토)**: 3643줄 단일 babel 블록. `<script type="text/babel" src=>` 다중 로딩은 file:// 호환 깨져 제외. 대안 — `components/*.jsx` 분리 + bash concat 빌드 스크립트(`build.sh`)로 index.html 번들 산출. 현 토큰 절감(CSS+SPEC_MAP)으로 충분하다면 후순위. 진행 결정 시 frontend-dev에 위임.
+
+---
+
 ## 외부 swap / 사양 추가 트리거 (Backlog)
 
 > 본 mockup의 특성상 외부 디자인시스템 swap 또는 추가 사양은 작업 도중 비동기로 들어옴. 트리거 발생 시 별도 phase로 등재.

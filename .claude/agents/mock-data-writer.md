@@ -112,9 +112,7 @@ window.MOCK_DATA = {
 
 ## spec 참조 정책 (절대 원칙)
 - **spec.md / req.md 통째로 Read 금지**. 통 Read는 컨텍스트 폭발(60k+) → 응답 사이클 5분/턴 + watchdog stall 사고 패턴 (실제 발생 이력)
-- 작업 시작 전 spec.md §0 섹션 인덱스 확인 → 작업 유형별 권장 섹션 식별 → `grep -n '^### 4-' spec.md`로 라인 번호 동적 확인 → Read의 `offset`/`limit`으로 해당 엔티티 섹션만 부분 Read
-- 본 위임 프롬프트에 schema가 inline으로 제공되면 spec.md 재읽기 금지
-- 라인 번호 하드코딩 금지 (변동됨) — 매 작업마다 grep으로 동적 확인
+- 스펙 참조 시 먼저 `.claude/SPEC_MAP.md`(작은 표 파일)를 Read하여 필요 섹션의 라인 범위 확인 → spec.md를 `offset`/`limit`으로 정확히 부분 Read. 본 위임 프롬프트에 schema가 inline으로 제공되면 spec.md 재읽기 금지.
 
 ## 제약
 - `mock-data.js`만 수정 가능
