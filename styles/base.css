@@ -1,0 +1,247 @@
+/* ============================================================
+ * Base — minimal reset & document defaults
+ * ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-primary);
+  background: var(--color-bg-canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ---- 전역 스크롤바 — thumb 폭은 항상 thin(폭 고정), 색만 transparent ↔ visible 토글 ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*::-webkit-scrollbar {
+  width: var(--scrollbar-thumb-size);
+  height: var(--scrollbar-thumb-size);
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--surface-radius-pill);
+  transition: background var(--motion-duration-normal) var(--motion-easing-standard);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+.is-scrolling {
+  scrollbar-color: var(--scrollbar-thumb-color) transparent;
+}
+.is-scrolling::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-color);
+}
+
+
+/* ============================================================
+ * Typography helpers (spec.md §3-5)
+ * 12 semantic roles. JSX 단축 사용. raw 값 미사용.
+ * ============================================================ */
+.t-display-xl {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display-xl);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-display);
+  letter-spacing: var(--tracking-display-xl);
+  text-wrap: balance;
+}
+
+.t-display-lg {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display-lg);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-display);
+  text-wrap: balance;
+}
+
+.t-display-md {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-display-md);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-display);
+  text-wrap: balance;
+}
+
+.t-h1 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-heavy);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.t-h2 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.t-h3 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-snug);
+}
+
+.t-h4 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-snug);
+}
+
+.t-body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.t-body-lg {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.t-caption {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.t-overline {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-overline);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.t-button {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-snug);
+}
+
+/* ============================================================
+ * Reset 보강 — button/input/textarea/a/ul/ol/img/selection
+ * ============================================================ */
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+input,
+textarea {
+  background: none;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+}
+
+::selection {
+  background: var(--color-state-selected-bg);
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+ * Safe-area utilities
+ * ============================================================ */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ============================================================
+ * Container — 최대 폭 + 중앙 정렬
+ * ============================================================ */
+.container {
+  width: 100%;
+  max-width: var(--layout-container-max);
+  margin-inline: auto;
+  padding-inline: var(--gap-stack-md);
+}
+
+/* ============================================================
+ * Stack utilities — vertical / horizontal gap helpers
+ * ============================================================ */
+.stack-y-sm { display: flex; flex-direction: column; gap: var(--gap-stack-sm); }
+.stack-y-md { display: flex; flex-direction: column; gap: var(--gap-stack-md); }
+.stack-y-lg { display: flex; flex-direction: column; gap: var(--gap-stack-lg); }
+
+.stack-x-sm { display: flex; flex-direction: row; align-items: center; gap: var(--gap-inline-sm); }
+.stack-x-md { display: flex; flex-direction: row; align-items: center; gap: var(--gap-inline-md); }
+.stack-x-lg { display: flex; flex-direction: row; align-items: center; gap: var(--gap-stack-sm); }
+
+/* ============================================================
+ * Tappable — mobile fat-finger hit-area guarantee
+ * ============================================================ */
+.tappable {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

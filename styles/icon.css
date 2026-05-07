@@ -1,0 +1,18 @@
+/* ============================================================
+ * Icon utility (spec.md §3-6-3)
+ * ============================================================ */
+.icon { display: inline-block; flex-shrink: 0; }
+.icon--xs { width: var(--icon-size-xs); height: var(--icon-size-xs); }
+.icon--sm { width: var(--icon-size-sm); height: var(--icon-size-sm); }
+.icon--md { width: var(--icon-size-md); height: var(--icon-size-md); }
+.icon--lg { width: var(--icon-size-lg); height: var(--icon-size-lg); }
+.icon--tone-inherit  { color: currentColor; }
+.icon--tone-primary  { color: var(--icon-color-primary); }
+.icon--tone-muted    { color: var(--icon-color-muted); }
+.icon--tone-on-brand { color: var(--icon-color-on-brand); }
+.icon--tone-inverse  { color: var(--icon-color-inverse); }
+.icon--tone-accent   { color: var(--icon-color-accent); }
+.icon path, .icon circle, .icon rect,
+.icon line, .icon polyline, .icon polygon { stroke: currentColor; fill: none; }
+.icon [fill="currentColor"] { fill: currentColor; stroke: none; }
+

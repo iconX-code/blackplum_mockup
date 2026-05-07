@@ -1,0 +1,479 @@
+/* ---- TopToolbar ---- */
+.top-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-md);
+  padding: var(--gap-inline-sm) var(--gap-stack-md);
+  background: var(--color-bg-canvas);
+  border-bottom: var(--surface-border-default);
+  height: var(--top-toolbar-height);
+  min-height: var(--top-toolbar-height);
+}
+
+.top-toolbar__wordmark {
+  font-family: var(--font-family-display);
+  font-size: var(--toolbar-wordmark-font-size);
+  font-weight: var(--font-weight-black);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+  white-space: nowrap;
+  /* 모바일에서는 햄버거 메뉴 옆에 표시 */
+}
+
+.top-toolbar__hamburger {
+  display: none;
+  flex-shrink: 0;
+  position: relative;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+}
+
+/* 햄버거 ↔ 뒤로가기 morph 아이콘 레이어 */
+.top-toolbar__hamburger-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity var(--motion-duration-normal) var(--motion-easing-standard),
+    transform var(--motion-duration-normal) var(--motion-easing-standard);
+  pointer-events: none;
+}
+
+.top-toolbar__hamburger-icon--menu {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.top-toolbar__hamburger-icon--back {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+.top-toolbar__hamburger--back-mode .top-toolbar__hamburger-icon--menu {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+.top-toolbar__hamburger--back-mode .top-toolbar__hamburger-icon--back {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.top-toolbar__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+  flex: 1;
+  overflow-x: auto;
+}
+
+/* SNS filter chip — max-width transition으로 컨텐츠 기반 폭 + 상한 160px */
+.top-toolbar__chip {
+  display: flex;
+  align-items: center;
+  /* collapsed: width=auto이지만 max-width=44px → 정확한 44×44 원형 */
+  width: auto;
+  min-width: var(--chip-collapsed-width);
+  max-width: var(--chip-collapsed-width);
+  height: var(--chip-collapsed-width);
+  padding: 0;
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-tertiary);
+  overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
+  /* 양방향 동일한 transition — max-width 전환으로 컨텐츠 기반 자연스러운 확장 */
+  transition-property: max-width, color, border-color, background;
+  transition-duration: var(--motion-duration-normal), var(--motion-duration-fast), var(--motion-duration-fast), var(--motion-duration-fast);
+  transition-timing-function: var(--motion-easing-standard);
+}
+
+/* 아이콘 셀 — chip 내 좌측 고정, 항상 동일 위치 */
+.top-toolbar__chip-icon-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--chip-icon-col-width);
+  min-width: var(--chip-icon-col-width);
+  height: 100%;
+  flex-shrink: 0;
+}
+
+/* 라벨 셀 — collapsed 시 max-width=0으로 overflow hidden 숨김, hover 시 컨텐츠 폭만큼 펼쳐짐 */
+.top-toolbar__chip-label-cell {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  width: auto;
+  max-width: 0;
+  transition-property: max-width, padding-right;
+  transition-duration: var(--motion-duration-normal);
+  transition-timing-function: var(--motion-easing-standard);
+}
+
+.top-toolbar__chip-label-cell span {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-easing-standard);
+  white-space: nowrap;
+}
+
+.top-toolbar__chip:hover {
+  max-width: var(--chip-expanded-width);
+  color: var(--color-text-primary);
+  background: var(--color-bg-canvas-alt);
+}
+
+.top-toolbar__chip:hover .top-toolbar__chip-label-cell {
+  /* 라벨 셀을 chip의 max-width 상한 내에서 컨텐츠 폭만큼 펼침 */
+  max-width: var(--chip-expanded-width);
+  padding-right: var(--chip-label-padding-right);
+}
+
+.top-toolbar__chip:hover .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.top-toolbar__chip--active {
+  background: var(--color-bg-inverse);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-inverse);
+}
+
+.top-toolbar__chip--active:hover {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+/* dm_automation 뷰에서 비-IG chip 비활성화 */
+.top-toolbar__chip--disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.top-toolbar__chip-initial {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* 전체 토글 chip — 항상 라벨이 보이는 펼쳐진 형태 */
+.top-toolbar__chip--all {
+  max-width: var(--chip-expanded-width);
+}
+
+.top-toolbar__chip--all .top-toolbar__chip-label-cell {
+  max-width: var(--chip-expanded-width);
+  padding-right: var(--chip-label-padding-right);
+}
+
+.top-toolbar__chip--all .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.top-toolbar__chip--all:hover {
+  max-width: var(--chip-expanded-width);
+}
+
+.top-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  flex-shrink: 0;
+}
+
+.top-toolbar__action-button {
+  background: none;
+  border: none;
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-primary);
+  transition: background var(--transition-fast);
+}
+
+.top-toolbar__action-button:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+/* 카테고리 레이블 — Tablet/Mobile 전용, PC에서는 숨김 */
+.top-toolbar__category-label {
+  display: none;
+}
+
+/* 연결 계정 버튼 — Tablet/Mobile 전용, PC에서는 숨김 */
+.top-toolbar__connected-accounts-btn {
+  display: none; /* 기본 숨김, ≤1023px에서 inline-flex로 전환 */
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  background: none;
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-primary);
+  padding: 0 var(--gap-inline-sm);
+  height: var(--touch-target-min);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-toolbar__connected-accounts-btn:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+
+/* ---- Mobile LSB drawer ---- */
+.app-main__lsb-drawer-backdrop {
+  display: none;
+}
+
+.app-main__lsb-drawer {
+  display: none;
+}
+
+/* Tablet + Mobile (≤1023px): 햄버거, drawer 활성화 + wordmark/filter 분기 */
+@media (max-width: 1023px) {
+  /* TopToolbar: 3-section grid (햄버거 | 카테고리명 | 우측 액션) */
+  .top-toolbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0;
+  }
+
+  .top-toolbar__hamburger {
+    display: inline-flex;
+  }
+
+  /* TopToolbar wordmark 숨김 — drawer 헤더에서 표시 */
+  .top-toolbar__wordmark {
+    display: none;
+  }
+
+  /* SNS filter chip 전체 숨김 — 연결 계정 버튼으로 대체 */
+  .top-toolbar__filter {
+    display: none;
+  }
+
+  /* 가운데 카테고리명 표시 */
+  .top-toolbar__category-label {
+    display: block;
+    text-align: center;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-body-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 var(--gap-inline-sm);
+  }
+
+  /* 연결 계정 버튼 표시 */
+  .top-toolbar__connected-accounts-btn {
+    display: inline-flex;
+  }
+
+  /* (+) SNS 추가 버튼 숨김 — Tablet/Mobile에서 불필요 (popover 내 통합) */
+  .top-toolbar__action-button--add-sns {
+    display: none;
+  }
+
+  .app-main__lsb-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--color-scrim-light);
+  }
+
+  .app-main__lsb-drawer {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 400;
+    width: var(--lsb-drawer-width);
+    background: var(--color-bg-canvas);
+    border-right: var(--surface-border-default);
+    box-shadow: var(--surface-shadow-press-lg);
+    overflow-y: auto;
+    padding-top: env(safe-area-inset-top, 0px);
+    animation: lsb-slide-in var(--motion-duration-normal) var(--motion-easing-standard) both;
+  }
+
+  .app-main__lsb-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--gap-inline-sm) var(--gap-inline-sm);
+    border-bottom: var(--surface-border-default);
+  }
+
+  .app-main__lsb-drawer-header__wordmark {
+    font-family: var(--font-family-display);
+    font-size: var(--toolbar-wordmark-font-size);
+    font-weight: var(--font-weight-black);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    padding-left: var(--gap-inline-xs);
+  }
+
+  @keyframes lsb-slide-in {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+  }
+}
+
+/* PC (≥1024px): drawer header wordmark 숨김 (drawer 자체가 표시되지 않으므로 안전장치) */
+@media (min-width: 1024px) {
+  /* PC TopToolbar: LSB width | filter(1fr) | actions(auto) — app-main grid와 시각 정렬 */
+  .top-toolbar {
+    display: grid;
+    grid-template-columns: var(--layout-lsb-width) 1fr auto;
+    align-items: center;
+    gap: 0;
+    padding-inline: 0;
+  }
+
+  /* wordmark: LSB 폭 전체를 차지, 텍스트는 LSB 컨텐츠 padding에 맞춰 좌측 정렬 */
+  .top-toolbar__wordmark {
+    padding: 0 var(--card-padding-x);
+  }
+
+  /* filter: 첫 chip 좌측이 LSB 우측 경계와 정렬, 우측 패딩으로 actions 여백 확보 */
+  .top-toolbar__filter {
+    padding-inline-start: 0;
+    padding-inline-end: var(--gap-inline-sm);
+  }
+
+  /* actions: 우측 패딩 유지 */
+  .top-toolbar__actions {
+    padding-inline-end: var(--gap-stack-md);
+  }
+
+  .top-toolbar__connected-accounts-btn {
+    display: none;
+  }
+
+  /* 가운데 카테고리명 숨김 — PC에서는 wordmark + chip filter 구조 사용 */
+  .top-toolbar__category-label {
+    display: none;
+  }
+}
+
+
+/* ---- SNS 필터 모달 (Tablet/Mobile) ---- */
+.sns-filter-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-sm);
+  padding-bottom: var(--gap-stack-md);
+}
+
+/* 모달 내 chip — 항상 라벨 표시(확장) 형태, hover 전환 없음 */
+.sns-filter-modal .top-toolbar__chip {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding-right: var(--chip-label-padding-right);
+}
+
+.sns-filter-modal .top-toolbar__chip:hover {
+  width: auto;
+  max-width: none;
+}
+
+.sns-filter-modal .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+.sns-filter-modal .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.sns-filter-modal .top-toolbar__chip:hover .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+/* (+) 추가 버튼 — modal 내에서 chip과 동일한 높이 */
+.sns-filter-modal__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--chip-collapsed-width);
+  height: var(--chip-collapsed-width);
+  background: none;
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-pill);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.sns-filter-modal__add-btn:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+/* ---- sns-filter-popover — 연결 계정 popover 내부 컨테이너 ---- */
+.sns-filter-popover {
+  width: min(var(--popover-max-width), calc(100vw - var(--gap-stack-md) * 2));
+  max-height: var(--popover-max-height);
+  overflow-y: auto;
+}
+
+/* popover 내 chip — sns-filter-modal과 동일하게 항상 라벨 표시 */
+.sns-filter-popover .sns-filter-modal__chips {
+  padding-bottom: 0;
+}
+
+.sns-filter-popover .top-toolbar__chip {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  padding-right: var(--chip-label-padding-right);
+}
+
+.sns-filter-popover .top-toolbar__chip:hover {
+  width: auto;
+  max-width: none;
+}
+
+.sns-filter-popover .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+.sns-filter-popover .top-toolbar__chip-label-cell span {
+  opacity: 1;
+}
+
+.sns-filter-popover .top-toolbar__chip:hover .top-toolbar__chip-label-cell {
+  width: auto;
+  max-width: none;
+  padding-right: 0;
+}
+
+

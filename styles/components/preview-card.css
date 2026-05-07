@@ -1,0 +1,389 @@
+/* ---- PreviewCard ---- */
+.preview-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--card-gap);
+  padding: var(--card-padding-y) var(--card-padding-x);
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-card);
+  box-shadow: var(--surface-shadow-card);
+  min-height: var(--card-min-height);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.preview-card:hover {
+  transform: translate(var(--press-offset-x), var(--press-offset-y));
+  box-shadow: var(--surface-shadow-press-lg);
+}
+
+.preview-card:active {
+  transform: translate(0, 0);
+  box-shadow: var(--surface-shadow-card);
+}
+
+/* stacked effect — box-shadow stack (stacking context 독립, hover misalignment 없음) */
+.preview-card--stacked {
+  box-shadow:
+    var(--card-stacked-shadow),
+    var(--surface-shadow-card);
+}
+
+.preview-card--stacked:hover {
+  box-shadow:
+    var(--card-stacked-shadow),
+    var(--surface-shadow-press-lg);
+}
+
+/* thumb area */
+.preview-card__thumb {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--card-thumb-size);
+  height: var(--card-thumb-size);
+  border-radius: var(--surface-radius-md);
+  overflow: visible;
+}
+
+.preview-card__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--surface-radius-md);
+  border: var(--card-thumb-border-width) solid var(--color-border-soft);
+  display: block;
+}
+
+.preview-card__thumb-initial {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--surface-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-canvas-alt);
+  border: var(--card-thumb-border-width) solid var(--color-border-soft);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.preview-card__thumb-platform {
+  position: absolute;
+  bottom: var(--card-thumb-platform-offset);
+  right: var(--card-thumb-platform-offset);
+  width: var(--card-thumb-logo-size);
+  height: var(--card-thumb-logo-size);
+  background: var(--color-bg-surface);
+  border-radius: var(--surface-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--surface-border-default);
+}
+
+/* body area */
+.preview-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-xs);
+}
+
+.preview-card__body-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-inline-xs);
+}
+
+.preview-card__sender {
+  font-family: var(--font-family-display);
+  font-size: var(--card-sender-font-size);
+  font-weight: var(--font-weight-black);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.preview-card__sender-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-card__type-label {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0 var(--gap-inline-sm);
+  height: var(--size-20);
+  border-radius: var(--surface-radius-pill);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.preview-card__type-label--business { background: var(--card-type-chip-bg-business); }
+.preview-card__type-label--dm       { background: var(--card-type-chip-bg-dm); }
+.preview-card__type-label--comment  { background: var(--card-type-chip-bg-comment); }
+.preview-card__type-label--mail     { background: var(--card-type-chip-bg-mail); }
+
+.preview-card__time {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.preview-card__preview {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.preview-card__tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-xs);
+  margin-top: var(--gap-inline-xs);
+}
+
+.preview-card__tag {
+  display: inline-flex;
+  align-items: center;
+  height: var(--card-tag-chip-height);
+  padding: 0 var(--gap-inline-xs);
+  border-radius: var(--surface-radius-pill);
+  border: var(--surface-border-soft);
+  background: var(--color-bg-canvas-alt);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+ * Multi-selection — BulkActionBar + PreviewCard 선택 상태
+ * ============================================================ */
+
+/* BulkActionBar — InboxList 상단 sticky, 선택 모드 시 헤더 대체 */
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--card-padding-x);
+  min-height: var(--bulk-bar-height);
+  background: var(--bulk-bar-bg);
+  color: var(--bulk-bar-color);
+  border-bottom: var(--surface-border-default);
+  position: sticky;
+  top: 0;
+  z-index: var(--bulk-bar-z);
+  flex-shrink: 0;
+}
+
+.bulk-action-bar__left {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-sm);
+}
+
+.bulk-action-bar__count {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--bulk-bar-color);
+}
+
+.bulk-action-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+}
+
+.bulk-action-bar__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  padding: 0 var(--gap-inline-md);
+  height: var(--bulk-bar-btn-height);
+  border: var(--border-w-soft) solid var(--color-text-inverse);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--bulk-bar-color);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.bulk-action-bar__btn:hover {
+  background: var(--color-text-inverse);
+  color: var(--color-bg-inverse);
+}
+
+.bulk-action-bar__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--bulk-bar-color);
+  flex-shrink: 0;
+}
+
+/* PreviewCard — 선택 가능 상태 (PC: hover 시 체크박스 표시) */
+.preview-card__checkbox {
+  display: none;
+  position: absolute;
+  left: var(--gap-inline-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--card-checkbox-size);
+  height: var(--card-checkbox-size);
+  z-index: 2;
+  color: var(--color-state-checkbox-off);
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* PC: hover 시 체크박스 노출 */
+@media (min-width: 768px) {
+  .preview-card--selectable:hover .preview-card__checkbox {
+    display: flex;
+  }
+}
+
+/* 선택된 카드는 항상 체크박스 표시 */
+.preview-card--selected .preview-card__checkbox {
+  display: flex;
+  color: var(--color-state-checkbox-on);
+}
+
+/* 선택된 카드 강조 */
+.preview-card--selected {
+  background: var(--color-state-selected-bg);
+  border-color: var(--color-state-selected-border);
+}
+
+/* 선택 모드 ON: 모든 카드 체크박스 노출 (선택/미선택 불문) */
+.preview-card--selectable.preview-card--selection-mode-on .preview-card__checkbox {
+  display: flex;
+}
+
+/* 선택 모드에서 체크박스 공간만큼 내용 indent */
+.preview-card--selectable.preview-card--selection-mode-on {
+  padding-left: calc(var(--card-checkbox-size) + var(--card-gap));
+}
+
+/* long-press 시각 피드백 */
+.preview-card--pressing {
+  transform: scale(var(--card-longpress-scale));
+  transition: transform var(--transition-fast);
+}
+
+/* BulkTagModal chip grid */
+.bulk-tag-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-stack-md);
+}
+
+.bulk-tag-modal__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+}
+
+.bulk-tag-modal__group-label {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.bulk-tag-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-inline-xs);
+}
+
+.bulk-tag-modal__chip {
+  height: var(--bulk-tag-chip-height);
+  padding: 0 var(--gap-inline-md);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  background: var(--color-bg-surface);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.bulk-tag-modal__chip:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+.bulk-tag-modal__chip--selected {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-border-strong);
+}
+
+.bulk-tag-modal__apply-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--touch-target-min);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  margin-top: var(--gap-stack-md);
+  transition: opacity var(--transition-fast);
+}
+
+.bulk-tag-modal__apply-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+

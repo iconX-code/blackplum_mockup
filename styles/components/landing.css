@@ -1,0 +1,85 @@
+/* ============================================================
+ * Phase 2 Component CSS
+ * ============================================================ */
+
+/* ---- LandingScreen ---- */
+.landing-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-canvas);
+  padding: var(--gap-stack-lg);
+}
+
+.landing-screen__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-section);
+  width: 100%;
+  max-width: var(--landing-inner-max-width);
+}
+
+.landing-screen__brand {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-stack-md);
+}
+
+.landing-screen__wordmark {
+  color: var(--color-text-tertiary);
+}
+
+.landing-screen__headline {
+  margin: 0;
+  font-size: var(--landing-headline-font-size);
+  color: var(--color-text-primary);
+}
+
+.landing-screen__highlight {
+  display: inline-block;
+  background: var(--landing-headline-highlight-bg);
+  padding: 0.05em 0.15em;
+  border-radius: var(--landing-headline-highlight-radius);
+  transform: rotate(-1.5deg);
+}
+
+.landing-screen__sub {
+  margin: 0;
+  color: var(--color-text-secondary);
+  max-width: var(--landing-sub-max-width);
+}
+
+.landing-screen__buttons {
+  width: 100%;
+}
+
+.landing-screen__button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-inline-md);
+  padding: var(--gap-inline-md) var(--gap-stack-md);
+  background: var(--color-bg-surface);
+  border: var(--surface-border-default);
+  border-radius: var(--surface-radius-chip);
+  box-shadow: var(--surface-shadow-press);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.landing-screen__button:hover {
+  transform: translate(var(--press-offset-x), var(--press-offset-y));
+  box-shadow: var(--surface-shadow-press-lg);
+}
+
+.landing-screen__button:active {
+  transform: translate(0, 0);
+  box-shadow: var(--surface-shadow-card);
+}
+
+

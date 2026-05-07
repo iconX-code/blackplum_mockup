@@ -1,0 +1,150 @@
+/* ---- InboxList ---- */
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* TagFilterBar */
+.tag-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  padding: var(--gap-inline-sm) var(--card-padding-x);
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  border-bottom: var(--surface-border-default);
+  flex-wrap: nowrap;
+}
+
+.tag-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  height: var(--inbox-tag-chip-height);
+  padding: 0 var(--gap-inline-sm);
+  border-radius: var(--surface-radius-pill);
+  border: var(--surface-border-soft);
+  background: var(--color-bg-surface);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tag-filter-chip:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+.tag-filter-chip--active {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  border-color: var(--color-border-strong);
+}
+
+.tag-filter-chip--active:hover {
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+}
+
+/* toolbar row (TagFilterBar + Sort 버튼 나란히) */
+.inbox-list__toolbar {
+  display: flex;
+  align-items: center;
+  padding: var(--gap-inline-sm) var(--card-padding-x);
+  gap: var(--gap-inline-sm);
+  border-bottom: var(--surface-border-default);
+  flex-shrink: 0;
+  background: var(--color-bg-canvas);
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+
+.inbox-list__toolbar-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-inline-xs);
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+}
+
+.inbox-list__toolbar-chips .tag-filter-chip {
+  flex-shrink: 0;
+}
+
+/* Sort 버튼 컨테이너 */
+.inbox-list__sort {
+  flex-shrink: 0;
+}
+
+.inbox-list__sort-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--inbox-sort-btn-size);
+  height: var(--inbox-sort-btn-size);
+  border: none;
+  border-radius: var(--surface-radius-md);
+  background: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.inbox-list__sort-button:hover {
+  background: var(--color-bg-canvas-alt);
+  color: var(--color-text-primary);
+}
+
+/* Sort dropdown (popover 내부) */
+.inbox-list__sort-dropdown {
+  display: flex;
+  flex-direction: column;
+  min-width: var(--inbox-sort-dropdown-min-w);
+  padding: var(--gap-stack-xs) 0;
+}
+
+.inbox-list__sort-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-inline-sm);
+  width: 100%;
+  padding: var(--gap-stack-xs) var(--gap-inline-md);
+  border: none;
+  background: none;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+
+.inbox-list__sort-option:hover {
+  background: var(--color-bg-canvas-alt);
+}
+
+.inbox-list__sort-option--active {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.inbox-list__cards {
+  flex: 1;
+  padding: var(--gap-inline-sm) var(--gap-inline-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-inline-sm);
+}
+
+

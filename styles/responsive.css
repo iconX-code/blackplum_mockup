@@ -1,0 +1,104 @@
+/* ============================================================
+ * Layout — 3분할 app shell (spec.md §5-2 / §7)
+ * @media 조건절 raw px는 §3-8 예외 허용
+ * ============================================================ */
+
+/* ---- App shell — flex-column, height=100dvh (이슈 #7) ---- */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  background: var(--color-bg-canvas);
+}
+
+/* ---- PC grid (≥ 1024px) ---- */
+/* 패널 닫힘 default: LSB + InboxList(1fr) */
+.app-main {
+  display: grid;
+  grid-template-columns: var(--layout-lsb-width) 1fr;
+  grid-template-rows: 1fr;
+  flex: 1;
+  min-height: 0;
+  max-width: var(--layout-container-max);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.app-main__lsb {
+  grid-column: 1;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-main__inbox-list {
+  grid-column: 2;
+  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+}
+
+.app-main__side-panel {
+  grid-column: 3;
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* ---- Tablet (768px ~ 1023px): LSB 숨김, InboxList + SidePanel inline 2-col ---- */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .app-main__lsb {
+    display: none;
+  }
+
+  /* 패널 닫힘: 단일 컬럼 전체폭 */
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .app-main__inbox-list {
+    grid-column: 1;
+  }
+
+  /* 패널 열림: InboxList(고정) + SidePanel(잔여) 2-col inline */
+  .app-main--panel-open {
+    grid-template-columns: var(--layout-inboxlist-width-tablet) 1fr;
+  }
+
+  .app-main--panel-open .app-main__inbox-list {
+    grid-column: 1;
+  }
+
+  .app-main--panel-open .app-main__side-panel {
+    grid-column: 2;
+    display: block;
+  }
+}
+
+/* ---- Mobile (≤ 767px): 단일 컬럼 + overlay ---- */
+@media (max-width: 767px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .app-main__lsb {
+    display: none;
+  }
+
+  .app-main__side-panel {
+    display: none;
+  }
+
+  .app-main__inbox-list {
+    grid-column: 1;
+  }
+}
+
+

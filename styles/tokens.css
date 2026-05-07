@@ -1,0 +1,586 @@
+/* ============================================================
+ * Tier 1: Primitive 토큰 (raw values)
+ * 외부 DS swap 시 이 영역만 교체. UI 코드는 Tier 1을 직접 참조하지 않는다.
+ * ============================================================ */
+:root {
+  /* === Tier 1: Color — Foundations === */
+  /* === [LIGHT MODE — 활성] === */
+  --color-ink:           #201515;   /* Zapier Black — warm near-black w/ reddish undertone */
+  --color-ink-soft:      #36342e;   /* Dark Charcoal */
+  --color-paper:         #fffefb;   /* Cream White — paper-like warmth, NOT pure white */
+  --color-paper-warm:    #fffdf9;   /* Off-White, secondary surface */
+  --color-paper-cool:    #eceae3;   /* Light Sand */
+  --color-white:         #FFFFFF;   /* card interior only — NOT page floor */
+  /* === [DARK MODE — 보존] === */
+  /* --color-ink:           #F0EAE0; */  /* DM v1: 너무 stark — 고대비 모드 인상. 보더/텍스트 톤 다운으로 v2로 교체 */
+  /* --color-ink:           #D5CFC2; */  /* DM v2: warm bone — 보더 soft, text 가독 유지 */
+  /* --color-ink-soft:      #D9D3C7; */  /* DM v1 */
+  /* --color-ink-soft:      #B8B2A5; */  /* DM v2: ink 톤 다운에 맞춰 비례 조정 */
+  /* --color-paper:         #16140C; */  /* warm near-black — page floor */
+  /* --color-paper-warm:    #1F1D14; */  /* slightly elevated dark band */
+  /* --color-paper-cool:    #1B1A12; */
+  /* --color-white:         #26241B; */  /* card interior — elevated surface */
+  /* 주의: --color-ink-fixed는 라이트 모드에서도 always-dark — revert 시 유지 */
+  --color-ink-fixed:     #201515;   /* 테마 무관 always-dark — brand surface 위 텍스트 contrast 보장 */
+
+  /* === Tier 1: Color — Brand primaries (Zapier orange palette) === */
+  /* === [LIGHT MODE — 활성, -soft variants] === */
+  --color-orange:        #ff4f00;   /* Zapier signature orange */
+  --color-orange-soft:   #ffece4;   /* orange tint, selected-bg 용 */
+  --color-blue:          #5fb4f0;   /* gmail platform 용, warm-shift */
+  --color-blue-deep:     #3f8de0;
+  --color-pink:          #e8748a;   /* instagram platform 용, warm-shift */
+  --color-pink-soft:     #fadce4;
+  --color-green:         #6da33a;   /* naver platform */
+  --color-green-soft:    #c8d8a3;
+  --color-purple:        #7d63c8;
+  --color-purple-soft:   #d8cef0;
+  --color-coral:         #cc3924;   /* YouTube platform — more red-shift to distinguish from orange */
+  /* === [DARK MODE — 보존, -soft variants] === */
+  /* --color-orange-soft:   #4D2000; */  /* dark orange — chip/selected bg on dark */
+  /* --color-pink-soft:     #4D2D33; */
+  /* --color-green-soft:    #2D4D1F; */
+  /* --color-purple-soft:   #3D2F5C; */
+
+  /* === Tier 1: Color — Neutrals (Zapier sand palette) === */
+  /* === [LIGHT MODE — 활성] === */
+  --color-grey-100:      #eceae3;   /* Light Sand — secondary buttons, subtle backgrounds */
+  --color-grey-200:      #c5c0b1;   /* Sand — Zapier 시그니처 보더 색 */
+  --color-grey-300:      #b5b2aa;   /* Mid Warm */
+  --color-grey-400:      #939084;   /* Warm Gray — muted text */
+  --color-grey-500:      #36342e;   /* Dark Charcoal — secondary text, footer */
+  /* === [DARK MODE — 보존] === */
+  /* --color-grey-100:      #36342B; */  /* soft divider on dark */
+  /* --color-grey-200:      #4A4740; */
+  /* --color-grey-300:      #6E6A60; */
+  /* --color-grey-400:      #8F8C84; */
+  /* --color-grey-500:      #C9C4B8; */
+
+  /* === Tier 1: Font Family === */
+  --font-display:        'Manrope', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
+  --font-body:           'Inter', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
+  --font-mono:           ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  /* === Tier 1: Size Scale (font-size px) === */
+  --size-12: 12px;
+  --size-14: 14px;
+  --size-16: 16px;
+  --size-18: 18px;
+  --size-20: 20px;
+  --size-24: 24px;
+  --size-28: 28px;
+  --size-32: 32px;
+  --size-44: 44px;
+  --size-64: 64px;
+  --size-88: 88px;
+
+  /* === Tier 1: Spacing Scale (4px base) === */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* === Tier 1: Layout Width (3분할 shell — Phase 1-3 도입) === */
+  --width-lsb-pc:             240px;   /* PC 좌측 LSB 고정 폭 */
+  --width-sidepanel-pc:       400px;   /* PC 우측 SidePanel 폭 */
+  --width-inboxlist-pc:       520px;   /* PC InboxList 고정 폭 (패널 열림 시) */
+  --width-inboxlist-tablet:   360px;   /* Tablet InboxList 고정 폭 (패널 열림 시) */
+  --width-container-max:      1440px;  /* 콘텐츠 컨테이너 최대 폭 */
+
+  /* === Tier 1: Radius === */
+  --radius-xs:   4px;    /* Zapier orange CTA radius — 유지 */
+  --radius-sm:   5px;    /* Zapier 표준 카드/링크 radius */
+  --radius-md:   8px;    /* Zapier featured card / large button */
+  --radius-lg:   8px;    /* chunky 회피, md와 동일 */
+  --radius-xl:   14px;   /* Zapier social icon scale */
+  --radius-pill: 9999px;
+
+  /* === Tier 1: Border Width === */
+  --border-w-default: 1px;       /* Zapier 1px sand border */
+  --border-w-soft:    1px;       /* 모두 1px 통합 */
+
+  /* === Tier 1: Shadow — border-forward (hard-edge offset 폐기) === */
+  --shadow-card:            0 0 0 0 transparent;
+  --shadow-press:           0 0 0 0 transparent;
+  --shadow-press-lg:        0 0 0 0 transparent;
+  /* === Tier 1: Shadow — soft elevation (blur-based, UI element lift) === */
+  --shadow-elevation-soft:  0 1px 2px rgba(32, 21, 21, 0.08);  /* warm subtle shadow — toggle knob 등 소형 lift */
+
+  /* === Tier 1: Letter-spacing (tracking) === */
+  --tracking-display-xl:  -0.01em;    /* 88px+ hero — Zapier display weak negative tracking */
+  --tracking-display-md:  -0.01em;    /* 44px display */
+  --tracking-tight:       -0.02em;
+  --tracking-snug:        -0.015em;
+  --tracking-normal:      0;
+  --tracking-wide:        0.04em;     /* eyebrow */
+
+  /* === Tier 1: Line-height (leading) === */
+  --leading-display:  0.90;   /* Zapier hero 압축형 */
+  --leading-tight:    1.05;
+  --leading-snug:     1.2;
+  --leading-normal:   1.4;
+  --leading-relaxed:  1.5;
+
+  /* === Tier 1: Font weight === */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-heavy:    800;
+  --weight-black:    900;
+
+  /* === Tier 1: Motion === */
+  --motion-fast:     150ms;
+  --motion-normal:   200ms;
+  --motion-slow:     350ms;
+  --easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --easing-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* === Tier 1: Overlay / Opacity (§5-9 매크로 빌더 도입) === */
+  /* === [LIGHT MODE — 활성] === */
+  --color-overlay-scrim:        rgba(15, 15, 15, 0.4);   /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
+  --color-overlay-scrim-strong: rgba(15, 15, 15, 0.5);   /* modal backdrop dim (더 강한 dim) */
+  --opacity-disabled:           0.45;                     /* INACTIVE / disabled 시각 dim */
+  /* === [DARK MODE — 보존] === */
+  /* --color-overlay-scrim:        rgba(0, 0, 0, 0.55); */  /* sheet/drawer backdrop dim */
+  /* --color-overlay-scrim-strong: rgba(0, 0, 0, 0.65); */  /* modal backdrop dim (더 강한 dim) */
+}
+
+/* ============================================================
+ * Tier 2: Semantic 토큰 (UI 코드가 직접 참조)
+ * swap 후에도 이름은 변하지 않는다. 컴포넌트 CSS·inline style은 이 tier만 참조.
+ * ============================================================ */
+:root {
+  /* === Tier 2: Surface (background) === */
+  --color-bg-canvas:        var(--color-paper);        /* page floor — warm cream */
+  --color-bg-canvas-alt:    var(--color-paper-warm);   /* deeper cream band */
+  --color-bg-surface:       var(--color-white);        /* card interior */
+  --color-bg-inverse:       var(--color-ink);          /* dark band, primary CTA fill */
+
+  /* === Tier 2: Text === */
+  --color-text-primary:     var(--color-ink);
+  --color-text-secondary:   var(--color-grey-500);
+  --color-text-tertiary:    var(--color-grey-400);
+  --color-text-muted:       var(--color-grey-300);
+  --color-text-inverse:     var(--color-paper);
+  /* --color-text-on-brand:    var(--color-ink); */          /* yellow / cream surfaces use ink type */  /* DM 수정: ink가 다크모드에서 flip되면 brand surface 가독성 깨짐 → ink-fixed로 분리 */
+  --color-text-on-brand:    var(--color-ink-fixed);    /* always-dark — brand(노랑/파랑/핑크) bg에서 양 테마 공통 가독 보장 */
+
+  /* === Tier 2: Brand & accents === */
+  --color-brand:            var(--color-orange);       /* signature accent */
+  --color-brand-soft:       var(--color-orange-soft);
+  --color-accent-pink:      var(--color-pink);
+  --color-accent-pink-soft: var(--color-pink-soft);
+  --color-accent-blue:      var(--color-blue);
+  --color-accent-coral:       var(--color-coral);
+
+  /* === Tier 2: Border === */
+  --color-border-strong:    var(--color-ink);          /* 2px signature outline */
+  --color-border-soft:      var(--color-grey-100);     /* 1.5px hairline */
+
+  /* === Tier 2: Status === */
+  --color-status-danger:    var(--color-coral);
+
+  /* === Tier 2: Platform colors (functional — SNS borders/accents) === */
+  --color-platform-instagram: var(--color-pink);
+  --color-platform-youtube:   var(--color-coral);
+  --color-platform-gmail:     var(--color-blue);
+  --color-platform-tiktok:    var(--color-ink);
+  --color-platform-naver:     var(--color-green);
+  --color-platform-mail:      var(--color-grey-400);
+
+  /* === Tier 2: Typography — family === */
+  --font-family-display:    var(--font-display);       /* headlines / buttons / eyebrows / nav */
+  --font-family-primary:    var(--font-body);          /* body / lead / running text */
+
+  /* === Tier 2: Typography — size (semantic role) === */
+  --font-size-display-xl:   var(--size-88);            /* hero — desktop only */
+  --font-size-display-lg:   var(--size-64);
+  --font-size-display-md:   var(--size-44);
+  --font-size-h1:           var(--size-32);
+  --font-size-h2:           var(--size-24);
+  --font-size-h3:           var(--size-20);
+  --font-size-h4:           var(--size-18);
+  --font-size-body-lg:      var(--size-16);
+  --font-size-body:         var(--size-14);
+  --font-size-caption:      var(--size-12);
+  --font-size-overline:     var(--size-12);
+
+  /* === Tier 2: Typography — weight === */
+  --font-weight-regular:    var(--weight-regular);
+  --font-weight-medium:     var(--weight-medium);
+  --font-weight-semibold:   var(--weight-semibold);
+  --font-weight-bold:       var(--weight-bold);
+  --font-weight-heavy:      var(--weight-heavy);
+  --font-weight-black:      var(--weight-black);
+
+  /* === Tier 2: Typography — leading === */
+  --line-height-display:    var(--leading-display);    /* 0.92 — display type */
+  --line-height-tight:      var(--leading-tight);      /* 1.05 — h1~h3 */
+  --line-height-snug:       var(--leading-snug);       /* 1.2 — h4 / eyebrow */
+  --line-height-normal:     var(--leading-normal);     /* 1.4 — lead */
+  --line-height-relaxed:    var(--leading-relaxed);    /* 1.5 — body */
+
+  /* === Tier 2: Typography — tracking === */
+  --letter-spacing-display: var(--tracking-display-md);
+  --letter-spacing-tight:   var(--tracking-tight);
+  --letter-spacing-snug:    var(--tracking-snug);
+  --letter-spacing-normal:  var(--tracking-normal);
+  --letter-spacing-wide:    var(--tracking-wide);      /* eyebrow */
+
+  /* === Tier 2: Surface — radius === */
+  --surface-radius-card:    var(--radius-lg);          /* 24px — card / panel */
+  --surface-radius-md:      var(--radius-md);          /* 16px — icon box, small surfaces */
+  --surface-radius-chip:    var(--radius-pill);
+  --surface-radius-pill:    var(--radius-pill);
+
+  /* === Tier 2: Surface — border (composite) === */
+  --surface-border-default: var(--border-w-default) solid var(--color-border-strong);
+  --surface-border-soft:    var(--border-w-soft)    solid var(--color-border-soft);
+
+  /* === Tier 2: Surface — shadow === */
+  --surface-shadow-card:    var(--shadow-card);
+  --surface-shadow-press:   var(--shadow-press);       /* button hover */
+  --surface-shadow-press-lg:var(--shadow-press-lg);    /* card hover */
+
+  /* === Tier 2: Spacing aliases === */
+  --gap-inline-xs:          var(--space-1);
+  --gap-inline-sm:          var(--space-2);
+  --gap-inline-md:          var(--space-3);
+  --gap-stack-sm:           var(--space-3);
+  --gap-stack-md:           var(--space-4);
+  --gap-stack-lg:           var(--space-5);
+  --gap-section:            var(--space-7);
+
+  /* === Tier 2: Icon === */
+  --icon-size-xs:           var(--size-12);
+  --icon-size-sm:           var(--size-16);
+  --icon-size-md:           var(--size-20);
+  --icon-size-lg:           var(--size-24);
+  --icon-color-primary:     var(--color-text-primary);
+  --icon-color-muted:       var(--color-text-tertiary);
+  --icon-color-on-brand:    var(--color-text-on-brand);
+  --icon-color-inverse:     var(--color-text-inverse);
+  --icon-color-accent:      var(--color-accent-coral);
+
+  /* === Tier 2: Layout (3분할 shell + hit area — Phase 1-3 도입) === */
+  --layout-lsb-width:               var(--width-lsb-pc);
+  --layout-inboxlist-width:         var(--width-inboxlist-pc);        /* 패널 열림 시 InboxList 고정 폭 */
+  --layout-inboxlist-width-tablet:  var(--width-inboxlist-tablet);    /* Tablet InboxList 폭 */
+  --layout-container-max:           var(--width-container-max);
+  --touch-target-min:        var(--size-44);              /* mobile fat-finger 최소 타겟 */
+
+  /* === Tier 2: Motion === */
+  --transition-fast:        var(--motion-fast)   var(--easing-standard);
+  --transition-normal:      var(--motion-normal) var(--easing-standard);
+  --motion-duration-fast:   var(--motion-fast);
+  --motion-duration-normal: var(--motion-normal);
+  --motion-easing-standard: var(--easing-standard);
+
+  /* === Tier 2: State — selection === */
+  --color-state-selected-bg:   var(--color-orange-soft);   /* 선택된 카드 배경 */
+  --color-state-selected-border: var(--color-orange);      /* 선택된 카드 테두리 */
+  --color-state-checkbox-on:   var(--color-ink);           /* 체크박스 on 색 */
+  --color-state-checkbox-off:  var(--color-grey-300);      /* 체크박스 off 색 */
+
+  /* === Tier 2: Stacked card fill & border (box-shadow stack용 alpha 색상) === */
+  --color-stacked-card-1:   color-mix(in srgb, var(--color-bg-canvas-alt) 50%, transparent);
+  --color-stacked-card-2:   color-mix(in srgb, var(--color-bg-canvas-alt) 25%, transparent);
+  --color-stacked-border-1: color-mix(in srgb, var(--color-border-strong) 50%, transparent);
+  --color-stacked-border-2: color-mix(in srgb, var(--color-border-strong) 25%, transparent);
+
+  /* === Tier 2: Overlay scrim (backdrop) === */
+  --color-scrim-heavy:      var(--color-overlay-scrim-strong);   /* modal backdrop */
+  --color-scrim-light:      var(--color-overlay-scrim);          /* drawer backdrop */
+
+  /* === Tier 2: Interaction — press offset (button/card hover lift) === */
+  --press-offset-x:         -2px;
+  --press-offset-y:         -2px;
+
+  /* === Tier 2: Opacity — semantic intent === */
+  --opacity-hover:           0.85;  /* hover 단계 미세 dim (버튼·CTA) */
+  --opacity-disabled-soft:   0.7;   /* 외형 visible 유지한 disabled (AI 버튼 등) */
+  --opacity-disabled-strong: 0.35;  /* 강한 dim disabled (발송 버튼 비활성 등) */
+
+  /* === Tier 2: §5-9 매크로 빌더 — sheet / accordion / chip / status === */
+  --color-bg-sheet:               var(--color-bg-surface);         /* bottom sheet / SidePanel 표면 배경 */
+  --color-bg-sheet-overlay:       var(--color-overlay-scrim);      /* sheet 뒤 dim 오버레이 */
+  --color-bg-accordion-collapsed: var(--color-bg-canvas-alt);      /* 아코디언 닫힌 상태 배경 */
+  --color-bg-input-soft:          var(--color-bg-canvas-alt);      /* wizard input 영역 옅은 배경 */
+  --color-status-info-soft:       var(--color-accent-blue);        /* 활성 토글 ON 채움색 */
+  --color-chip-remove-bg:         var(--color-grey-100);           /* chip × 버튼 배경 */
+  --color-chip-remove-fg:         var(--color-text-tertiary);      /* chip × 버튼 글리프 색 */
+  --color-reply-remove-bg:        var(--color-accent-pink-soft);   /* 답글 − 버튼 배경 */
+  --color-reply-remove-fg:        var(--color-accent-pink);        /* 답글 − 버튼 글리프 */
+  --surface-radius-sheet:         var(--radius-lg);                /* bottom sheet 상단 radius (양 코너만) */
+}
+
+/* ============================================================
+ * Tier 3: Component tokens (Phase 2 — spec.md §3-4)
+ * ============================================================ */
+:root {
+  /* LandingScreen */
+  --landing-inner-max-width:        560px;
+  --landing-headline-font-size:     clamp(var(--size-44), 12vw, var(--font-size-display-xl));
+  --landing-headline-highlight-bg:  var(--color-brand-soft);
+  --landing-headline-highlight-radius: 12px;                /* DESIGN.md L305: rotated pill border-radius */
+  --landing-sub-max-width:          36ch;
+
+  /* TopToolbar chip */
+  --chip-collapsed-width:       var(--touch-target-min);   /* icon-only 상태 chip 폭(=height) — 원형 */
+  --chip-expanded-width:        160px;                     /* hover 확장 시 전체 chip 폭 */
+  --chip-icon-col-width:        var(--touch-target-min);   /* 아이콘 셀 고정 폭 */
+  --chip-label-padding-right:   var(--gap-inline-sm);      /* 확장 시 라벨 우측 패딩 */
+  /* TopToolbar wordmark */
+  --toolbar-wordmark-font-size: var(--font-size-h3);
+
+  /* Toast */
+  --toast-max-width:            320px;
+
+  /* Modal */
+  --modal-dialog-max-width:     480px;
+
+  /* Popover */
+  --popover-min-width:          160px;
+  --popover-max-width:          320px;
+  --popover-max-height:         60vh;
+  --z-popover:                  7000;
+  --z-popover-backdrop:         6999;
+
+  /* EmptyState icon box */
+  --empty-state-icon-size:      48px;
+  --empty-state-desc-max-width: 280px;
+  --empty-state-min-height:     200px;
+  --empty-state-title-font-size: clamp(var(--size-24), 7vw, var(--font-size-display-md));
+
+  /* LSB drawer (mobile) */
+  --lsb-drawer-width:           min(280px, 80vw);
+
+  /* Modal max-height */
+  --modal-dialog-max-height:        90vh;   /* PC */
+  --modal-dialog-max-height-mobile: 85vh;   /* mobile bottom-sheet 형태 */
+
+  /* Toast animation micro-offsets */
+  --toast-enter-offset:         8px;
+  --toast-exit-offset:          4px;
+
+  /* ---- LSB (LeftSidebar) component tokens ---- */
+  --lsb-brand-height:           52px;
+  --lsb-category-row-height:    var(--touch-target-min);   /* 44px — fat-finger 최소 */
+  --lsb-category-icon-size:     var(--icon-size-md);
+  --lsb-badge-min-width:        20px;
+  --lsb-badge-height:           20px;
+  --lsb-divider-height:         1px;
+  --lsb-section-divider-height: var(--border-w-default);   /* 굵은 섹션 구분선 */
+  --lsb-profile-height:         56px;
+  --lsb-profile-avatar-size:    var(--size-32);
+
+  /* ---- InboxList component tokens ---- */
+  --inbox-tag-chip-height:      28px;
+  --inbox-sort-btn-size:        var(--touch-target-min);
+  --inbox-sort-dropdown-min-w:  120px;
+
+  /* ---- PreviewCard component tokens ---- */
+  --card-thumb-size:            56px;
+  --card-thumb-logo-size:       var(--icon-size-sm);       /* platform logo badge */
+  --card-thumb-border-width:    var(--border-w-soft);
+  --card-gap:                   var(--gap-inline-md);
+  --card-padding-x:             var(--gap-stack-md);
+  --card-padding-y:             var(--gap-inline-md);
+  --card-stacked-offset:        4px;
+  --card-stacked-shadow:
+    var(--card-stacked-offset) var(--card-stacked-offset) 0 0 var(--color-stacked-card-1),
+    var(--card-stacked-offset) var(--card-stacked-offset) 0 var(--border-w-default) var(--color-stacked-border-1),
+    calc(var(--card-stacked-offset) * 2) calc(var(--card-stacked-offset) * 2) 0 0 var(--color-stacked-card-2),
+    calc(var(--card-stacked-offset) * 2) calc(var(--card-stacked-offset) * 2) 0 var(--border-w-default) var(--color-stacked-border-2);
+  --card-min-height:            var(--touch-target-min);   /* 44px — fat-finger */
+  --card-tag-chip-height:       20px;
+  --card-checkbox-size:         var(--icon-size-md);       /* 체크박스 아이콘 크기 */
+  --card-longpress-scale:       0.97;                      /* 모바일 long-press 시각 피드백 */
+
+  /* ---- PreviewCard — platform badge offset ---- */
+  --card-thumb-platform-offset: calc(-1 * var(--card-stacked-offset));
+
+  /* ---- PreviewCard — typography ramp ---- */
+  --card-sender-font-size:       clamp(var(--size-18), 5vw, var(--font-size-h3));
+  /* ---- PreviewCard — type chip colors ---- */
+  --card-type-chip-bg-business: var(--color-orange-soft);
+  --card-type-chip-bg-dm:       var(--color-pink-soft);
+  --card-type-chip-bg-comment:  var(--color-pink-soft);
+  --card-type-chip-bg-mail:     var(--color-purple-soft);
+
+  /* ---- BulkActionBar component tokens ---- */
+  --bulk-bar-height:            var(--touch-target-min);   /* 44px 최소 */
+  --bulk-bar-bg:                var(--color-bg-inverse);   /* dark background */
+  --bulk-bar-color:             var(--color-text-inverse); /* light text */
+  --bulk-bar-z:                 20;                        /* sticky z-index (header z=10보다 위) */
+  --bulk-bar-btn-height:        32px;
+
+  /* ---- BulkTagModal component tokens ---- */
+  --bulk-tag-chip-height:       32px;
+
+  /* ---- PreviewCard — active (SidePanel 열림 표시) ---- */
+  --card-active-bg:             var(--color-state-selected-bg);
+
+  /* ---- TopToolbar ---- */
+  --top-toolbar-height:         56px;                          /* sticky bar 실효 높이 (touch-target-min 44px + padding 상하 6px×2) */
+
+  /* ---- SidePanel component tokens (Phase 4) ---- */
+  --side-panel-padding-block:   var(--gap-stack-md);
+  --side-panel-padding-inline:  var(--gap-stack-md);
+  --side-panel-z-overlay:       50;                            /* mobile overlay z-index */
+
+  /* ---- ThreadHeader ---- */
+  --thread-header-action-gap:   var(--gap-inline-sm);
+  --thread-header-sender-font-size: clamp(var(--size-20), 6vw, var(--font-size-display-md));
+
+  /* ---- Message bubbles (DM) ---- */
+  --message-bubble-radius:      var(--surface-radius-md);
+  --message-bubble-padding-x:   var(--gap-stack-md);
+  --message-bubble-padding-y:   var(--gap-inline-md);
+  --message-bubble-max-width:   72%;
+  --message-bubble-bg-incoming: var(--color-bg-canvas-alt);
+  --message-bubble-bg-outgoing: var(--color-brand-soft);
+
+  /* ---- Comment thread ---- */
+  --comment-indent-depth-2:     var(--gap-stack-lg);           /* depth-2 댓글 들여쓰기 */
+
+  /* ---- Avatar sizes ---- */
+  --avatar-size-sm:             var(--size-28);                /* 댓글·버블 아바타 */
+  --avatar-size-md:             var(--size-32);                /* 스레드 헤더 */
+
+  /* ---- SavedReply chips ---- */
+  --saved-reply-chip-max-width: 200px;
+
+  /* ---- ReplyEditor ---- */
+  --reply-editor-min-height:    80px;
+  --reply-editor-max-height:    200px;
+
+  /* ---- AI summary block ---- */
+  /* --ai-summary-bg:              var(--color-blue); */
+  --ai-summary-bg:              var(--color-purple-soft);   /* purple soft accent — AI 블록 vibe + body 가독 */
+  --ai-summary-border:          var(--border-w-soft) solid var(--color-ink);
+  --ai-summary-padding:         var(--gap-inline-sm);
+
+  /* ---- SavedReply chip dot ---- */
+  --saved-reply-chip-dot-size:  6px;                       /* 상태 표시 dot 크기 */
+
+  /* ---- Attachment chip ---- */
+  --attachment-chip-max-width:  160px;                     /* 메시지 첨부 chip 최대폭 */
+
+  /* ---- Message bubble tail radius ---- */
+  --message-bubble-tail-radius: var(--radius-sm);          /* 말풍선 꼬리쪽 radius */
+
+  /* ---- Scrollbar (전역 overlay 스크롤바) ---- */
+  --scrollbar-thumb-size:       6px;                        /* thumb 폭/높이 — thin 고정 */
+  --scrollbar-thumb-color:      var(--color-text-muted);    /* 스크롤 중 thumb 색 */
+
+  /* ---- §5-9 매크로 빌더 컴포넌트 토큰 ---- */
+  /* Bottom sheet grab handle */
+  --sheet-handle-bg:                     var(--color-grey-200);          /* handle 색상 */
+  --sheet-handle-w:                      var(--space-7);                 /* handle 너비 (48px) */
+  --sheet-handle-h:                      var(--space-1);                 /* handle 높이 (4px) */
+
+  /* Wizard step tab navigation */
+  --wizard-tab-underline-w:              2px;                            /* 활성 step tab bottom underline 두께 */
+
+  /* AutomationCard */
+  --automation-card-disabled-opacity:    var(--opacity-disabled);        /* INACTIVE 카드 dim */
+
+  /* Keyword chip */
+  --keyword-chip-bg:                     var(--color-bg-canvas-alt);     /* 키워드 chip 배경 */
+  --keyword-chip-fg:                     var(--color-text-primary);      /* 키워드 chip 글자색 */
+
+  /* Toggle switch */
+  --toggle-on-bg:                        var(--color-status-info-soft);  /* 토글 ON 배경 */
+  --toggle-off-bg:                       var(--color-grey-200);          /* 토글 OFF 배경 */
+  --toggle-knob-bg:                      var(--color-bg-surface);        /* 토글 knob */
+
+  /* ---- §5-9 추가 컴포넌트 토큰 (Round 2) ---- */
+  /* Toggle track geometry */
+  --toggle-track-w:                      44px;                           /* 토글 트랙 너비 */
+  --toggle-track-h:                      24px;                           /* 토글 트랙 높이 */
+  --toggle-knob-size:                    18px;                           /* 토글 knob 크기 */
+  --toggle-knob-inset:                   3px;                            /* knob 내부 간격 */
+
+  /* Wizard step tab mobile padding */
+  --wizard-tab-mobile-px-x:             2px;                            /* 모바일 step tab 좌우 padding (xs보다 작은 tight 간격) */
+
+  /* Button edit sheet */
+  --button-edit-sheet-max-width:         480px;                          /* PC sheet 최대 너비 */
+
+  /* AutomationCard thumb */
+  --automation-card-thumb-w:             80px;                           /* 카드 썸네일 너비 (PC) */
+  --automation-card-thumb-w-mobile:      64px;                           /* 카드 썸네일 너비 (모바일) */
+  --automation-card-thumb-border:        var(--surface-border-soft);     /* 썸네일 보더 */
+  --automation-card-padding-x:          var(--card-padding-x);          /* 카드 좌우 패딩 */
+  --automation-card-padding-y:          var(--card-padding-y);          /* 카드 상하 패딩 */
+  --automation-card-future-bg:           var(--color-bg-canvas-alt);     /* FUTURE placeholder 배경 */
+
+  /* AutomationTemplateCard */
+  --template-card-w:                     160px;                          /* 템플릿 카드 너비 */
+  --template-card-h:                     64px;                          /* 템플릿 카드 높이 */
+
+  /* Wizard form layout */
+  --wizard-field-radius:                 var(--radius-sm);               /* 입력 필드 radius */
+  --wizard-section-gap:                  var(--gap-stack-md);            /* wizard 섹션 간격 */
+
+  /* IgPostGridPicker */
+  --ig-post-grid-cell-size:              80px;                           /* 그리드 셀 크기 */
+
+  /* Review summary */
+  --review-row-min-height:               var(--touch-target-min);        /* 요약 row 최소 높이 */
+
+  /* ---- Phase 5 통합 검증 — C-1/C-2/C-4 fix 신설 토큰 ---- */
+
+  /* Toggle knob shadow (C-1) */
+  --toggle-knob-shadow:                  var(--shadow-elevation-soft);   /* knob lift 그림자 */
+
+  /* Media/thumb radius (C-2) — image thumb, uploader, post grid cell */
+  --media-thumb-radius:                  var(--radius-sm);               /* 미리보기·업로더·그리드 셀 모서리 */
+
+  /* Keyword chip in wizard input (C-4) */
+  --keyword-chip-height:                 28px;                           /* wizard 입력 영역 chip 높이 */
+
+  /* Chip remove button (C-4) */
+  --chip-remove-icon-size:               18px;                           /* chip 내 X 버튼 크기 */
+
+  /* Reply item textarea (C-4) */
+  --reply-item-min-height:               40px;                           /* reply 항목 textarea 최소 높이 */
+
+  /* Icon button 28px 사이즈군 (C-4) — reply-item__remove / button-row__action 공용 */
+  --icon-button-size:                    28px;                           /* 28px 사이즈 아이콘 버튼 */
+
+  /* Message bubble preview thumb (C-4) */
+  --message-preview-thumb-size:          60px;                           /* 말풍선 미리보기 이미지 썸네일 크기 */
+
+  /* Wizard textarea height (C-4) */
+  --wizard-textarea-min-h:               80px;                           /* wizard 내 textarea 최소 높이 */
+  --wizard-textarea-max-h:               160px;                          /* wizard 내 textarea 최대 높이 */
+
+  /* Button row URL display (C-4) */
+  --button-row-url-max-w:                120px;                          /* 버튼 편집 행 URL 표시 최대 너비 */
+
+  /* Image uploader thumb remove button (C-4) */
+  --thumb-remove-offset:                 2px;                            /* thumb remove 버튼 top/right 오프셋 */
+  --thumb-remove-size:                   20px;                           /* thumb remove 버튼 크기 */
+
+  /* IG post grid cell check indicator (C-4) */
+  --cell-check-offset:                   4px;                            /* 그리드 셀 check 버튼 top/right 오프셋 */
+  --cell-check-size:                     20px;                           /* 그리드 셀 check 버튼 크기 */
+
+  /* Review step label (C-4) */
+  --review-step-label-min-w:             48px;                           /* 요약 행 스텝 라벨 최소 너비 */
+  --review-step-label-pt:                2px;                            /* 요약 행 스텝 라벨 상단 패딩 */
+
+  /* IG post grid cell border (C-3 — width-only for transparent border) */
+  --ig-post-grid-cell-border-w:          var(--border-w-soft);           /* 그리드 셀 기본 테두리 두께 */
+  --ig-post-grid-cell-border-w-selected: var(--border-w-default);        /* 그리드 셀 선택 테두리 두께 */
+}
+
