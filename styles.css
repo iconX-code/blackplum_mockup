@@ -17,32 +17,58 @@
  * ============================================================ */
 :root {
   /* === Tier 1: Color — Foundations === */
-  --color-ink:           #0F0F0F;   /* near-black body / display copy */
-  --color-ink-soft:      #1F1F1F;
-  --color-paper:         #F5EFE3;   /* warm cream — page floor */
-  --color-paper-warm:    #EFE7D6;   /* slightly deeper cream */
-  --color-paper-cool:    #ECE9E2;   /* desaturated alt cream */
-  --color-white:         #FFFFFF;   /* card interior only — NOT page floor */
+  /* === [LIGHT MODE — 보존] === */
+  /* --color-ink:           #0F0F0F; */  /* near-black body / display copy */
+  /* --color-ink-soft:      #1F1F1F; */
+  /* --color-paper:         #F5EFE3; */  /* warm cream — page floor */
+  /* --color-paper-warm:    #EFE7D6; */  /* slightly deeper cream */
+  /* --color-paper-cool:    #ECE9E2; */  /* desaturated alt cream */
+  /* --color-white:         #FFFFFF; */  /* card interior only — NOT page floor */
+  /* (신규 토큰: --color-ink-fixed — DM 추가됨, 라이트 모드에서도 #1A1410 사용) */
+  /* === [DARK MODE — 활성] === */
+  /* --color-ink:           #F0EAE0; */  /* DM v1: 너무 stark — 고대비 모드 인상. 보더/텍스트 톤 다운으로 v2로 교체 */
+  --color-ink:           #D5CFC2;   /* DM v2: warm bone — 보더 soft, text 가독 유지 */
+  /* --color-ink-soft:      #D9D3C7; */  /* DM v1 */
+  --color-ink-soft:      #B8B2A5;   /* DM v2: ink 톤 다운에 맞춰 비례 조정 */
+  --color-paper:         #16140C;   /* warm near-black — page floor */
+  --color-paper-warm:    #1F1D14;   /* slightly elevated dark band */
+  --color-paper-cool:    #1B1A12;
+  --color-white:         #26241B;   /* card interior — elevated surface */
+  /* 주의: --color-ink-fixed는 라이트 모드에서도 #1A1410 그대로 사용 — revert 시 유지 */
+  --color-ink-fixed:     #1A1410;   /* 테마 무관 always-dark — brand surface 위 텍스트 contrast 보장 */
 
   /* === Tier 1: Color — Brand primaries (halftone shape palette) === */
+  /* === [LIGHT MODE — 보존] === */
+  /* --color-yellow-soft:   #FFE680; */
+  /* --color-pink-soft:     #FFC2CD; */
+  /* --color-green-soft:    #B8D88A; */
+  /* --color-purple-soft:   #D4C8F8; */
+  /* === [DARK MODE — 활성] === */
   --color-yellow:        #FFD23F;   /* signature yellow */
-  --color-yellow-soft:   #FFE680;
+  --color-yellow-soft:   #4D3D00;   /* dark amber — chip/selected bg on dark */
   --color-blue:          #4FC3F7;
   --color-blue-deep:     #2196F3;
   --color-pink:          #FF8FA3;
-  --color-pink-soft:     #FFC2CD;
+  --color-pink-soft:     #4D2D33;
   --color-green:         #7CB342;
-  --color-green-soft:    #B8D88A;
+  --color-green-soft:    #2D4D1F;
   --color-purple:        #8E6FE0;
-  --color-purple-soft:   #D4C8F8;
+  --color-purple-soft:   #3D2F5C;
   --color-coral:         #FF6B4A;
 
   /* === Tier 1: Color — Neutrals (warm-tinted) === */
-  --color-grey-100:      #E8E4DA;
-  --color-grey-200:      #C9C4B8;
-  --color-grey-300:      #9D998E;
-  --color-grey-400:      #6B6862;
-  --color-grey-500:      #3D3B36;
+  /* === [LIGHT MODE — 보존] === */
+  /* --color-grey-100:      #E8E4DA; */
+  /* --color-grey-200:      #C9C4B8; */
+  /* --color-grey-300:      #9D998E; */
+  /* --color-grey-400:      #6B6862; */
+  /* --color-grey-500:      #3D3B36; */
+  /* === [DARK MODE — 활성] === */
+  --color-grey-100:      #36342B;   /* soft divider on dark */
+  --color-grey-200:      #4A4740;
+  --color-grey-300:      #6E6A60;
+  --color-grey-400:      #8F8C84;
+  --color-grey-500:      #C9C4B8;
 
   /* === Tier 1: Font Family === */
   --font-display:        'Hanken Grotesk', 'Pretendard Variable', 'Pretendard', system-ui, -apple-system, sans-serif;
@@ -51,18 +77,14 @@
 
   /* === Tier 1: Size Scale (font-size px) === */
   --size-12: 12px;
-  --size-13: 13px;
   --size-14: 14px;
-  --size-15: 15px;
   --size-16: 16px;
   --size-18: 18px;
   --size-20: 20px;
-  --size-22: 22px;
   --size-24: 24px;
   --size-28: 28px;
   --size-32: 32px;
   --size-44: 44px;
-  --size-56: 56px;
   --size-64: 64px;
   --size-88: 88px;
 
@@ -106,9 +128,7 @@
 
   /* === Tier 1: Letter-spacing (tracking) === */
   --tracking-display-xl:  -0.04em;    /* 88px+ hero */
-  --tracking-display-lg:  -0.035em;   /* 64px display */
   --tracking-display-md:  -0.03em;    /* 44px display */
-  --tracking-display-sm:  -0.025em;   /* 32px display */
   --tracking-tight:       -0.02em;
   --tracking-snug:        -0.015em;
   --tracking-normal:      0;
@@ -137,8 +157,12 @@
   --easing-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* === Tier 1: Overlay / Opacity (§5-9 매크로 빌더 도입) === */
-  --color-overlay-scrim:       rgba(15, 15, 15, 0.4);   /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
-  --color-overlay-scrim-strong: rgba(15, 15, 15, 0.5);  /* modal backdrop dim (더 강한 dim) */
+  /* === [LIGHT MODE — 보존] === */
+  /* --color-overlay-scrim:        rgba(15, 15, 15, 0.4); */  /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
+  /* --color-overlay-scrim-strong: rgba(15, 15, 15, 0.5); */  /* modal backdrop dim (더 강한 dim) */
+  /* === [DARK MODE — 활성] === */
+  --color-overlay-scrim:       rgba(0, 0, 0, 0.55);   /* sheet/drawer backdrop dim — Tier 1에서만 raw rgba 허용 */
+  --color-overlay-scrim-strong: rgba(0, 0, 0, 0.65);  /* modal backdrop dim (더 강한 dim) */
   --opacity-disabled:          0.45;                    /* INACTIVE / disabled 시각 dim */
 }
 
@@ -159,7 +183,8 @@
   --color-text-tertiary:    var(--color-grey-400);
   --color-text-muted:       var(--color-grey-300);
   --color-text-inverse:     var(--color-paper);
-  --color-text-on-brand:    var(--color-ink);          /* yellow / cream surfaces use ink type */
+  /* --color-text-on-brand:    var(--color-ink); */          /* yellow / cream surfaces use ink type */  /* DM 수정: ink가 다크모드에서 flip되면 brand surface 가독성 깨짐 → ink-fixed로 분리 */
+  --color-text-on-brand:    var(--color-ink-fixed);    /* always-dark — brand(노랑/파랑/핑크) bg에서 양 테마 공통 가독 보장 */
 
   /* === Tier 2: Brand & accents === */
   --color-brand:            var(--color-yellow);       /* signature accent */
@@ -167,9 +192,6 @@
   --color-accent-pink:      var(--color-pink);
   --color-accent-pink-soft: var(--color-pink-soft);
   --color-accent-blue:      var(--color-blue);
-  --color-accent-green:     var(--color-green);
-  --color-accent-purple:      var(--color-purple);
-  --color-accent-purple-soft: var(--color-purple-soft);
   --color-accent-coral:       var(--color-coral);
 
   /* === Tier 2: Border === */
@@ -178,7 +200,6 @@
 
   /* === Tier 2: Status === */
   --color-status-danger:    var(--color-coral);
-  --color-status-info:      var(--color-blue-deep);
 
   /* === Tier 2: Platform colors (functional — SNS borders/accents) === */
   --color-platform-instagram: var(--color-pink);
@@ -191,7 +212,6 @@
   /* === Tier 2: Typography — family === */
   --font-family-display:    var(--font-display);       /* headlines / buttons / eyebrows / nav */
   --font-family-primary:    var(--font-body);          /* body / lead / running text */
-  --font-family-code:       var(--font-mono);
 
   /* === Tier 2: Typography — size (semantic role) === */
   --font-size-display-xl:   var(--size-88);            /* hero — desktop only */
@@ -265,7 +285,6 @@
 
   /* === Tier 2: Layout (3분할 shell + hit area — Phase 1-3 도입) === */
   --layout-lsb-width:               var(--width-lsb-pc);
-  --layout-sidepanel-width:         var(--width-sidepanel-pc);
   --layout-inboxlist-width:         var(--width-inboxlist-pc);        /* 패널 열림 시 InboxList 고정 폭 */
   --layout-inboxlist-width-tablet:  var(--width-inboxlist-tablet);    /* Tablet InboxList 폭 */
   --layout-container-max:           var(--width-container-max);
@@ -274,10 +293,8 @@
   /* === Tier 2: Motion === */
   --transition-fast:        var(--motion-fast)   var(--easing-standard);
   --transition-normal:      var(--motion-normal) var(--easing-standard);
-  --transition-slow:        var(--motion-slow)   var(--easing-standard);
   --motion-duration-fast:   var(--motion-fast);
   --motion-duration-normal: var(--motion-normal);
-  --motion-duration-slow:   var(--motion-slow);
   --motion-easing-standard: var(--easing-standard);
 
   /* === Tier 2: State — selection === */
@@ -309,7 +326,6 @@
   --color-bg-sheet:               var(--color-bg-surface);         /* bottom sheet / SidePanel 표면 배경 */
   --color-bg-sheet-overlay:       var(--color-overlay-scrim);      /* sheet 뒤 dim 오버레이 */
   --color-bg-accordion-collapsed: var(--color-bg-canvas-alt);      /* 아코디언 닫힌 상태 배경 */
-  --color-bg-accordion-expanded:  var(--color-bg-surface);         /* 아코디언 펼친 상태 배경 */
   --color-bg-input-soft:          var(--color-bg-canvas-alt);      /* wizard input 영역 옅은 배경 */
   --color-status-info-soft:       var(--color-accent-blue);        /* 활성 토글 ON 채움색 */
   --color-chip-remove-bg:         var(--color-grey-100);           /* chip × 버튼 배경 */
@@ -545,7 +561,6 @@ textarea {
 :root {
   /* LandingScreen */
   --landing-inner-max-width:        560px;
-  --landing-tagline-font-size:      clamp(var(--size-32), 10vw, var(--font-size-display-lg));
   --landing-headline-font-size:     clamp(var(--size-44), 12vw, var(--font-size-display-xl));
   --landing-headline-highlight-bg:  var(--color-brand-soft);
   --landing-headline-highlight-radius: 12px;                /* DESIGN.md L305: rotated pill border-radius */
@@ -556,8 +571,6 @@ textarea {
   --chip-expanded-width:        160px;                     /* hover 확장 시 전체 chip 폭 */
   --chip-icon-col-width:        var(--touch-target-min);   /* 아이콘 셀 고정 폭 */
   --chip-label-padding-right:   var(--gap-inline-sm);      /* 확장 시 라벨 우측 패딩 */
-  /* SNS 필터 모달 (Tablet/Mobile) */
-  --sns-filter-modal-chip-height: var(--touch-target-min); /* 모달 내 chip 높이 */
   /* TopToolbar wordmark */
   --toolbar-wordmark-font-size: var(--font-size-h3);
 
@@ -684,12 +697,12 @@ textarea {
   --reply-editor-max-height:    200px;
 
   /* ---- AI summary block ---- */
-  --ai-summary-bg:              var(--color-blue);
+  /* === [LIGHT MODE — 보존] === */
+  /* --ai-summary-bg:              var(--color-blue); */
+  /* === [DARK MODE — 활성] === */
+  --ai-summary-bg:              var(--color-purple-soft);   /* 다크모드: 밝은파랑 → 다크 보라(=#3D2F5C) AI 블록 vibe 유지하며 cream 텍스트 가독 확보 */
   --ai-summary-border:          var(--border-w-soft) solid var(--color-ink);
   --ai-summary-padding:         var(--gap-inline-sm);
-
-  /* ---- OriginInfo thumb ---- */
-  --origin-thumb-size:          var(--card-thumb-size);    /* alias — 56px, 의미 분리 */
 
   /* ---- SavedReply chip dot ---- */
   --saved-reply-chip-dot-size:  6px;                       /* 상태 표시 dot 크기 */

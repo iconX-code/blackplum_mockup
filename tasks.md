@@ -291,3 +291,4 @@
 - 매크로 빌더 P3 (이벤트 추첨 탭, A/B 테스트, 고급 분석): 본 mockup 범위 외 (macro-prd.md §10)
 - **아이콘 일괄 점검 (Phase 7-1 직전 권장)**: 제품 전체에 사용되는 아이콘(brand 로고 / 카테고리 / 액션 / 매크로 / SNS 로고 등 53개+α)을 한 번에 시각·정합성 검증. LandingScreen의 kakao/apple brand 아이콘 미등록(Phase 2 backlog)도 본 점검에 합류
 - **InboxList 정렬 기준 확장**: 현재는 우선순위순 / 최신순 2종. SortToggle을 드롭다운 sort 아이콘 형태로 전환한 시점(2026-05-04)부터 정렬 기준은 향후 추가 예정. 후보: 미처리 우선 / 답장 대기 / sender 알파벳순 / unread 우선 등. 추가 시 §6-1 우선순위 score 모델 정합성 함께 점검
+- **디자인 토큰 health check 2차 (backlog)**: 1차(2026-05-07)에서 dead 18개 삭제 완료. 후속 정리 대상 — (1) Tier 2/3 색명 노출 위반(`--color-accent-pink/-blue/-coral`, `--card-type-chip-bg-{business,dm,comment,mail}` 등) 명명 정상화, (2) Tier 3 single-use 토큰(약 31개) 통폐합 또는 Tier 2 흡수, (3) `--color-platform-*` 동적 매핑 정상화(현재 JS template literal 방식 → semantic alias 도입 검토), (4) raw 값 하드코딩 잔존(rotation deg, em fine-tuning) 토큰화 검토. 신규 토큰 신설 정책: 컴포넌트마다 신규 생성 금지 — 기존 토큰 재활용 우선 검토 후 정당성 인정 시에만 추가
